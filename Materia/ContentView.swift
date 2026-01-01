@@ -2,20 +2,16 @@
 //  ContentView.swift
 //  Materia
 //
-//  Created by Anubhav Dubey on 01/01/26.
+//  Main navigation view for the chemistry app
 //
 
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            HomeView()
         }
-        .padding()
     }
 }
 
