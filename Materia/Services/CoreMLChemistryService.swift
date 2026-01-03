@@ -310,6 +310,7 @@ extension CoreMLChemistryService {
         features[15] = Float(tripleBonds)
         
         // Functional group flags
+        // add more functionalGroup (add loop with all the FunctionalGroup from ChemicalStructure.swift)
         features[16] = structure.functionalGroups.contains { $0.group == .alcohol } ? 1.0 : 0.0
         features[17] = structure.functionalGroups.contains { $0.group == .carboxylicAcid } ? 1.0 : 0.0
         features[18] = structure.functionalGroups.contains { $0.group == .amine } ? 1.0 : 0.0
