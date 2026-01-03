@@ -99,11 +99,11 @@ struct ValidationStatusSection: View {
                                     .font(.caption2)
                                     .foregroundColor(.green)
                                 
-                                ProgressView(value: result.validProbability)
+                                ProgressView(value: result.isValid ? result.confidence : (1.0 - result.confidence))
                                     .progressViewStyle(LinearProgressViewStyle(tint: .green))
                                     .frame(height: 4)
                                 
-                                Text("\(Int(result.validProbability * 100))%")
+                                Text("\(Int((result.isValid ? result.confidence : (1.0 - result.confidence)) * 100))%")
                                     .font(.caption2)
                                     .foregroundColor(.green)
                             }
@@ -115,11 +115,11 @@ struct ValidationStatusSection: View {
                                     .font(.caption2)
                                     .foregroundColor(.red)
                                 
-                                ProgressView(value: result.invalidProbability)
+                                ProgressView(value: result.isValid ? (1.0 - result.confidence) : result.confidence)
                                     .progressViewStyle(LinearProgressViewStyle(tint: .red))
                                     .frame(height: 4)
                                 
-                                Text("\(Int(result.invalidProbability * 100))%")
+                                Text("\(Int((result.isValid ? (1.0 - result.confidence) : result.confidence) * 100))%")
                                     .font(.caption2)
                                     .foregroundColor(.red)
                             }
