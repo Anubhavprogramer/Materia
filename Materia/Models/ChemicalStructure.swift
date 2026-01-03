@@ -76,12 +76,13 @@ enum FunctionalGroup: String, CaseIterable, Codable {
 
 // MARK: - Bond Structure
 struct Bond: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let fromCarbon: Int
     let toCarbon: Int
     let type: BondType
     
     init(from: Int, to: Int, type: BondType = .single) {
+        self.id = UUID()
         self.fromCarbon = min(from, to)
         self.toCarbon = max(from, to)
         self.type = type
@@ -90,11 +91,12 @@ struct Bond: Identifiable, Codable {
 
 // MARK: - Functional Group Attachment
 struct FunctionalGroupAttachment: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let carbonPosition: Int
     let group: FunctionalGroup
     
     init(position: Int, group: FunctionalGroup) {
+        self.id = UUID()
         self.carbonPosition = position
         self.group = group
     }
@@ -102,13 +104,14 @@ struct FunctionalGroupAttachment: Identifiable, Codable {
 
 // MARK: - Chemical Structure
 struct ChemicalStructure: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let carbonChainLength: Int
     var bonds: [Bond]
     var functionalGroups: [FunctionalGroupAttachment]
     let createdAt: Date
     
     init(carbonChainLength: Int) {
+        self.id = UUID()
         self.carbonChainLength = carbonChainLength
         self.bonds = []
         self.functionalGroups = []
@@ -175,18 +178,25 @@ struct ChemicalStructure: Identifiable, Codable {
 
 // MARK: - Identified Compound
 struct IdentifiedCompound: Identifiable, Codable {
-    let id = UUID()
+    let id: UUID
     let structure: ChemicalStructure
     let compoundName: String
+    let iupacName: String
     let molecularFormula: String
     let category: String
     let identifiedAt: Date
+    let confidence: Double?
+    let isValidated: Bool?
     
-    init(structure: ChemicalStructure, name: String, formula: String, category: String) {
+    init(structure: ChemicalStructure, name: String, iupacName: String, formula: String, category: String, confidence: Double? = nil, isValidated: Bool? = nil) {
+        self.id = UUID()
         self.structure = structure
         self.compoundName = name
+        self.iupacName = iupacName
         self.molecularFormula = formula
         self.category = category
         self.identifiedAt = Date()
+        self.confidence = confidence
+        self.isValidated = isValidated
     }
 }

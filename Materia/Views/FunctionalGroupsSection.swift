@@ -99,7 +99,7 @@ struct FunctionalGroupsSection: View {
         .onAppear {
             selectedCarbon = min(selectedCarbon, viewModel.carbonChainLength)
         }
-        .onChange(of: viewModel.carbonChainLength) { newLength in
+        .onChange(of: viewModel.carbonChainLength) { _, newLength in
             selectedCarbon = min(selectedCarbon, newLength)
         }
     }

@@ -76,19 +76,26 @@ A comprehensive iOS chemistry app built with SwiftUI that identifies chemical co
 
 ## 🎯 Compound Identification
 
+### Dual Nomenclature System
+- **Common Names**: Student-friendly traditional names (e.g., "Ethanol", "Acetic Acid")
+- **IUPAC Names**: Systematic chemical nomenclature (e.g., "ethanol", "ethanoic acid")
+- **Smart Display**: Both names shown for educational comparison
+- **Color Coding**: Purple for IUPAC, blue for molecular formulas
+
 ### AI-Powered Naming
+- **Dual nomenclature**: Both common and IUPAC names
 - Common name preference (e.g., "Ethanol" vs "Ethyl alcohol")
-- IUPAC nomenclature support
+- IUPAC systematic naming (e.g., "ethanol", "propan-1-ol")
 - Functional group priority rules
 - Molecular formula calculation
 
 ### Supported Compound Classes
-- **Alkanes**: Methane, Ethane, Propane, etc.
-- **Alcohols**: Methanol, Ethanol, Propanol, etc.
-- **Carboxylic Acids**: Formic, Acetic, Propanoic, etc.
-- **Aldehydes**: Formaldehyde, Acetaldehyde, etc.
-- **Ketones**: Acetone, Butanone, etc.
-- **Amines**: Methylamine, Ethylamine, etc.
+- **Alkanes**: Methane/methane, Ethane/ethane, Propane/propane, etc.
+- **Alcohols**: Methanol/methanol, Ethanol/ethanol, Propanol/propan-1-ol, etc.
+- **Carboxylic Acids**: Formic Acid/methanoic acid, Acetic Acid/ethanoic acid, etc.
+- **Aldehydes**: Formaldehyde/methanal, Acetaldehyde/ethanal, etc.
+- **Ketones**: Acetone/propan-2-one, Butanone/butan-2-one, etc.
+- **Amines**: Methylamine/methanamine, Ethylamine/ethanamine, etc.
 
 ## 📱 User Experience
 

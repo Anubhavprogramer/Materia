@@ -10,6 +10,7 @@ import SwiftUI
 
 @MainActor
 class HomeViewModel: ObservableObject {
+    var LOAD: String = "HOME VIEW MODEL"
     @Published var savedCompounds: [IdentifiedCompound] = []
     @Published var isLoading: Bool = false
     
@@ -50,7 +51,7 @@ class HomeViewModel: ObservableObject {
         do {
             savedCompounds = try JSONDecoder().decode([IdentifiedCompound].self, from: data)
         } catch {
-            print("Failed to load saved compounds: \(error)")
+            CommonFunctions.debugPrint(load: LOAD, message: "Failed to load saved compounds: \(error)")
             loadSampleCompounds()
         }
     }
@@ -60,7 +61,8 @@ class HomeViewModel: ObservableObject {
             let data = try JSONEncoder().encode(savedCompounds)
             userDefaults.set(data, forKey: savedCompoundsKey)
         } catch {
-            print("Failed to save compounds: \(error)")
+//            print("Failed to save compounds: \(error)")
+            CommonFunctions.debugPrint(load: LOAD, message: "Failed to save compounds: \(error)")
         }
     }
     
@@ -75,8 +77,8 @@ class HomeViewModel: ObservableObject {
         aceticAcid.functionalGroups.append(FunctionalGroupAttachment(position: 2, group: .carboxylicAcid))
         
         savedCompounds = [
-            IdentifiedCompound(structure: ethanol, name: "Ethanol", formula: "C₂H₆O", category: "Organic"),
-            IdentifiedCompound(structure: aceticAcid, name: "Acetic Acid", formula: "C₂H₄O₂", category: "Organic")
+            IdentifiedCompound(structure: ethanol, name: "Ethanol", iupacName: "ethanol", formula: "C₂H₆O", category: "Organic"),
+            IdentifiedCompound(structure: aceticAcid, name: "Acetic Acid", iupacName: "ethanoic acid", formula: "C₂H₄O₂", category: "Organic")
         ]
     }
     

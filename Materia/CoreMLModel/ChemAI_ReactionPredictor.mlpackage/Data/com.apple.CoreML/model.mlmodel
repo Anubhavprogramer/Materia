@@ -1,0 +1,352 @@
+¶
+D
+reaction_features"4096-dimensional reaction features*	
+Ä †ÄRB
+product_features!2048-dimensional product features*	
+Ä†Ä¢ò
+!ChemAI Reaction Product Predictor1.0ChemAI Team"MIT¢:
++com.github.apple.coremltools.source_dialectTorchScript¢:
+,com.github.apple.coremltools.conversion_date
+2025-12-28¢3
+#com.github.apple.coremltools.sourcetorch==2.8.0¢+
+$com.github.apple.coremltools.version9.0≤Ë˚
+mainÚ
+(
+reaction_features
+
+
+Ä CoreML5º
+CoreML5∞product_featuresÜ
+const)
+!reaction_features_to_fp16_dtype_0
+*
+val
+
+
+"
+fp16*7
+name/
+'
+%"#
+!reaction_features_to_fp16_dtype_0¨
+const0
+encoder_0_weight_to_fp16
+
+
+Ä
+Ä *A
+val:
+
+
+Ä
+Ä *"
+@model_path/weights/weight.bin@*.
+name&
+
+"
+encoder_0_weight_to_fp16ù
+const'
+encoder_0_bias_to_fp16
+
+
+Ä*=
+val6
+
+
+Ä*%
+@model_path/weights/weight.binÄÅÄ*,
+name$
+
+"
+encoder_0_bias_to_fp16¢
+cast
+x
+
+reaction_features.
+dtype%
+#
+!reaction_features_to_fp16_dtype_00
+reaction_features_to_fp16
+
+
+
+Ä *
+name
+
+
+"
+cast_1Õ
+linear"
+x
+
+reaction_features_to_fp16"
+bias
+
+encoder_0_bias_to_fp16&
+weight
+
+encoder_0_weight_to_fp16)
+linear_0_cast_fp16
+
+
+
+Ä*(
+name 
+
+"
+linear_0_cast_fp16v
+relu
+x
+
+linear_0_cast_fp16(
+input_3_cast_fp16
+
+
+
+Ä*'
+name
+
+"
+input_3_cast_fp16Ø
+const0
+encoder_3_weight_to_fp16
+
+
+Ä
+Ä*D
+val=
+
+
+Ä
+Ä*%
+@model_path/weights/weight.bin¿ëÄ*.
+name&
+
+"
+encoder_3_weight_to_fp16ù
+const'
+encoder_3_bias_to_fp16
+
+
+Ä*=
+val6
+
+
+Ä*%
+@model_path/weights/weight.binÄí¿*,
+name$
+
+"
+encoder_3_bias_to_fp16≈
+linear
+x
+
+input_3_cast_fp16"
+bias
+
+encoder_3_bias_to_fp16&
+weight
+
+encoder_3_weight_to_fp16)
+linear_1_cast_fp16
+
+
+
+Ä*(
+name 
+
+"
+linear_1_cast_fp16v
+relu
+x
+
+linear_1_cast_fp16(
+input_9_cast_fp16
+
+
+
+Ä*'
+name
+
+"
+input_9_cast_fp16Ø
+const0
+decoder_0_weight_to_fp16
+
+
+Ä
+Ä*D
+val=
+
+
+Ä
+Ä*%
+@model_path/weights/weight.bin¿ö¿*.
+name&
+
+"
+decoder_0_weight_to_fp16ù
+const'
+decoder_0_bias_to_fp16
+
+
+Ä*=
+val6
+
+
+Ä*%
+@model_path/weights/weight.binÄõÄ*,
+name$
+
+"
+decoder_0_bias_to_fp16≈
+linear
+x
+
+input_9_cast_fp16"
+bias
+
+decoder_0_bias_to_fp16&
+weight
+
+decoder_0_weight_to_fp16)
+linear_2_cast_fp16
+
+
+
+Ä*(
+name 
+
+"
+linear_2_cast_fp16x
+relu
+x
+
+linear_2_cast_fp16)
+input_15_cast_fp16
+
+
+
+Ä*(
+name 
+
+"
+input_15_cast_fp16Ø
+const0
+decoder_2_weight_to_fp16
+
+
+Ä
+Ä*D
+val=
+
+
+Ä
+Ä*%
+@model_path/weights/weight.bin¿´Ä*.
+name&
+
+"
+decoder_2_weight_to_fp16ù
+const'
+decoder_2_bias_to_fp16
+
+
+Ä*=
+val6
+
+
+Ä*%
+@model_path/weights/weight.binÄ¨Ä*,
+name$
+
+"
+decoder_2_bias_to_fp16∆
+linear
+x
+
+input_15_cast_fp16"
+bias
+
+decoder_2_bias_to_fp16&
+weight
+
+decoder_2_weight_to_fp16)
+linear_3_cast_fp16
+
+
+
+Ä*(
+name 
+
+"
+linear_3_cast_fp16v
+sigmoid
+x
+
+linear_3_cast_fp16'
+var_27_cast_fp16
+
+
+
+Ä*%
+name
+
+"
+op_27_cast_fp16É
+const(
+ var_27_cast_fp16_to_fp32_dtype_0
+*
+val
+
+
+"
+fp32*5
+name-
+%
+#"!
+op_27_cast_fp16_to_fp32_dtype_0ó
+cast
+x
+
+var_27_cast_fp16-
+dtype$
+"
+ var_27_cast_fp16_to_fp32_dtype_0'
+product_features
+
+
+Ä*
+name
+
+
+"
+cast_0"Â
+	buildInfo◊"
+
+
+ƒ"¡
+6
+!
+
+"
+coremltools-version
+	
+"
+9.0
+@
+)
+!
+"
+coremltools-component-torch
+
+	"
+2.8.0
+E
+(
+ 
+"
+coremltools-source-dialect
+
+"
+TorchScript

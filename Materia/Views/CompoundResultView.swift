@@ -31,15 +31,30 @@ struct CompoundResultView: View {
                     
                     // Compound Information Card
                     VStack(spacing: 20) {
-                        // Compound Name
+                        // Common Name
                         VStack(spacing: 8) {
-                            Text("Compound Name")
+                            Text("Common Name")
                                 .font(.headline)
                                 .foregroundColor(.secondary)
                             
                             Text(compound.compoundName)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
+                                .multilineTextAlignment(.center)
+                        }
+                        
+                        Divider()
+                        
+                        // IUPAC Name
+                        VStack(spacing: 8) {
+                            Text("IUPAC Name")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            
+                            Text(compound.iupacName)
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.purple)
                                 .multilineTextAlignment(.center)
                         }
                         
@@ -80,7 +95,7 @@ struct CompoundResultView: View {
                     .cornerRadius(16)
                     .padding(.horizontal)
                     
-                    // Structure Information
+                    // Structure Information with CoreML Properties
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Structure Details")
                             .font(.headline)
@@ -112,6 +127,9 @@ struct CompoundResultView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
                     .padding(.horizontal)
+                    
+                    // CoreML Properties Section
+                    CoreMLPropertiesSection(compound: compound)
                     
                     // Structure Preview
                     VStack(alignment: .leading, spacing: 16) {
@@ -212,6 +230,7 @@ struct InfoRow: View {
     let sampleCompound = IdentifiedCompound(
         structure: sampleStructure,
         name: "Ethanol",
+        iupacName: "ethanol",
         formula: "C₂H₆O",
         category: "Organic"
     )

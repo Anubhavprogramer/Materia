@@ -41,6 +41,9 @@ struct CompoundBuilderView: View {
                     // Functional Groups Section
                     FunctionalGroupsSection(viewModel: viewModel)
                     
+                    // Validation Status
+                    ValidationStatusSection(viewModel: viewModel)
+                    
                     // Structure Preview
                     StructurePreviewSection(viewModel: viewModel)
                     
