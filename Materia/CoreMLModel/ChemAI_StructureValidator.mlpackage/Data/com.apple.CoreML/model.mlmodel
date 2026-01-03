@@ -1,313 +1,0 @@
-¶
-C
-structure_features!50-dimensional structure features
-*
-2†ÄRJ
-validation_result)Validation probabilities [invalid, valid]
-*
-†Ä¢ë
-ChemAI Structure Validator1.0ChemAI Team"MIT¢:
-+com.github.apple.coremltools.source_dialectTorchScript¢:
-,com.github.apple.coremltools.conversion_date
-2025-12-28¢3
-#com.github.apple.coremltools.sourcetorch==2.8.0¢+
-$com.github.apple.coremltools.version9.0≤ò´
-main¢
-(
-structure_features
-
-
-2CoreML5Ï
-CoreML5‡validation_resultà
-const*
-"structure_features_to_fp16_dtype_0
-*
-val
-
-
-"
-fp16*8
-name0
-(
-&"$
-"structure_features_to_fp16_dtype_0û
-const)
-fc1_weight_to_fp16
-
-
-Ä
-2*@
-val9
-
-
-Ä
-2*"
-@model_path/weights/weight.bin@*(
-name 
-
-"
-fc1_weight_to_fp16è
-const!
-fc1_bias_to_fp16
-
-
-Ä*;
-val4
-
-
-Ä*#
-@model_path/weights/weight.binÄe*&
-name
-
-"
-fc1_bias_to_fp16§
-cast
-x
-
-structure_features/
-dtype&
-$
-"structure_features_to_fp16_dtype_00
-structure_features_to_fp16
-
-
-
-2*
-name
-
-
-"
-cast_1¬
-linear#
-x
-
-structure_features_to_fp16
-bias
-
-fc1_bias_to_fp16 
-weight
-
-fc1_weight_to_fp16)
-linear_0_cast_fp16
-
-
-
-Ä*(
-name 
-
-"
-linear_0_cast_fp16v
-relu
-x
-
-linear_0_cast_fp16(
-input_3_cast_fp16
-
-
-
-Ä*'
-name
-
-"
-input_3_cast_fp16ü
-const)
-fc2_weight_to_fp16
-
-
-@
-Ä*A
-val:
-
-
-@
-Ä*#
-@model_path/weights/weight.bin¿g*(
-name 
-
-"
-fc2_weight_to_fp16é
-const 
-fc2_bias_to_fp16
-
-
-
-@*;
-val4
-
-
-
-@*$
-@model_path/weights/weight.binÄË*&
-name
-
-"
-fc2_bias_to_fp16∏
-linear
-x
-
-input_3_cast_fp16
-bias
-
-fc2_bias_to_fp16 
-weight
-
-fc2_weight_to_fp16(
-linear_1_cast_fp16
-
-
-
-@*(
-name 
-
-"
-linear_1_cast_fp16q
-relu
-x
-
-linear_1_cast_fp16%
-input_cast_fp16
-
-
-
-@*%
-name
-
-"
-input_cast_fp16û
-const(
-fc3_weight_to_fp16
-
-
-
-@*A
-val:
-
-
-
-@*$
-@model_path/weights/weight.bin¿È*(
-name 
-
-"
-fc3_weight_to_fp16t
-const 
-fc3_bias_to_fp16
-
-
-
-*!
-val
-
-
-
-
-
-:
-ï,zà*&
-name
-
-"
-fc3_bias_to_fp16∂
-linear
-x
-
-input_cast_fp16
-bias
-
-fc3_bias_to_fp16 
-weight
-
-fc3_weight_to_fp16(
-linear_2_cast_fp16
-
-
-
-*(
-name 
-
-"
-linear_2_cast_fp16L
-const
-var_16
-*
-val
-
-
-*
-name
-
-	"
-op_16â
-softmax
-x
-
-linear_2_cast_fp16
-axis
-
-
-var_16&
-var_18_cast_fp16
-
-
-
-*%
-name
-
-"
-op_18_cast_fp16É
-const(
- var_18_cast_fp16_to_fp32_dtype_0
-*
-val
-
-
-"
-fp32*5
-name-
-%
-#"!
-op_18_cast_fp16_to_fp32_dtype_0ó
-cast
-x
-
-var_18_cast_fp16-
-dtype$
-"
- var_18_cast_fp16_to_fp32_dtype_0'
-validation_result
-
-
-*
-name
-
-
-"
-cast_0"Â
-	buildInfo◊"
-
-
-ƒ"¡
-6
-!
-
-"
-coremltools-version
-	
-"
-9.0
-@
-)
-!
-"
-coremltools-component-torch
-
-	"
-2.8.0
-E
-(
- 
-"
-coremltools-source-dialect
-
-"
-TorchScript
