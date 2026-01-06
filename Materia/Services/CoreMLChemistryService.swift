@@ -14,6 +14,23 @@ protocol CoreMLChemistryServiceProtocol {
     func validateStructure(_ structure: ChemicalStructure) async throws -> StructureValidationResult
     func predictProperties(from structure: ChemicalStructure) async throws -> MolecularPropertiesResult
     func generateIUPACName(from structure: ChemicalStructure) async throws -> IUPACNameResult
+
+    // Educational mode (deterministic, offline)
+    func explainIUPAC(from structure: ChemicalStructure) -> IUPACExplanation
+}
+
+// MARK: - Educational IUPAC Explanation
+struct IUPACExplanation: Identifiable {
+    let id = UUID()
+    let finalName: String
+    let steps: [IUPACExplanationStep]
+    let notes: [String]
+}
+
+struct IUPACExplanationStep: Identifiable {
+    let id = UUID()
+    let title: String
+    let detail: String
 }
 
 // MARK: - Result Types
@@ -65,7 +82,64 @@ class IUPACNamer {
         "", "meth", "eth", "prop", "but", "pent", 
         "hex", "hept", "oct", "non", "dec"
     ]
-    
+
+    // Public helper for educational UI
+    func explainIUPACName(from structure: ChemicalStructure) -> IUPACExplanation {
+        let chain = identifyParentChain(structure)
+        let principal = identifyPrincipalFunctionalGroup(structure)
+        let numbering = numberParentChain(structure, principalGroup: principal)
+        let parentRoot = selectParentName(structure, numbering: numbering)
+        let unsaturation = handleUnsaturation(structure, numbering: numbering)
+        let secondarySuffix = getSecondarySuffix(principal, unsaturation: getUnsaturationType(structure))
+        let substituents = nameSubstituents(structure, principalGroup: principal, numbering: numbering)
+
+        let finalName = assembleIUPACName(
+            substituents: substituents,
+            parentName: parentRoot,
+            unsaturation: unsaturation,
+            suffix: secondarySuffix
+        )
+
+        let principalText: String = {
+            guard let principal else { return "None" }
+            return principal.displayName
+        }()
+
+        let steps: [IUPACExplanationStep] = [
+            IUPACExplanationStep(
+                title: "Select parent chain",
+                detail: "Longest chain (current scope): \(chain) carbons → root '\(parentRoot)'."
+            ),
+            IUPACExplanationStep(
+                title: "Pick principal functional group",
+                detail: principal == nil ? "No functional group outranks the chain." : "Highest priority group: \(principalText)."
+            ),
+            IUPACExplanationStep(
+                title: "Find unsaturation (double/triple bonds)",
+                detail: unsaturation.isEmpty ? "No double/triple bonds → 'ane'." : "Unsaturation part: '\(unsaturation)'."
+            ),
+            IUPACExplanationStep(
+                title: "Add suffix",
+                detail: "Suffix selected: '\(secondarySuffix)'."
+            ),
+            IUPACExplanationStep(
+                title: "Name substituents",
+                detail: substituents.isEmpty ? "No substituents." : "Substituents: \(substituents.joined(separator: ", "))."
+            ),
+            IUPACExplanationStep(
+                title: "Assemble final name",
+                detail: finalName
+            )
+        ]
+
+        let notes: [String] = [
+            "Current naming scope: straight chains (C1–C10) with selected functional groups.",
+            "Numbering is simplified in this version (can be expanded to lowest-locant rules)."
+        ]
+
+        return IUPACExplanation(finalName: finalName, steps: steps, notes: notes)
+    }
+
     // MARK: - Functional Group Priority (Rule 2)
     private let functionalGroupPriority: [FunctionalGroup: Int] = [
         .carboxylicAcid: 10,  // Highest priority
@@ -544,6 +618,10 @@ class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
     }
     
     // MARK: - Public Methods
+    func explainIUPAC(from structure: ChemicalStructure) -> IUPACExplanation {
+        iupacNamer.explainIUPACName(from: structure)
+    }
+    
     func analyzeCompound(from structure: ChemicalStructure) async throws -> CompoundAnalysisResult {
         // Validate structure first
         let validation = try await validateStructure(structure)

@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @State private var showingBuilder = false
+    @State private var quickStartStructure: ChemicalStructure?
+    @State private var selectedCompound: IdentifiedCompound?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -33,8 +35,16 @@ struct HomeView: View {
                 }
                 .padding(.horizontal)
                 
+                // Quick Start examples
+                QuickStartSection { structure in
+                    quickStartStructure = structure
+                    showingBuilder = true
+                }
+                .padding(.horizontal)
+                
                 // Build Compound Button
                 Button(action: {
+                    quickStartStructure = nil
                     showingBuilder = true
                 }) {
                     HStack {
@@ -70,7 +80,12 @@ struct HomeView: View {
                 List {
                     Section {
                         ForEach(viewModel.savedCompounds) { compound in
-                            CompoundRowView(compound: compound)
+                            Button {
+                                selectedCompound = compound
+                            } label: {
+                                CompoundRowView(compound: compound)
+                            }
+                            .buttonStyle(.plain)
                         }
                         .onDelete(perform: viewModel.deleteCompound)
                     } header: {
@@ -97,7 +112,7 @@ struct HomeView: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                         
-                        Text("Build your first molecular structure to identify chemical compounds")
+                        Text("Start with an example, or build your first molecular structure to identify chemical compounds")
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -110,9 +125,96 @@ struct HomeView: View {
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showingBuilder) {
-            CompoundBuilderView { compound in
+            CompoundBuilderView(initialStructure: quickStartStructure) { compound in
                 viewModel.saveCompound(compound)
             }
+        }
+        .sheet(item: $selectedCompound) { compound in
+            CompoundDetailView(compound: compound)
+        }
+    }
+}
+
+// MARK: - Quick Start
+private struct QuickStartSection: View {
+    let onSelect: (ChemicalStructure) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "sparkles")
+                    .foregroundColor(.purple)
+                Text("Quick Start")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+
+            Text("Tap an example to prefill the builder")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    QuickStartChip(title: "Ethanol", subtitle: "C₂H₆O") {
+                        var s = ChemicalStructure(carbonChainLength: 2)
+                        s.functionalGroups.append(FunctionalGroupAttachment(position: 2, group: .alcohol))
+                        onSelect(s)
+                    }
+
+                    QuickStartChip(title: "Ethene", subtitle: "C₂H₄") {
+                        var s = ChemicalStructure(carbonChainLength: 2)
+                        s.bonds.removeAll()
+                        s.bonds.append(Bond(from: 1, to: 2, type: .double))
+                        onSelect(s)
+                    }
+
+                    QuickStartChip(title: "Ethyne", subtitle: "C₂H₂") {
+                        var s = ChemicalStructure(carbonChainLength: 2)
+                        s.bonds.removeAll()
+                        s.bonds.append(Bond(from: 1, to: 2, type: .triple))
+                        onSelect(s)
+                    }
+
+                    QuickStartChip(title: "Acetic acid", subtitle: "C₂H₄O₂") {
+                        var s = ChemicalStructure(carbonChainLength: 2)
+                        s.functionalGroups.append(FunctionalGroupAttachment(position: 2, group: .carboxylicAcid))
+                        onSelect(s)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+}
+
+private struct QuickStartChip: View {
+    let title: String
+    let subtitle: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(.systemGray4), lineWidth: 1)
+            )
         }
     }
 }
@@ -195,6 +297,18 @@ struct CompoundRowView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - Compound Details
+private struct CompoundDetailView: View {
+    let compound: IdentifiedCompound
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        CompoundResultView(compound: compound, canSave: false) { _ in
+            // no-op (read-only)
+        }
     }
 }
 

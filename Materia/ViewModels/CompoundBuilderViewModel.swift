@@ -25,6 +25,15 @@ class CompoundBuilderViewModel: ObservableObject {
         self.structure = ChemicalStructure(carbonChainLength: 3)
     }
     
+    init(initialStructure: ChemicalStructure, coreMLService: CoreMLChemistryServiceProtocol? = nil) {
+        self.coreMLService = coreMLService ?? CoreMLChemistryServiceFactory.createService()
+        self.structure = initialStructure
+        self.carbonChainLength = initialStructure.carbonChainLength
+
+        // Ensure validation state is up-to-date.
+        validateStructure()
+    }
+    
     // MARK: - Carbon Chain Management
     func updateCarbonChainLength(_ length: Int) {
         carbonChainLength = length

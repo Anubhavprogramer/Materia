@@ -8,12 +8,23 @@
 import SwiftUI
 
 struct CompoundBuilderView: View {
-    @StateObject private var viewModel = CompoundBuilderViewModel()
+    @StateObject private var viewModel: CompoundBuilderViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showingResult = false
     @State private var identifiedCompound: IdentifiedCompound?
     
     let onCompoundSaved: (IdentifiedCompound) -> Void
+    
+    init(initialStructure: ChemicalStructure? = nil,
+         onCompoundSaved: @escaping (IdentifiedCompound) -> Void) {
+        // Use a custom init so we can seed the builder.
+        if let initialStructure {
+            _viewModel = StateObject(wrappedValue: CompoundBuilderViewModel(initialStructure: initialStructure))
+        } else {
+            _viewModel = StateObject(wrappedValue: CompoundBuilderViewModel())
+        }
+        self.onCompoundSaved = onCompoundSaved
+    }
     
     var body: some View {
         NavigationStack {

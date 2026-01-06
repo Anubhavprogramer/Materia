@@ -9,9 +9,26 @@ import SwiftUI
 
 struct CompoundResultView: View {
     let compound: IdentifiedCompound
+    let canSave: Bool
     let onSave: (IdentifiedCompound) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var isSaved = false
+
+    @State private var showIUPACExplanation = true
+
+    private var iupacExplanation: IUPACExplanation {
+        // Deterministic + offline explanation.
+        let service = CoreMLChemistryServiceFactory.createService()
+        return service.explainIUPAC(from: compound.structure)
+    }
+    
+    init(compound: IdentifiedCompound,
+         canSave: Bool = true,
+         onSave: @escaping (IdentifiedCompound) -> Void) {
+        self.compound = compound
+        self.canSave = canSave
+        self.onSave = onSave
+    }
     
     var body: some View {
         NavigationStack {
@@ -28,6 +45,69 @@ struct CompoundResultView: View {
                             .fontWeight(.bold)
                     }
                     .padding(.top)
+
+                    // Educational Mode: IUPAC explanation
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "graduationcap")
+                                .foregroundColor(.purple)
+                            Text("Educational Mode")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                            Spacer()
+                            Toggle("", isOn: $showIUPACExplanation)
+                                .labelsHidden()
+                        }
+
+                        if showIUPACExplanation {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("How the IUPAC name is built")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+
+                                ForEach(iupacExplanation.steps) { step in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(step.title)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                        Text(step.detail)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(10)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color(.systemGray5), lineWidth: 1)
+                                    )
+                                }
+
+                                if !iupacExplanation.notes.isEmpty {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        Text("Notes")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                        ForEach(iupacExplanation.notes, id: \.self) { note in
+                                            Text("• \(note)")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .padding(.top, 2)
+                                }
+                            }
+                        } else {
+                            Text("Turn this on to see step-by-step naming.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(16)
+                    .padding(.horizontal)
                     
                     // Compound Information Card
                     VStack(spacing: 20) {
@@ -150,23 +230,25 @@ struct CompoundResultView: View {
                     
                     // Action Buttons
                     VStack(spacing: 12) {
-                        Button(action: saveCompound) {
-                            HStack {
-                                Image(systemName: isSaved ? "checkmark" : "square.and.arrow.down")
-                                Text(isSaved ? "Saved!" : "Save Compound")
-                                    .fontWeight(.semibold)
+                        if canSave {
+                            Button(action: saveCompound) {
+                                HStack {
+                                    Image(systemName: isSaved ? "checkmark" : "square.and.arrow.down")
+                                    Text(isSaved ? "Saved!" : "Save Compound")
+                                        .fontWeight(.semibold)
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    isSaved
+                                        ? LinearGradient(colors: [.green], startPoint: .leading, endPoint: .trailing)
+                                        : LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12)
                             }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                isSaved
-                                    ? LinearGradient(colors: [.green], startPoint: .leading, endPoint: .trailing)
-                                    : LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                            )
-                            .cornerRadius(12)
+                            .disabled(isSaved)
                         }
-                        .disabled(isSaved)
                         
                         Button(action: {
                             dismiss()
@@ -194,11 +276,11 @@ struct CompoundResultView: View {
             }
         }
     }
-    
+
     private func saveCompound() {
         onSave(compound)
         isSaved = true
-        
+
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
