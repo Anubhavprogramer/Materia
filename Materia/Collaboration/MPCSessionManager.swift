@@ -37,6 +37,9 @@ final class MPCSessionManager: NSObject, ObservableObject {
     private var advertiser: MCNearbyServiceAdvertiser?
     private var browser: MCNearbyServiceBrowser?
 
+    /// Prevent double-stop and teardown races during view dismissal.
+    private var isStopping = false
+
     // Callbacks
     var onMessage: ((MPCMessage, MCPeerID) -> Void)?
 
@@ -50,14 +53,18 @@ final class MPCSessionManager: NSObject, ObservableObject {
         self.session.delegate = self
     }
 
-    nonisolated deinit {
-        Task { @MainActor in
-            self.stop()
-        }
+    /// IMPORTANT: Don't do async teardown in `deinit`. Swift can release `self` while the task is still pending,
+    /// and Multipeer may still call delegates during shutdown, causing EXC_BAD_ACCESS.
+    /// Call `shutdown()` from the owning view's `.onDisappear` instead.
+
+    /// Call when the collaboration flow is ending.
+    func shutdown() {
+        stop(disconnectSession: true)
+        onMessage = nil
     }
 
     func startAdvertising(discoveryInfo: [String: String]? = nil) {
-        stop()
+        stop(disconnectSession: false)
         advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: discoveryInfo, serviceType: serviceType)
         advertiser?.delegate = self
         advertiser?.startAdvertisingPeer()
@@ -65,7 +72,7 @@ final class MPCSessionManager: NSObject, ObservableObject {
     }
 
     func startBrowsing() {
-        stop()
+        stop(disconnectSession: false)
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
         browser?.delegate = self
         browser?.startBrowsingForPeers()
@@ -73,16 +80,40 @@ final class MPCSessionManager: NSObject, ObservableObject {
         mode = .browsing
     }
 
-    func stop() {
-        advertiser?.stopAdvertisingPeer()
-        advertiser = nil
+    /// Stops discovery/advertising. Optionally disconnects the session.
+    ///
+    /// EXC_BAD_ACCESS on dismissal is commonly caused by delegate callbacks arriving
+    /// while advertiser/browser are being torn down. We make teardown idempotent and
+    /// clear delegates before stopping.
+    func stop(disconnectSession: Bool = false) {
+        guard !isStopping else { return }
+        isStopping = true
+        defer { isStopping = false }
 
-        browser?.stopBrowsingForPeers()
+        // Snapshot to local vars to avoid any weirdness if properties change mid-call.
+        let advertiserToStop = advertiser
+        let browserToStop = browser
+        let sessionToDisconnect = session
+
+        // Clear first to prevent re-entrancy / callbacks referencing partially-torn-down state.
+        advertiser = nil
         browser = nil
 
+        advertiserToStop?.delegate = nil
+        advertiserToStop?.stopAdvertisingPeer()
+
+        browserToStop?.delegate = nil
+        browserToStop?.stopBrowsingForPeers()
+
         foundPeers = []
-        // Keep session alive while app is running; disconnect only when needed.
-        // session.disconnect() // optional
+
+        if disconnectSession {
+            // Prevent further delegate callbacks from using this object.
+            sessionToDisconnect?.delegate = nil
+            sessionToDisconnect?.disconnect()
+            connectedPeers = []
+        }
+
         mode = .idle
     }
 
@@ -167,7 +198,11 @@ extension MPCSessionManager: MCNearbyServiceBrowserDelegate {
         }
     }
 
-    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) { }
+    nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        Task { @MainActor in
+            self.foundPeers.removeAll { $0 == peerID }
+        }
+    }
 
     nonisolated func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error) {
         Task { @MainActor in

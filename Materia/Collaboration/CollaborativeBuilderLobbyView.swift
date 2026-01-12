@@ -100,8 +100,14 @@ struct CollaborativeBuilderLobbyView: View {
             .navigationTitle("Pair Mode")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") { dismiss() }
+                    Button("Close") {
+                        mpc.shutdown()
+                        dismiss()
+                    }
                 }
+            }
+            .onDisappear {
+                mpc.shutdown()
             }
         }
     }
