@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var showingBuilder = false
     @State private var quickStartStructure: ChemicalStructure?
     @State private var selectedCompound: IdentifiedCompound?
+    @State private var showingMateriaLive = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -39,6 +40,36 @@ struct HomeView: View {
                 QuickStartSection { structure in
                     quickStartStructure = structure
                     showingBuilder = true
+                }
+                .padding(.horizontal)
+                
+                // Materia Live (offline collaboration)
+                Button(action: {
+                    showingMateriaLive = true
+                }) {
+                    HStack {
+                        Image(systemName: "person.2.wave.2")
+                            .font(.title3)
+                        Text("Materia Live (Offline)")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text("NEW")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.orange.opacity(0.2))
+                            .foregroundColor(.orange)
+                            .cornerRadius(8)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
+                    )
+                    .cornerRadius(12)
                 }
                 .padding(.horizontal)
                 
@@ -131,6 +162,9 @@ struct HomeView: View {
         }
         .sheet(item: $selectedCompound) { compound in
             CompoundDetailView(compound: compound)
+        }
+        .sheet(isPresented: $showingMateriaLive) {
+            MateriaLiveEntryView()
         }
     }
 }

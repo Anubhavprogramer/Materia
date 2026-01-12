@@ -556,7 +556,6 @@ enum CoreMLChemistryError: Error, LocalizedError {
 }
 
 // MARK: - CoreML Chemistry Service Implementation
-@MainActor
 class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
     
     // MARK: - Models
@@ -1483,8 +1482,7 @@ extension Array {
 
 // MARK: - CoreML Service Factory
 class CoreMLChemistryServiceFactory {
-    @MainActor
     static func createService() -> CoreMLChemistryServiceProtocol {
-        return CoreMLChemistryService()
+        CoreMLChemistryService()
     }
 }
