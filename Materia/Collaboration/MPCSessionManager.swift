@@ -27,6 +27,7 @@ final class MPCSessionManager: NSObject, ObservableObject {
     // MARK: Published state
     @Published private(set) var mode: Mode = .idle
     @Published private(set) var connectedPeers: [MCPeerID] = []
+    @Published private(set) var foundPeers: [MCPeerID] = []
     @Published var lastError: String?
 
     // MARK: MPC primitives
@@ -68,6 +69,7 @@ final class MPCSessionManager: NSObject, ObservableObject {
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
         browser?.delegate = self
         browser?.startBrowsingForPeers()
+        foundPeers = []
         mode = .browsing
     }
 
@@ -78,9 +80,18 @@ final class MPCSessionManager: NSObject, ObservableObject {
         browser?.stopBrowsingForPeers()
         browser = nil
 
+        foundPeers = []
         // Keep session alive while app is running; disconnect only when needed.
         // session.disconnect() // optional
         mode = .idle
+    }
+
+    func connectToFirstFoundPeer(timeout: TimeInterval = 12) {
+        guard let peer = foundPeers.first else {
+            lastError = "No peers found yet"
+            return
+        }
+        invite(peer, timeout: timeout)
     }
 
     func invite(_ peer: MCPeerID, context: Data? = nil, timeout: TimeInterval = 12) {
@@ -149,6 +160,11 @@ extension MPCSessionManager: MCNearbyServiceAdvertiserDelegate {
 extension MPCSessionManager: MCNearbyServiceBrowserDelegate {
     nonisolated func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         // For MVP we don't auto-invite. UI will decide.
+        Task { @MainActor in
+            if !self.foundPeers.contains(peerID) {
+                self.foundPeers.append(peerID)
+            }
+        }
     }
 
     nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) { }
