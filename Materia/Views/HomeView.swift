@@ -63,14 +63,8 @@ struct HomeView: View {
                             .foregroundColor(.orange)
                             .cornerRadius(8)
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
-                    )
-                    .cornerRadius(12)
                 }
+                .liquidGlassPrimaryButton(tint: .purple, size: .regular, isEnabled: true)
                 .padding(.horizontal)
                 
                 // Build Compound Button
@@ -85,18 +79,8 @@ struct HomeView: View {
                             .font(.headline)
                             .fontWeight(.semibold)
                     }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(12)
                 }
+                .liquidGlassPrimaryButton(tint: .blue, size: .regular, isEnabled: true)
                 .padding(.horizontal)
             }
             .padding(.top)

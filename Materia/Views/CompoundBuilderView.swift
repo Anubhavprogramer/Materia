@@ -72,26 +72,22 @@ struct CompoundBuilderView: View {
                         HStack {
                             if viewModel.isBuilding {
                                 ProgressView()
-                                    .scaleEffect(0.8)
+                                    .scaleEffect(0.9)
                                     .tint(.white)
                             } else {
                                 Image(systemName: "wand.and.stars")
                             }
-                            
+
                             Text(viewModel.isBuilding ? "Identifying..." : "Identify Compound")
                                 .fontWeight(.semibold)
                         }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            viewModel.isValidStructure && !viewModel.isBuilding
-                                ? LinearGradient(colors: [.green, .blue], startPoint: .leading, endPoint: .trailing)
-                                : LinearGradient(colors: [.gray], startPoint: .leading, endPoint: .trailing)
-                        )
-                        .cornerRadius(12)
                     }
                     .disabled(!viewModel.isValidStructure || viewModel.isBuilding)
+                    .liquidGlassPrimaryButton(
+                        tint: viewModel.isValidStructure && !viewModel.isBuilding ? .blue : .gray,
+                        size: .large,
+                        isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
+                    )
                     .padding(.horizontal)
                     .padding(.bottom)
                 }
