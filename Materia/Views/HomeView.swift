@@ -170,7 +170,7 @@ struct HomeView: View {
 }
 
 // MARK: - Quick Start
-private struct QuickStartSection: View {
+struct QuickStartSection: View {
     let onSelect: (ChemicalStructure) -> Void
 
     var body: some View {
@@ -335,19 +335,24 @@ struct CompoundRowView: View {
 }
 
 // MARK: - Compound Details
-private struct CompoundDetailView: View {
+struct CompoundDetailView: View {
     let compound: IdentifiedCompound
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        CompoundResultView(compound: compound, canSave: false) { _ in
-            // no-op (read-only)
+        NavigationStack {
+            CompoundResultView(compound: compound, canSave: false)
+                .navigationTitle("Details")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") { dismiss() }
+                    }
+                }
         }
     }
 }
 
 #Preview {
-    NavigationStack {
-        HomeView()
-    }
+    HomeView()
 }

@@ -31,17 +31,17 @@ struct CompoundBuilderView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     // Header
-                    VStack(spacing: 8) {
-                        Text("Compound Builder")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        
-                        Text("Build a molecular structure to identify the compound")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.top)
+//                    VStack(spacing: 8) {
+//                        Text("Compound Builder")
+//                            .font(.largeTitle)
+//                            .fontWeight(.bold)
+//                        
+//                        Text("Build a molecular structure to identify the compound")
+//                            .font(.subheadline)
+//                            .foregroundColor(.secondary)
+//                            .multilineTextAlignment(.center)
+//                    }
+//                    .padding(.top)
                     
                     // Carbon Chain Section
                     CarbonChainSection(viewModel: viewModel)
@@ -97,13 +97,7 @@ struct CompoundBuilderView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
+           
         }
         .sheet(isPresented: $showingResult) {
             if let compound = identifiedCompound {

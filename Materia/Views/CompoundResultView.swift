@@ -24,7 +24,7 @@ struct CompoundResultView: View {
     
     init(compound: IdentifiedCompound,
          canSave: Bool = true,
-         onSave: @escaping (IdentifiedCompound) -> Void) {
+         onSave: @escaping (IdentifiedCompound) -> Void = { _ in }) {
         self.compound = compound
         self.canSave = canSave
         self.onSave = onSave
