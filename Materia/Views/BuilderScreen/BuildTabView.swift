@@ -22,17 +22,19 @@ struct BuildTabView: View {
                 VStack(spacing: 16) {
                     // Header
                     HStack {
-                        Image(systemName: "atom")
-                            .font(.system(size: 32, weight: .bold))
+                        Image("HomeScreenIcon")
+                            .frame(width: 15, height: 15)
                             .foregroundColor(.blue)
+                            .opacity(0.3)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Materia")
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
+                                .foregroundColor(AppColors.textPrimary)
                             Text("Chemical Structure Identifier")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.textSecondary)
                         }
 
                         Spacer()
@@ -42,6 +44,7 @@ struct BuildTabView: View {
                         initialStructure = structure
                         builderSessionID = UUID() // reset builder
                     }
+                    .padding(20)
 
                     // Embedded builder (no separate "Build Compound" button)
                     CompoundBuilderView(initialStructure: initialStructure) { compound in
@@ -74,6 +77,7 @@ struct BuildTabView: View {
                     }
                 }
             }
+            .background(AppColors.background)
         }
     }
 }
