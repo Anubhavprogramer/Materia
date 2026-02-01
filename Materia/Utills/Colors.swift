@@ -27,6 +27,7 @@ final class AppColors {
     // MARK: - Components
     static let carbon = Color("CarbonAtom")
     static let carbonTextColor = Color("CarbonTextColor")
+    static let white = Color("white")
 
 }
 

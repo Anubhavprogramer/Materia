@@ -31,13 +31,13 @@ struct BondConfigRow: View {
                             .frame(width: 40, height: 32)
                             .background(
                                 viewModel.getBondType(from: fromCarbon, to: toCarbon) == bondType
-                                    ? Color.blue
+                                    ? AppColors.surface
                                     : Color(.systemGray5)
                             )
                             .foregroundColor(
                                 viewModel.getBondType(from: fromCarbon, to: toCarbon) == bondType
-                                    ? .white
-                                    : .primary
+                                ? AppColors.textPrimary
+                                : AppColors.primary
                             )
                             .cornerRadius(8)
                     }
