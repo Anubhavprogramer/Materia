@@ -14,12 +14,13 @@ struct CarbonChainSection: View {
             Text("Carbon Chain")
                 .font(.headline)
                 .fontWeight(.semibold)
+                .foregroundColor(AppColors.textPrimary)
             
             VStack(spacing: 12) {
                 HStack {
                     Text("Length: \(viewModel.carbonChainLength) carbons")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.textSecondary)
                     Spacer()
                 }
                 
@@ -39,18 +40,19 @@ struct CarbonChainSection: View {
                         ForEach(1...viewModel.carbonChainLength, id: \.self) { carbon in
                             VStack(spacing: 4) {
                                 Circle()
-                                    .fill(Color.gray.opacity(0.3))
+                                    .fill(AppColors.carbon)
                                     .frame(width: 32, height: 32)
                                     .overlay(
                                         Text("C\(carbon)")
                                             .font(.caption)
                                             .fontWeight(.medium)
+                                            .foregroundColor(AppColors.carbonTextColor)
                                     )
                             }
                             
                             if carbon < viewModel.carbonChainLength {
                                 Rectangle()
-                                    .fill(Color.gray)
+                                    .fill(AppColors.carbon.opacity(0.7))
                                     .frame(width: 20, height: 2)
                             }
                         }
@@ -60,7 +62,7 @@ struct CarbonChainSection: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(AppColors.surface)
         .cornerRadius(12)
         .padding(.horizontal)
     }

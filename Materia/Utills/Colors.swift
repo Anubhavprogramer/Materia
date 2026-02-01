@@ -23,5 +23,10 @@ final class AppColors {
     
     // MARK: - Feedback
     static let error = Color("MateriaError")
+    
+    // MARK: - Components
+    static let carbon = Color("CarbonAtom")
+    static let carbonTextColor = Color("CarbonTextColor")
+
 }
 

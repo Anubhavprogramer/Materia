@@ -17,18 +17,18 @@ struct QuickStartChip: View {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppColors.textPrimary)
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.textSecondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(Color(.systemBackground))
+            .background(AppColors.secondary)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(.systemGray4), lineWidth: 1)
+                    .stroke(AppColors.textSecondary, lineWidth: 1)
             )
         }
     }

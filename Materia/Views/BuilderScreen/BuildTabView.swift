@@ -24,17 +24,16 @@ struct BuildTabView: View {
                     HStack {
                         Image("HomeScreenIcon")
                             .frame(width: 15, height: 15)
-                            .foregroundColor(.blue)
                             .opacity(0.3)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Materia")
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .foregroundColor(AppColors.textPrimary)
+                                .foregroundColor(AppColors.accent)
                             Text("Chemical Structure Identifier")
                                 .font(.subheadline)
-                                .foregroundColor(AppColors.textSecondary)
+                                .foregroundColor(AppColors.textPrimary)
                         }
 
                         Spacer()

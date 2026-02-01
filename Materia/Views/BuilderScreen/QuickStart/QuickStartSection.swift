@@ -13,11 +13,10 @@ struct QuickStartSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Image(systemName: "sparkles")
-                    .foregroundColor(.purple)
                 Text("Quick Start")
                     .font(.headline)
                     .fontWeight(.semibold)
+                    .foregroundColor(AppColors.textPrimary)
                 Spacer()
             }
 
