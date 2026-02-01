@@ -17,22 +17,17 @@ struct CarbonChainSection: View {
                 .foregroundColor(AppColors.textPrimary)
             
             VStack(spacing: 12) {
-                HStack {
-                    Text("Length: \(viewModel.carbonChainLength) carbons")
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.textSecondary)
-                    Spacer()
-                }
-                
-                Slider(
+                CustomSlider(
                     value: Binding(
                         get: { Double(viewModel.carbonChainLength) },
                         set: { viewModel.updateCarbonChainLength(Int($0)) }
                     ),
                     in: 1...10,
-                    step: 1
+                    step: 1,
+                    label: "Chain Length",
+                    tintColor: AppColors.accent,
+                    trackHeight: 8
                 )
-                .tint(.blue)
                 
                 // Carbon chain visualization
                 ScrollView(.horizontal, showsIndicators: false) {
