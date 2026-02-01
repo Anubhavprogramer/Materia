@@ -287,26 +287,6 @@ struct CompoundResultView: View {
     }
 }
 
-struct InfoRow: View {
-    let title: String
-    let value: String
-    
-    var body: some View {
-        HStack {
-            Text(title)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Spacer()
-            
-            Text(value)
-                .font(.system(.subheadline, design: title == "Structure Notation" ? .monospaced : .default))
-                .fontWeight(.medium)
-        }
-        .padding(.vertical, 2)
-    }
-}
-
 #Preview {
     let sampleStructure = ChemicalStructure(carbonChainLength: 2)
     let sampleCompound = IdentifiedCompound(
