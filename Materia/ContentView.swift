@@ -9,26 +9,31 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        TabView {
-            BuildTabView()
-                .tabItem {
-                    Label("Materia", systemImage: "plus.circle")
-                }
+        ZStack {
+            TabView {
+                BuildTabView()
+                    .tabItem {
+                        Label("Materia", systemImage: "plus.circle")
+                    }
 
-            CollaborationTabView()
-                .tabItem {
-                    Label("Live", systemImage: "person.2.wave.2")
-                }
+                MolecularWeightCalculatorView()
+                    .tabItem {
+                        Label("Weight", systemImage: "scalemass.fill")
+                    }
 
-            MolecularWeightCalculatorView()
-                .tabItem {
-                    Label("Weight", systemImage: "scalemass.fill")
-                }
+                CollaborationTabView()
+                    .tabItem {
+                        Label("Live", systemImage: "person.2.wave.2")
+                    }
 
-            SavedCompoundsTabView()
-                .tabItem {
-                    Label("Saved", systemImage: "bookmark")
-                }
+                SavedCompoundsTabView()
+                    .tabItem {
+                        Label("Saved", systemImage: "bookmark")
+                    }
+            }
+            
+            // Floating Search Button
+            FloatingSearchButton()
         }
     }
 }
