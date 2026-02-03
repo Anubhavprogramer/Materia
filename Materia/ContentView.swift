@@ -20,6 +20,11 @@ struct ContentView: View {
                     Label("Live", systemImage: "person.2.wave.2")
                 }
 
+            MolecularWeightCalculatorView()
+                .tabItem {
+                    Label("Weight", systemImage: "scalemass.fill")
+                }
+
             SavedCompoundsTabView()
                 .tabItem {
                     Label("Saved", systemImage: "bookmark")

@@ -209,7 +209,7 @@ struct CompoundResultView: View {
                     .padding(.horizontal)
                     
                     // CoreML Properties Section
-                    CoreMLPropertiesSection(compound: compound)
+//                    CoreMLPropertiesSection(compound: compound)
                     
                     // Structure Preview
                     VStack(alignment: .leading, spacing: 16) {
