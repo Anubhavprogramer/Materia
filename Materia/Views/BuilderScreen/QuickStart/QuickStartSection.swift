@@ -13,6 +13,9 @@ struct QuickStartSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
+                Image(systemName: "bolt.fill")
+                    .foregroundColor(AppColors.primary)
+                
                 Text("Quick Start")
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -22,7 +25,7 @@ struct QuickStartSection: View {
 
             Text("Tap an example to prefill the builder")
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.textSecondary)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -56,7 +59,13 @@ struct QuickStartSection: View {
             }
         }
         .padding(12)
-        .background(AppColors.surface)
-        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(AppColors.secondaryLight)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(AppColors.primaryMuted, lineWidth: 1)
+                )
+        )
     }
 }

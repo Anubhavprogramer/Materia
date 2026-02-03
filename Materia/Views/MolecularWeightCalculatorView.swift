@@ -34,7 +34,7 @@ struct MolecularWeightCalculatorView: View {
     
     var body: some View {
         ZStack {
-            Color("MateriaBackground")
+            AppColors.background
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
@@ -45,26 +45,26 @@ struct MolecularWeightCalculatorView: View {
                             Text("Molecular Weight")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(Color("MateriaTextPrimary"))
+                                .foregroundColor(AppColors.textPrimary)
                             
                             Text("Calculate and explore molecular properties")
                                 .font(.caption)
-                                .foregroundColor(Color("MateriaTextSecondary"))
+                                .foregroundColor(AppColors.textSecondary)
                         }
                         
                         Spacer()
                         
                         Image(systemName: "scalemass.fill")
                             .font(.system(size: 32))
-                            .foregroundColor(Color("MateriaPrimary"))
+                            .foregroundColor(AppColors.primary)
                     }
                 }
                 .padding()
                 .background(
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color("MateriaSurface"),
-                            Color("MateriaSurface").opacity(0.5)
+                            AppColors.surface,
+                            AppColors.surface.opacity(0.5)
                         ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -80,15 +80,15 @@ struct MolecularWeightCalculatorView: View {
                                     Text("Molecular Weight")
                                         .font(.caption)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(Color("MateriaTextSecondary"))
+                                        .foregroundColor(AppColors.textSecondary)
                                     
                                     Text(String(format: "%.3f", molecularWeight))
                                         .font(.system(size: 36, weight: .bold, design: .monospaced))
-                                        .foregroundColor(Color("MateriaPrimary"))
+                                        .foregroundColor(AppColors.primary)
                                     
                                     Text("g/mol")
                                         .font(.caption)
-                                        .foregroundColor(Color("MateriaTextSecondary"))
+                                        .foregroundColor(AppColors.textSecondary)
                                 }
                                 
                                 Spacer()
@@ -97,20 +97,20 @@ struct MolecularWeightCalculatorView: View {
                                     Text("Formula")
                                         .font(.caption)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(Color("MateriaTextSecondary"))
+                                        .foregroundColor(AppColors.textSecondary)
                                     
                                     Text(molecularFormula)
                                         .font(.system(.headline, design: .monospaced))
-                                        .foregroundColor(Color("MateriaAccent"))
+                                        .foregroundColor(AppColors.accent)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 8)
-                                        .background(Color("MateriaPrimary").opacity(0.15))
+                                        .background(AppColors.primaryLight)
                                         .cornerRadius(8)
                                 }
                             }
                         }
                         .padding()
-                        .background(Color("MateriaSurface"))
+                        .background(AppColors.surface)
                         .cornerRadius(12)
                         .padding(.horizontal)
                         
@@ -119,32 +119,32 @@ struct MolecularWeightCalculatorView: View {
                             Label("Carbon Chain Length", systemImage: "chain")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color("MateriaTextPrimary"))
+                                .foregroundColor(AppColors.textPrimary)
                             
                             HStack(spacing: 16) {
                                 Button(action: { if carbonChainLength > 1 { carbonChainLength -= 1 } }) {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.system(size: 24))
-                                        .foregroundColor(Color("MateriaPrimary"))
+                                        .foregroundColor(AppColors.primary)
                                 }
                                 
                                 Text("\(carbonChainLength)")
                                     .font(.system(size: 20, weight: .bold, design: .monospaced))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(Color("MateriaPrimary").opacity(0.1))
+                                    .background(AppColors.primaryFaded)
                                     .cornerRadius(8)
-                                    .foregroundColor(Color("MateriaPrimary"))
+                                    .foregroundColor(AppColors.primary)
                                 
                                 Button(action: { if carbonChainLength < 20 { carbonChainLength += 1 } }) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 24))
-                                        .foregroundColor(Color("MateriaPrimary"))
+                                        .foregroundColor(AppColors.primary)
                                 }
                             }
                         }
                         .padding()
-                        .background(Color("MateriaSurface"))
+                        .background(AppColors.surface)
                         .cornerRadius(12)
                         .padding(.horizontal)
                         
@@ -153,7 +153,7 @@ struct MolecularWeightCalculatorView: View {
                             Label("Functional Groups", systemImage: "cube.transparent")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color("MateriaTextPrimary"))
+                                .foregroundColor(AppColors.textPrimary)
                             
                             VStack(spacing: 8) {
                                 ForEach(FunctionalGroup.allCases, id: \.self) { group in
@@ -162,11 +162,11 @@ struct MolecularWeightCalculatorView: View {
                                             Text(group.displayName)
                                                 .font(.subheadline)
                                                 .fontWeight(.medium)
-                                                .foregroundColor(Color("MateriaTextPrimary"))
+                                                .foregroundColor(AppColors.textPrimary)
                                             
                                             Text("Weight: \(String(format: "%.2f", getGroupWeight(group))) g/mol")
                                                 .font(.caption)
-                                                .foregroundColor(Color("MateriaTextSecondary"))
+                                                .foregroundColor(AppColors.textSecondary)
                                         }
                                         
                                         Spacer()
@@ -175,8 +175,8 @@ struct MolecularWeightCalculatorView: View {
                                             .font(.system(size: 20))
                                             .foregroundColor(
                                                 selectedFunctionalGroups.contains(group)
-                                                    ? Color("MateriaAccent")
-                                                    : Color("MateriaTextSecondary")
+                                                    ? AppColors.accent
+                                                    : AppColors.textSecondary
                                             )
                                     }
                                     .contentShape(Rectangle())
@@ -193,7 +193,7 @@ struct MolecularWeightCalculatorView: View {
                                     .padding(.horizontal, 12)
                                     .background(
                                         selectedFunctionalGroups.contains(group)
-                                            ? Color("MateriaAccent").opacity(0.08)
+                                            ? AppColors.accentLight
                                             : Color.clear
                                     )
                                     .cornerRadius(8)
@@ -201,7 +201,7 @@ struct MolecularWeightCalculatorView: View {
                             }
                         }
                         .padding()
-                        .background(Color("MateriaSurface"))
+                        .background(AppColors.surface)
                         .cornerRadius(12)
                         .padding(.horizontal)
                         
@@ -210,7 +210,7 @@ struct MolecularWeightCalculatorView: View {
                             Label("Molecular Weight Info", systemImage: "info.circle")
                                 .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color("MateriaTextPrimary"))
+                                .foregroundColor(AppColors.textPrimary)
                             
                             VStack(alignment: .leading, spacing: 10) {
                                 MWInfoRow(label: "Total Atoms", value: "\(getTotalAtoms())")
@@ -222,7 +222,7 @@ struct MolecularWeightCalculatorView: View {
                             .padding(.vertical, 8)
                         }
                         .padding()
-                        .background(Color("MateriaSurface"))
+                        .background(AppColors.surface)
                         .cornerRadius(12)
                         .padding(.horizontal)
                         .padding(.bottom, 20)
@@ -272,14 +272,14 @@ struct MWInfoRow: View {
         HStack {
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(Color("MateriaTextSecondary"))
+                .foregroundColor(AppColors.textSecondary)
             
             Spacer()
             
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(Color("MateriaPrimary"))
+                .foregroundColor(AppColors.primary)
         }
     }
 }

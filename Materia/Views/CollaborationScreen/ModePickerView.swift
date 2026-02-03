@@ -7,25 +7,53 @@ struct ModePickerView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Modes") {
-                    Button("Mode 1 — Collaborative Molecule Builder") {
-                        showingBuilderMode = true
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        AppColors.gradientStart,
+                        AppColors.gradientEnd
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                List {
+                    Section("Modes") {
+                        Button("Mode 1 — Collaborative Molecule Builder") {
+                            showingBuilderMode = true
+                        }
+                        .foregroundColor(AppColors.primary)
+                        .fontWeight(.semibold)
+
+                        Button("Mode 2 — Teacher (Host Classroom)") {
+                            showingTeacherMode = true
+                        }
+                        .foregroundColor(AppColors.primary)
+                        .fontWeight(.semibold)
+
+                        Button("Mode 2 — Student (Join Classroom)") {
+                            showingStudentMode = true
+                        }
+                        .foregroundColor(AppColors.primary)
+                        .fontWeight(.semibold)
                     }
 
-                    Button("Mode 2 — Teacher (Host Classroom)") {
-                        showingTeacherMode = true
-                    }
-
-                    Button("Mode 2 — Student (Join Classroom)") {
-                        showingStudentMode = true
+                    Section("Notes") {
+                        HStack {
+                            Image(systemName: "info.circle.fill")
+                                .foregroundColor(AppColors.primary)
+                            Text("Offline-first. Nearby-only. No backend.")
+                        }
+                        HStack {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(AppColors.accent)
+                            Text("All sessions are encrypted using Multipeer Connectivity.")
+                        }
                     }
                 }
-
-                Section("Notes") {
-                    Text("Offline-first. Nearby-only. No backend.")
-                    Text("All sessions are encrypted using Multipeer Connectivity.")
-                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Materia Live")
             .sheet(isPresented: $showingBuilderMode) {

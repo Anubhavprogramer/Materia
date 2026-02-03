@@ -24,11 +24,13 @@ struct QuickStartChip: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(AppColors.secondary)
-            .cornerRadius(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(AppColors.accentLight)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(AppColors.textSecondary, lineWidth: 1)
+                    .stroke(AppColors.primaryMuted, lineWidth: 1.5)
             )
         }
     }

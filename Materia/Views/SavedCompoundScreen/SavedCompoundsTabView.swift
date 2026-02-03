@@ -12,46 +12,65 @@ struct SavedCompoundsTabView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading {
-                    ProgressView("Loading compounds...")
-                } else if viewModel.hasCompounds {
-                    List {
-                        Section {
-                            ForEach(viewModel.savedCompounds) { compound in
-                                Button {
-                                    selectedCompound = compound
-                                } label: {
-                                    CompoundRowView(compound: compound)
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        AppColors.gradientStart,
+                        AppColors.gradientEnd
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView("Loading compounds...")
+                            .tint(AppColors.primary)
+                    } else if viewModel.hasCompounds {
+                        List {
+                            Section {
+                                ForEach(viewModel.savedCompounds) { compound in
+                                    Button {
+                                        selectedCompound = compound
+                                    } label: {
+                                        CompoundRowView(compound: compound)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
-                            }
-                            .onDelete(perform: viewModel.deleteCompound)
-                        } header: {
-                            HStack {
-                                Text("Saved Compounds")
-                                Spacer()
-                                Text("\(viewModel.compoundCount)")
-                                    .foregroundColor(.secondary)
+                                .onDelete(perform: viewModel.deleteCompound)
+                            } header: {
+                                HStack {
+                                    Image(systemName: "bookmark.fill")
+                                        .foregroundColor(AppColors.primary)
+                                    
+                                    Text("Saved Compounds")
+                                        .fontWeight(.semibold)
+                                    Spacer()
+                                    Text("\(viewModel.compoundCount)")
+                                        .foregroundColor(AppColors.primary)
+                                        .fontWeight(.bold)
+                                }
                             }
                         }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
+                    } else {
+                        VStack(spacing: 12) {
+                            Image(systemName: "bookmark")
+                                .font(.system(size: 44))
+                                .foregroundColor(AppColors.primaryMuted)
+                            Text("No Saved Compounds")
+                                .font(.headline)
+                                .foregroundColor(AppColors.textPrimary)
+                            Text("Build and save a compound from the Build tab.")
+                                .font(.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .listStyle(.insetGrouped)
-                } else {
-                    VStack(spacing: 12) {
-                        Image(systemName: "bookmark")
-                            .font(.system(size: 44))
-                            .foregroundColor(.gray)
-                        Text("No Saved Compounds")
-                            .font(.headline)
-                        Text("Build and save a compound from the Build tab.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemGroupedBackground))
                 }
             }
             .navigationTitle("Saved")

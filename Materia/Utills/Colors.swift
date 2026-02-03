@@ -12,22 +12,33 @@ final class AppColors {
     static let background = Color("MateriaBackground")
     static let surface = Color("MateriaSurface")
     
-    // MARK: - Brand
-    static let primary = Color("MateriaPrimary")
-    static let secondary = Color("MateriaSecondary")
-    static let accent = Color("MateriaAccent")
+    // MARK: - Brand Colors (Green Palette)
+    static let primary = Color("MateriaPrimary")           // Vibrant green (#66CC99)
+    static let secondary = Color("MateriaSecondary")       // Pale mint green
+    static let accent = Color("MateriaAccent")             // Bright lime green
     
-    // MARK: - Text
+    // MARK: - Text Colors
     static let textPrimary = Color("MateriaTextPrimary")
     static let textSecondary = Color("MateriaTextSecondary")
     
-    // MARK: - Feedback
+    // MARK: - Feedback Colors
     static let error = Color("MateriaError")
     
-    // MARK: - Components
+    // MARK: - Component Colors
     static let carbon = Color("CarbonAtom")
     static let carbonTextColor = Color("CarbonTextColor")
     static let white = Color("white")
+    
+    // MARK: - Utility Colors (Green Theme Variants)
+    static let primaryLight = primary.opacity(0.15)        // Light primary for backgrounds
+    static let primaryMuted = primary.opacity(0.3)         // Muted primary for borders
+    static let primaryFaded = primary.opacity(0.08)        // Faded primary for subtle backgrounds
+    static let secondaryLight = secondary.opacity(0.15)    // Light secondary for backgrounds
+    static let accentLight = accent.opacity(0.12)          // Light accent for backgrounds
+    
+    // MARK: - Gradient Colors
+    static let gradientStart = background.opacity(0.95)
+    static let gradientEnd = secondary.opacity(0.2)
 
 }
 
