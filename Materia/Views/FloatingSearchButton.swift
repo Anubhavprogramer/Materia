@@ -275,33 +275,33 @@
 
 
 
-import SwiftUI
-
-struct SearchTabView: View {
-    @State private var searchText = ""
-    private let items = [
-    "Item1",
-    "Item2",
-    "Item3",
-    "Item4",
-    "Item5",
-    "Item6",
-    "Item7",
-    "Item8",
-    "Item9",
-    ]
-    private var filteredItems: [String] {
-        if searchText.isEmpty { return items }
-        return items.filter { $0.localizedCaseInsensitiveContains(searchText)}
-    }
-    
-    var body: some View {
-        NavigationStack {
-            List (filteredItems,id: \.self) { item in
-                Text (item)
-            }
-            .navigationTitle("Search")
-        }
-        .searchable(text: $searchText)
-    }
-}
+//import SwiftUI
+//
+//struct SearchTabView: View {
+//    @State private var searchText = ""
+//    private let items = [
+//    "Item1",
+//    "Item2",
+//    "Item3",
+//    "Item4",
+//    "Item5",
+//    "Item6",
+//    "Item7",
+//    "Item8",
+//    "Item9",
+//    ]
+//    private var filteredItems: [String] {
+//        if searchText.isEmpty { return items }
+//        return items.filter { $0.localizedCaseInsensitiveContains(searchText)}
+//    }
+//    
+//    var body: some View {
+//        NavigationStack {
+//            List (filteredItems,id: \.self) { item in
+//                Text (item)
+//            }
+//            .navigationTitle("Search")
+//        }
+//        .searchable(text: $searchText)
+//    }
+//}
