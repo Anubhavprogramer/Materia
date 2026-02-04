@@ -9,35 +9,25 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        ZStack {
-            TabView {
+        TabView {
+            Tab ("Materia", systemImage: "plus.circle"){
                 BuildTabView()
-                    .tabItem {
-                        Label("Materia", systemImage: "plus.circle")
-                    }
-
+            }
+            Tab ("Weight", systemImage: "scalemass.fill"){
                 MolecularWeightCalculatorView()
-                    .tabItem {
-                        Label("Weight", systemImage: "scalemass.fill")
-                    }
-
+            }
+            Tab ("Live", systemImage: "person.2.wave.2"){
                 CollaborationTabView()
-                    .tabItem {
-                        Label("Live", systemImage: "person.2.wave.2")
-                    }
-
+            }
+            Tab ("Saved", systemImage: "bookmark"){
                 SavedCompoundsTabView()
-                    .tabItem {
-                        Label("Saved", systemImage: "bookmark")
-                    }
             }
             
-            // Floating Search Button
-            FloatingSearchButton()
+            Tab(role: .search){
+                SearchTabView()
+            }
         }
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 
-#Preview {
-    ContentView()
-}
