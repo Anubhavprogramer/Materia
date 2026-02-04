@@ -38,7 +38,7 @@ class HomeViewModel: ObservableObject {
     }
     
     // MARK: - Persistence
-    private func loadSavedCompounds() {
+    func loadSavedCompounds() {
         isLoading = true
         defer { isLoading = false }
         

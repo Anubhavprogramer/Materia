@@ -9,6 +9,7 @@ import SwiftUI
 struct SavedCompoundsTabView: View {
     @StateObject private var viewModel = HomeViewModel()
     @State private var selectedCompound: IdentifiedCompound?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         NavigationStack {
@@ -77,6 +78,16 @@ struct SavedCompoundsTabView: View {
         }
         .sheet(item: $selectedCompound) { compound in
             CompoundDetailView(compound: compound)
+        }
+        .onAppear {
+            // Reload when tab appears
+            viewModel.loadSavedCompounds()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Reload when scene becomes active
+            if newPhase == .active {
+                viewModel.loadSavedCompounds()
+            }
         }
     }
 }
