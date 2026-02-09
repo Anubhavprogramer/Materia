@@ -40,10 +40,10 @@ struct BuildTabView: View {
                                     .opacity(0.3)
 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Materia")
-                                        .font(.largeTitle)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(AppColors.primary)
+//                                    Text("Materia")
+//                                        .font(.largeTitle)
+//                                        .fontWeight(.bold)
+//                                        .foregroundColor(AppColors.primary)
                                     Text("Chemical Structure Identifier")
                                         .font(.subheadline)
                                         .foregroundColor(AppColors.textPrimary)
@@ -97,7 +97,8 @@ struct BuildTabView: View {
                 }
                 .padding(.top)
             }
-//            .navigationTitle("Materia")
+            .navigationTitle("Materia")
+//            .navigationBarTitleDisplayMode(.automatic)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Reset") {
