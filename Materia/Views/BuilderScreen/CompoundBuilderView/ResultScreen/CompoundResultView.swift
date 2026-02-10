@@ -14,7 +14,7 @@ struct CompoundResultView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isSaved = false
 
-    @State private var showIUPACExplanation = true
+    @State private var showIUPACExplanation = false
 
     private var iupacExplanation: IUPACExplanation {
         // Deterministic + offline explanation.
@@ -99,9 +99,15 @@ struct CompoundResultView: View {
                                 }
                             }
                         } else {
-                            Text("Turn this on to see step-by-step naming.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            InfoCardView(
+                                icon: "info.circle.fill",
+                                title: "Info",
+                                message: "Turn this on to see step-by-step naming.",
+                                accentColor: .blue,
+                                backgroundColor: Color.blue.opacity(0.1),
+                                borderColor: Color.blue.opacity(0.3)
+                            )
+
                         }
                     }
                     .padding()
