@@ -35,7 +35,7 @@ struct FunctionalGroupsSection: View {
                                     .frame(width: 40, height: 32)
                                     .background(
                                         selectedCarbon == carbon
-                                            ? Color.blue
+                                        ? AppColors.accent
                                             : Color(.systemGray5)
                                     )
                                     .foregroundColor(
@@ -95,7 +95,7 @@ struct FunctionalGroupsSection: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .padding(.horizontal)
+//        .padding(.horizontal)
         .onAppear {
             selectedCarbon = min(selectedCarbon, viewModel.carbonChainLength)
         }

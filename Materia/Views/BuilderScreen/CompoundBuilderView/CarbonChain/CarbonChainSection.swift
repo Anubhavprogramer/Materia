@@ -52,13 +52,13 @@ struct CarbonChainSection: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
+//                    .padding(.horizontal)
                 }
             }
         }
         .padding()
         .background(AppColors.surface)
         .cornerRadius(12)
-        .padding(.horizontal)
+//        .padding(.horizontal)
     }
 }

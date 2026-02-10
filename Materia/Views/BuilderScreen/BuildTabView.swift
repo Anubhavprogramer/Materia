@@ -18,17 +18,17 @@ struct BuildTabView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
+//            ZStack {
                 // Background gradient
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        AppColors.gradientStart,
-                        AppColors.gradientEnd
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+//                LinearGradient(
+//                    gradient: Gradient(colors: [
+//                        AppColors.gradientStart,
+//                        AppColors.gradientEnd
+//                    ]),
+//                    startPoint: .topLeading,
+//                    endPoint: .bottomTrailing
+//                )
+//                .ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -59,7 +59,7 @@ struct BuildTabView: View {
                         initialStructure = structure
                         builderSessionID = UUID() // reset builder
                     }
-                    .padding(20)
+//                    .padding(20)
 
                     // Embedded builder (no separate "Build Compound" button)
                     CompoundBuilderView(initialStructure: initialStructure) { compound in
@@ -95,10 +95,12 @@ struct BuildTabView: View {
                             )
                     )
                 }
-                .padding(.top)
+                .padding()
             }
+            
+//            }
             .navigationTitle("Materia")
-//            .navigationBarTitleDisplayMode(.automatic)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Reset") {
@@ -108,7 +110,6 @@ struct BuildTabView: View {
                     .foregroundColor(AppColors.primary)
                     .fontWeight(.semibold)
                 }
-            }
             }
         }
     }

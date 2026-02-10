@@ -75,7 +75,7 @@ struct CompoundBuilderView: View {
                         size: .large,
                         isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
                     )
-                    .padding(.horizontal)
+//                    .padding(.horizontal)
                     .padding(.bottom)
                 }
             }

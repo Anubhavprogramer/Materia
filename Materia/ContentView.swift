@@ -28,6 +28,7 @@ struct ContentView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .accentColor(AppColors.accent)
     }
 }
 

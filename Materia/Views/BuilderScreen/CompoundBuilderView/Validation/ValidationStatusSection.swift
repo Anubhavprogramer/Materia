@@ -131,7 +131,7 @@ struct ValidationStatusSection: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
-        .padding(.horizontal)
+//        .padding(.horizontal)
     }
     
     private var validationStatusText: String {

@@ -33,87 +33,10 @@ struct MolecularWeightCalculatorView: View {
     }
     
     var body: some View {
-        ZStack {
-            AppColors.background
-                .ignoresSafeArea()
-            
+        NavigationStack{
             VStack(spacing: 0) {
-                // Header with gradient
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Molecular Weight")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(AppColors.textPrimary)
-                            
-                            Text("Calculate and explore molecular properties")
-                                .font(.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                        }
-                        
-                        Spacer()
-                        
-                        Image(systemName: "scalemass.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(AppColors.primary)
-                    }
-                }
-                .padding()
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            AppColors.surface,
-                            AppColors.surface.opacity(0.5)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                
                 ScrollView {
                     VStack(spacing: 20) {
-                        // MARK: - Molecular Weight Card
-                        VStack(spacing: 12) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Molecular Weight")
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(AppColors.textSecondary)
-                                    
-                                    Text(String(format: "%.3f", molecularWeight))
-                                        .font(.system(size: 36, weight: .bold, design: .monospaced))
-                                        .foregroundColor(AppColors.primary)
-                                    
-                                    Text("g/mol")
-                                        .font(.caption)
-                                        .foregroundColor(AppColors.textSecondary)
-                                }
-                                
-                                Spacer()
-                                
-                                VStack(alignment: .trailing, spacing: 4) {
-                                    Text("Formula")
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(AppColors.textSecondary)
-                                    
-                                    Text(molecularFormula)
-                                        .font(.system(.headline, design: .monospaced))
-                                        .foregroundColor(AppColors.accent)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(AppColors.primaryLight)
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(AppColors.surface)
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                        
                         // MARK: - Carbon Chain Length
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Carbon Chain Length", systemImage: "chain")
@@ -230,6 +153,8 @@ struct MolecularWeightCalculatorView: View {
                     .padding(.vertical, 16)
                 }
             }
+            .background(AppColors.background)
+            .navigationTitle("Molecular Weight")
         }
     }
     
