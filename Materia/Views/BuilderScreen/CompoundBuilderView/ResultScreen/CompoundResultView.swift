@@ -13,6 +13,8 @@ struct CompoundResultView: View {
     let onSave: (IdentifiedCompound) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var isSaved = false
+    @State private var showToast = false
+    @State private var currentToast: Toast?
 
     @State private var showIUPACExplanation = false
 
@@ -31,20 +33,21 @@ struct CompoundResultView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Success Header
-                    VStack(spacing: 16) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.green)
-                        
-                        Text("Compound Identified!")
-                            .font(.title)
-                            .fontWeight(.bold)
-                    }
-                    .padding(.top)
+        ZStack {
+            NavigationStack {
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Success Header
+                        VStack(spacing: 16) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.green)
+                            
+                            Text("Compound Identified!")
+                                .font(.title)
+                                .fontWeight(.bold)
+                        }
+                        .padding(.top)
 
                     // Educational Mode: IUPAC explanation
                     VStack(alignment: .leading, spacing: 12) {
@@ -281,11 +284,31 @@ struct CompoundResultView: View {
                 }
             }
         }
+            
+            // Toast overlay
+            VStack {
+                Spacer()
+                
+                if let toast = currentToast {
+                    ToastView(toast: toast) {
+                        withAnimation {
+                            currentToast = nil
+                        }
+                    }
+                }
+            }
+            .padding(.bottom, 16)
+        }
     }
 
     private func saveCompound() {
         onSave(compound)
         isSaved = true
+        
+        // Show toast
+        withAnimation {
+            currentToast = Toast(message: AppStrings.compoundSaved, type: .success, duration: AppConstants.toastDuration)
+        }
 
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
