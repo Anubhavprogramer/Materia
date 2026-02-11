@@ -47,6 +47,29 @@ struct Toast: Identifiable, Equatable {
     }
 }
 
+// MARK: - Global Toast Manager (Environment Object)
+class ToastManager: ObservableObject {
+    @Published var currentToast: Toast?
+    
+    func show(_ message: String, type: ToastType = .success, duration: Double = AppConstants.toastDuration) {
+        withAnimation {
+            currentToast = Toast(message: message, type: type, duration: duration)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation {
+                self.currentToast = nil
+            }
+        }
+    }
+    
+    func dismiss() {
+        withAnimation {
+            currentToast = nil
+        }
+    }
+}
+
 // MARK: - Toast View
 struct ToastView: View {
     let toast: Toast
@@ -90,7 +113,31 @@ struct ToastView: View {
     }
 }
 
-// MARK: - Toast Container View
+// MARK: - Global Toast Container (Add to root view)
+struct GlobalToastContainer<Content: View>: View {
+    @StateObject private var toastManager = ToastManager()
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        ZStack {
+            content()
+                .environmentObject(toastManager)
+            
+            VStack {
+                Spacer()
+                
+                if let toast = toastManager.currentToast {
+                    ToastView(toast: toast) {
+                        toastManager.dismiss()
+                    }
+                }
+            }
+            .padding(.bottom, 32)
+        }
+    }
+}
+
+// MARK: - Toast Container View (Deprecated - use GlobalToastContainer instead)
 struct ToastContainerView<Content: View>: View {
     @State private var currentToast: Toast?
     let content: Content
@@ -131,7 +178,7 @@ struct ToastPreferenceKey: PreferenceKey {
     }
 }
 
-// MARK: - View Extension for Toast
+// MARK: - View Extension for Toast (Global)
 extension View {
     func showToast(_ message: String, type: ToastType = .success, duration: Double = AppConstants.toastDuration) -> some View {
         preference(key: ToastPreferenceKey.self, value: Toast(message: message, type: type, duration: duration))

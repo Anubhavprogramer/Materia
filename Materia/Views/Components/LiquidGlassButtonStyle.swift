@@ -10,25 +10,25 @@ struct LiquidGlassButtonStyle: ButtonStyle {
 
         var verticalPadding: CGFloat {
             switch self {
-            case .small: return 10
-            case .regular: return 14
-            case .large: return 18
+            case .small: return AppConstants.smallPadding
+            case .regular: return AppConstants.defaultPadding
+            case .large: return AppConstants.largePadding
             }
         }
 
         var horizontalPadding: CGFloat {
             switch self {
-            case .small: return 14
-            case .regular: return 18
-            case .large: return 22
+            case .small: return AppConstants.smallPadding
+            case .regular: return AppConstants.defaultPadding
+            case .large: return AppConstants.largePadding
             }
         }
 
         var cornerRadius: CGFloat {
             switch self {
-            case .small: return 12
-            case .regular: return 16
-            case .large: return 18
+            case .small: return AppConstants.smallCornerRadius
+            case .regular: return AppConstants.defaultCornerRadius
+            case .large: return AppConstants.largeCornerRadius
             }
         }
     }

@@ -61,11 +61,9 @@ struct CompoundBuilderView: View {
                                 ProgressView()
                                     .scaleEffect(0.9)
                                     .tint(.white)
-                            } else {
-                                Image(systemName: "wand.and.stars")
                             }
 
-                            Text(viewModel.isBuilding ? "Identifying..." : "Identify Compound")
+                            Text(viewModel.isBuilding ? AppStrings.identifying : AppStrings.identifyCompound)
                                 .fontWeight(.semibold)
                         }
                     }

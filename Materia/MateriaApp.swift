@@ -11,7 +11,9 @@ import SwiftUI
 struct MateriaApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            GlobalToastContainer {
+                ContentView()
+            }
         }
     }
 }

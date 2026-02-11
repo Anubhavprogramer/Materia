@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FunctionalGroupsSection: View {
     @ObservedObject var viewModel: CompoundBuilderViewModel
+    @EnvironmentObject var toastManager: ToastManager
     @State private var selectedCarbon: Int = 1
     
     var body: some View {
@@ -60,8 +61,18 @@ struct FunctionalGroupsSection: View {
                         action: {
                             if viewModel.getFunctionalGroups(at: selectedCarbon).contains(group) {
                                 viewModel.removeFunctionalGroup(group, at: selectedCarbon)
+                                // Show removal toast
+                                toastManager.show(
+                                    "\(group.displayName) removed from C\(selectedCarbon)",
+                                    type: .info
+                                )
                             } else {
                                 viewModel.addFunctionalGroup(group, at: selectedCarbon)
+                                // Show addition toast
+                                toastManager.show(
+                                    "\(group.displayName) added to C\(selectedCarbon)",
+                                    type: .success
+                                )
                             }
                         }
                     )

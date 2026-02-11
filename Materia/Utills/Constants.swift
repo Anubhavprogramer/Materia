@@ -52,7 +52,6 @@ struct AppStrings {
     static let carbonChainLength = "Carbon Chain Length"
     static let totalBonds = "Total Bonds"
     static let functionalGroups = "Functional Groups"
-    static let structureNotation = "Structure Notation"
     static let structureDiagram = "Structure Diagram"
     
     // MARK: - Compound Builder
@@ -68,7 +67,22 @@ struct AppStrings {
     static let functionalGroupstext = "Add to Carbon at position :"
     static let validationStatus = "Validation Status"
     static let structurePreview = "Structure Preview"
-    
+    static let structureNotation = "Structure Notation:"
+
+    static let structureAnalysis = "Structure Analysis"
+    static let basicValidation = "Basic Validation"
+    static let basicValidationMessage = "Structure follows basic chemistry rules"
+    static let aiAnalysis = "AI Analysis"
+    static let overallConfidence = "Overall Confidence"
+    static let structureIssues = "Structure Issues"
+    static let basicRules = "Basic Rules"
+    static let basicRulesConfidence = "100%"
+    static let aiAnalysisInProgress = "Analyzing structure with AI models..."
+    static let aiAnalysisComplete = "Structure appears chemically feasible"
+    static let aiAnalysisIssues = "Structure may have issues"
+    static let aiAnalysisWaiting = "Waiting for structure analysis..."
+    static let validationDetails = "Validation Details"
+
     // MARK: - Toast Messages
     static let compoundSaved = "Compound saved successfully"
     static let compoundDeleted = "Compound deleted"
@@ -184,4 +198,15 @@ struct AppConstants {
 
     static let functionalGroupCardHeight: CGFloat = 32
     static let functionalGroupCardWidth: CGFloat = 40
+}
+
+struct AppIcons {
+    static let checkmark = "checkmark.circle.fill"
+    static let xmark = "xmark.circle.fill"
+    static let brain = "brain.head.profile"
+    static let exclamation = "exclamationmark.triangle.fill"
+    static let bookmark = "bookmark.fill"
+    static let magnifyingGlass = "magnifyingglass"
+    static let info = "info.circle"
+    static let bolt = "bolt.fill"
 }

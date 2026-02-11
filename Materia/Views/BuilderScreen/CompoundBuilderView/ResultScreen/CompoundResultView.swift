@@ -12,9 +12,9 @@ struct CompoundResultView: View {
     let canSave: Bool
     let onSave: (IdentifiedCompound) -> Void
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var toastManager: ToastManager
     @State private var isSaved = false
     @State private var showToast = false
-    @State private var currentToast: Toast?
 
     @State private var showIUPACExplanation = false
 
@@ -48,255 +48,240 @@ struct CompoundResultView: View {
                                 .fontWeight(.bold)
                         }
                         .padding(.top)
-
-                    // Educational Mode: IUPAC explanation
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Image(systemName: "graduationcap")
-                                .foregroundColor(.purple)
-                            Text("Educational Mode")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            Spacer()
-                            Toggle("", isOn: $showIUPACExplanation)
-                                .labelsHidden()
-                        }
-
-                        if showIUPACExplanation {
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("How the IUPAC name is built")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-
-                                ForEach(iupacExplanation.steps) { step in
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(step.title)
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                        Text(step.detail)
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(10)
-                                    .background(Color(.systemBackground))
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color(.systemGray5), lineWidth: 1)
-                                    )
-                                }
-
-                                if !iupacExplanation.notes.isEmpty {
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        Text("Notes")
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                        ForEach(iupacExplanation.notes, id: \.self) { note in
-                                            Text("• \(note)")
+                        
+                        // Educational Mode: IUPAC explanation
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Image(systemName: "graduationcap")
+                                    .foregroundColor(.purple)
+                                Text("Educational Mode")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                Spacer()
+                                Toggle("", isOn: $showIUPACExplanation)
+                                    .labelsHidden()
+                            }
+                            
+                            if showIUPACExplanation {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("How the IUPAC name is built")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    
+                                    ForEach(iupacExplanation.steps) { step in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(step.title)
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                            Text(step.detail)
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(10)
+                                        .background(Color(.systemBackground))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color(.systemGray5), lineWidth: 1)
+                                        )
                                     }
-                                    .padding(.top, 2)
+                                    
+                                    if !iupacExplanation.notes.isEmpty {
+                                        VStack(alignment: .leading, spacing: 6) {
+                                            Text("Notes")
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                            ForEach(iupacExplanation.notes, id: \.self) { note in
+                                                Text("• \(note)")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        .padding(.top, 2)
+                                    }
                                 }
+                            } else {
+                                InfoCardView(
+                                    icon: "info.circle.fill",
+                                    title: "Info",
+                                    message: "Turn this on to see step-by-step naming.",
+                                    accentColor: .blue,
+                                    backgroundColor: Color.blue.opacity(0.1),
+                                    borderColor: Color.blue.opacity(0.3)
+                                )
+                                
                             }
-                        } else {
-                            InfoCardView(
-                                icon: "info.circle.fill",
-                                title: "Info",
-                                message: "Turn this on to see step-by-step naming.",
-                                accentColor: .blue,
-                                backgroundColor: Color.blue.opacity(0.1),
-                                borderColor: Color.blue.opacity(0.3)
-                            )
-
                         }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                    
-                    // Compound Information Card
-                    VStack(spacing: 20) {
-                        // Common Name
-                        VStack(spacing: 8) {
-                            Text("Common Name")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(16)
+                        .padding(.horizontal)
+                        
+                        // Compound Information Card
+                        VStack(spacing: 20) {
+                            // Common Name
+                            VStack(spacing: 8) {
+                                Text("Common Name")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(compound.compoundName)
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .multilineTextAlignment(.center)
+                            }
                             
-                            Text(compound.compoundName)
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
-                                .multilineTextAlignment(.center)
+                            Divider()
+                            
+                            // IUPAC Name
+                            VStack(spacing: 8) {
+                                Text("IUPAC Name")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(compound.iupacName)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.purple)
+                                    .multilineTextAlignment(.center)
+                            }
+                            
+                            Divider()
+                            
+                            // Molecular Formula
+                            VStack(spacing: 8) {
+                                Text("Molecular Formula")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(compound.molecularFormula)
+                                    .font(.title)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.blue)
+                            }
+                            
+                            Divider()
+                            
+                            // Category
+                            VStack(spacing: 8) {
+                                Text("Category")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                                
+                                Text(compound.category)
+                                    .font(.title2)
+                                    .fontWeight(.medium)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.1))
+                                    .foregroundColor(.blue)
+                                    .cornerRadius(12)
+                            }
                         }
+                        .padding(24)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(16)
+                        .padding(.horizontal)
                         
-                        Divider()
-                        
-                        // IUPAC Name
-                        VStack(spacing: 8) {
-                            Text("IUPAC Name")
+                        // Structure Information with CoreML Properties
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Structure Details")
                                 .font(.headline)
-                                .foregroundColor(.secondary)
-                            
-                            Text(compound.iupacName)
-                                .font(.title2)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.purple)
-                                .multilineTextAlignment(.center)
-                        }
-                        
-                        Divider()
-                        
-                        // Molecular Formula
-                        VStack(spacing: 8) {
-                            Text("Molecular Formula")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
                             
-                            Text(compound.molecularFormula)
-                                .font(.title)
+                            VStack(spacing: 12) {
+                                InfoRow(
+                                    title: "Carbon Chain Length",
+                                    value: "\(compound.structure.carbonChainLength)"
+                                )
+                                
+                                InfoRow(
+                                    title: "Total Bonds",
+                                    value: "\(compound.structure.bonds.count)"
+                                )
+                                
+                                InfoRow(
+                                    title: "Functional Groups",
+                                    value: "\(compound.structure.functionalGroups.count)"
+                                )
+                                
+                                InfoRow(
+                                    title: "Structure Notation",
+                                    value: compound.structure.toSMILESLike()
+                                )
+                            }
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                        
+                        // CoreML Properties Section
+                        //                    CoreMLPropertiesSection(compound: compound)
+                        
+                        // Structure Preview
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Structure Diagram")
+                                .font(.headline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.blue)
-                        }
-                        
-                        Divider()
-                        
-                        // Category
-                        VStack(spacing: 8) {
-                            Text("Category")
-                                .font(.headline)
-                                .foregroundColor(.secondary)
                             
-                            Text(compound.category)
-                                .font(.title2)
-                                .fontWeight(.medium)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(Color.blue.opacity(0.1))
-                                .foregroundColor(.blue)
+                            StructureDiagramView(structure: compound.structure)
+                                .frame(height: 200)
+                                .background(AppColors.Card)
                                 .cornerRadius(12)
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                         }
-                    }
-                    .padding(24)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(16)
-                    .padding(.horizontal)
-                    
-                    // Structure Information with CoreML Properties
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Structure Details")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                         
+                        // Action Buttons
                         VStack(spacing: 12) {
-                            InfoRow(
-                                title: "Carbon Chain Length",
-                                value: "\(compound.structure.carbonChainLength)"
-                            )
-                            
-                            InfoRow(
-                                title: "Total Bonds",
-                                value: "\(compound.structure.bonds.count)"
-                            )
-                            
-                            InfoRow(
-                                title: "Functional Groups",
-                                value: "\(compound.structure.functionalGroups.count)"
-                            )
-                            
-                            InfoRow(
-                                title: "Structure Notation",
-                                value: compound.structure.toSMILESLike()
-                            )
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    
-                    // CoreML Properties Section
-//                    CoreMLPropertiesSection(compound: compound)
-                    
-                    // Structure Preview
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Structure Diagram")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                        
-                        StructureDiagramView(structure: compound.structure)
-                            .frame(height: 200)
-                            .background(AppColors.Card)
-                            .cornerRadius(12)
-                            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    
-                    // Action Buttons
-                    VStack(spacing: 12) {
-                        if canSave {
-                            Button(action: saveCompound) {
-                                HStack {
-                                    Image(systemName: isSaved ? "checkmark" : "square.and.arrow.down")
-                                    Text(isSaved ? "Saved!" : "Save Compound")
-                                        .fontWeight(.semibold)
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(
-                                    isSaved
+                            if canSave {
+                                Button(action: saveCompound) {
+                                    HStack {
+                                        Image(systemName: isSaved ? "checkmark" : "square.and.arrow.down")
+                                        Text(isSaved ? "Saved!" : "Save Compound")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(
+                                        isSaved
                                         ? LinearGradient(colors: [.green], startPoint: .leading, endPoint: .trailing)
                                         : LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                                )
-                                .cornerRadius(12)
+                                    )
+                                    .cornerRadius(12)
+                                }
+                                .disabled(isSaved)
                             }
-                            .disabled(isSaved)
                         }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
+                        .padding(.horizontal)
+                        .padding(.bottom)
                     }
                 }
             }
-        }
-            
-            // Toast overlay
-            VStack {
-                Spacer()
-                
-                if let toast = currentToast {
-                    ToastView(toast: toast) {
-                        withAnimation {
-                            currentToast = nil
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Close") {
+                            dismiss()
                         }
                     }
                 }
             }
-            .padding(.bottom, 16)
         }
-    }
+    
 
     private func saveCompound() {
         onSave(compound)
         isSaved = true
         
         // Show toast
-        withAnimation {
-            currentToast = Toast(message: AppStrings.compoundSaved, type: .success, duration: AppConstants.toastDuration)
-        }
+        toastManager.show(AppStrings.compoundSaved, type: .success)
 
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
@@ -305,11 +290,9 @@ struct CompoundResultView: View {
     
     private func resetForm() {
         // Reset all states
-        withAnimation {
-            isSaved = false
-            showIUPACExplanation = false
-            currentToast = Toast(message: "Form reset", type: .info, duration: AppConstants.toastDuration)
-        }
+        isSaved = false
+        showIUPACExplanation = false
+        toastManager.show("Form reset", type: .info)
         
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .light)

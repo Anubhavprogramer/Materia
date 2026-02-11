@@ -12,7 +12,7 @@ struct StructurePreviewSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Structure Preview")
+            Text(AppStrings.structurePreview)
                 .font(.headline)
                 .fontWeight(.semibold)
             
@@ -21,12 +21,11 @@ struct StructurePreviewSection: View {
                 StructureDiagramView(structure: viewModel.structure)
                     .frame(height: 200)
                     .background(AppColors.Card)
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    .cornerRadius(AppConstants.largeCornerRadius)
                 
                 // SMILES-like representation
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Structure Notation:")
+                    Text(AppStrings.structureNotation)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -39,10 +38,6 @@ struct StructurePreviewSection: View {
                 }
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-//        .padding(.horizontal)
     }
 }
 
