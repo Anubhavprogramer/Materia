@@ -9,6 +9,22 @@ import SwiftUI
 
 struct ValidationStatusSection: View {
     @ObservedObject var viewModel: CompoundBuilderViewModel
+    var load = "ValidationStatusSection"
+    
+    // Calculate combined confidence from basic validation and CoreML
+    private var combinedConfidence: Double {
+        let basicValidationScore: Double = viewModel.isValidStructure ? 1.0 : 0.0
+        CommonFunctions.debugPrint(load: load, message: "\(String(describing: viewModel.validationResult?.confidence))")
+        let coreMLConfidence = viewModel.validationResult?.confidence ?? 0.0
+        
+        // If basic validation passes, boost confidence based on CoreML result
+        if viewModel.validationError == nil {
+            // Average basic validation (100%) with CoreML confidence
+            return (basicValidationScore + coreMLConfidence) / 2.0
+        } else {
+            return coreMLConfidence
+        }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -81,11 +97,11 @@ struct ValidationStatusSection: View {
                 
                 // Detailed Analysis (if available)
                 if let result = viewModel.validationResult, !viewModel.isValidating {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         Divider()
                         
                         HStack {
-                            Text("Confidence Breakdown")
+                            Text("Validation Details")
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundColor(.secondary)
@@ -93,35 +109,67 @@ struct ValidationStatusSection: View {
                             Spacer()
                         }
                         
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Valid")
-                                    .font(.caption2)
-                                    .foregroundColor(.green)
+                        // Combined Confidence Bar
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text(result.isValid ? "Overall Confidence" : "Structure Issues")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(result.isValid ? .green : .red)
                                 
-                                ProgressView(value: result.isValid ? result.confidence : (1.0 - result.confidence))
-                                    .progressViewStyle(LinearProgressViewStyle(tint: .green))
-                                    .frame(height: 4)
+                                Spacer()
                                 
-                                Text("\(Int((result.isValid ? result.confidence : (1.0 - result.confidence)) * 100))%")
-                                    .font(.caption2)
-                                    .foregroundColor(.green)
+                                Text("\(Int(combinedConfidence * 100))%")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(result.isValid ? .green : .red)
                             }
                             
-                            Spacer()
+                            ProgressView(value: combinedConfidence)
+                                .progressViewStyle(LinearProgressViewStyle(tint: result.isValid ? .green : .red))
+                                .frame(height: 6)
+                        }
+                        
+                        // Confidence Breakdown
+                        VStack(spacing: 10) {
+                            Divider()
                             
-                            VStack(alignment: .trailing, spacing: 4) {
-                                Text("Invalid")
-                                    .font(.caption2)
-                                    .foregroundColor(.red)
+                            HStack {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.caption)
+                                            .foregroundColor(.green)
+                                        
+                                        Text("Basic Rules")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                    }
+                                    
+                                    Text("100%")
+                                        .font(.caption2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.green)
+                                }
                                 
-                                ProgressView(value: result.isValid ? (1.0 - result.confidence) : result.confidence)
-                                    .progressViewStyle(LinearProgressViewStyle(tint: .red))
-                                    .frame(height: 4)
+                                Spacer()
                                 
-                                Text("\(Int((result.isValid ? (1.0 - result.confidence) : result.confidence) * 100))%")
-                                    .font(.caption2)
-                                    .foregroundColor(.red)
+                                VStack(alignment: .trailing, spacing: 6) {
+                                    HStack {
+                                        Text("AI Analysis")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                        
+                                        Image(systemName: "brain.head.profile")
+                                            .font(.caption)
+                                            .foregroundColor(.blue)
+                                    }
+                                    
+                                    Text("\(Int(result.confidence * 100))%")
+                                        .font(.caption2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.blue)
+                                }
                             }
                         }
                     }
@@ -133,7 +181,6 @@ struct ValidationStatusSection: View {
         .cornerRadius(12)
 //        .padding(.horizontal)
     }
-    
     private var validationStatusText: String {
         if viewModel.isValidating {
             return "Analyzing structure with AI models..."

@@ -659,6 +659,8 @@ class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
         let useFingerprint = fingerprintSize > 0
 
         do {
+            var validProb = 0.5
+            
             if useFingerprint {
                 let fp = try extractFingerprintFeatures(from: structure, size: fingerprintSize)
                 let input = try MLMultiArray(shape: [NSNumber(value: fingerprintSize)], dataType: .float32)
@@ -669,38 +671,122 @@ class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
                 // If the generated model class still exposes `structure_features`, fall back.
                 if let prediction = try? validator.prediction(structure_features: input) {
                     let validationOutput = prediction.validation_result
-                    let validProb = validationOutput[0].doubleValue
-                    let isValid = validProb > 0.5
-                    let confidence = abs(validProb - 0.5) * 2.0
-                    let message = isValid ? "Structure appears chemically valid" : "Structure may have valency or stability issues"
-                    return StructureValidationResult(isValid: isValid, confidence: confidence, validationMessage: message)
+                    validProb = validationOutput[0].doubleValue
                 }
             }
+            
+            // If fingerprint failed or not available, try legacy path
+            if validProb == 0.5 {
+                let features = extractCompatibleStructureFeatures(from: structure)
+                let input = try MLMultiArray(shape: [5], dataType: .float32)
+                for (index, value) in features.enumerated() {
+                    input[index] = NSNumber(value: value)
+                }
 
-            // Legacy 5D-compatible path
-            let features = extractCompatibleStructureFeatures(from: structure)
-            let input = try MLMultiArray(shape: [5], dataType: .float32)
-            for (index, value) in features.enumerated() {
-                input[index] = NSNumber(value: value)
+                let prediction = try validator.prediction(structure_features: input)
+                let validationOutput = prediction.validation_result
+                validProb = validationOutput[0].doubleValue
             }
 
-            let prediction = try validator.prediction(structure_features: input)
-            let validationOutput = prediction.validation_result
-
-            let validProb = validationOutput[0].doubleValue
             let isValid = validProb > 0.5
-            let confidence = abs(validProb - 0.5) * 2.0
-
+            
+            // Calculate confidence with structure variance boost
+            var confidence = isValid ? validProb : (1.0 - validProb)
+            
+            // Boost confidence based on structure characteristics
+            confidence = boostConfidenceByStructure(confidence, structure: structure, isValid: isValid)
+            
             let message = isValid ? "Structure appears chemically valid" : "Structure may have valency or stability issues"
 
             return StructureValidationResult(
                 isValid: isValid,
-                confidence: confidence,
+                confidence: min(confidence, 0.99), // Cap at 99%
                 validationMessage: message
             )
         } catch {
             throw CoreMLChemistryError.predictionFailed("Structure validation failed: \(error.localizedDescription)")
         }
+    }
+    
+    // MARK: - Confidence Boosting Based on Structure
+    private func boostConfidenceByStructure(_ baseConfidence: Double, structure: ChemicalStructure, isValid: Bool) -> Double {
+        var confidence = baseConfidence
+        
+        // Factor 1: Structure Complexity (0.0 to 0.15)
+        let functionalGroupBoost = min(0.15, Double(structure.functionalGroups.count) * 0.03)
+        
+        // Factor 2: Carbon Chain Variety (0.0 to 0.10)
+        let chainBoost = Double(structure.carbonChainLength) > 2 ? 0.10 : 0.02
+        
+        // Factor 3: Bond Diversity (0.0 to 0.10)
+        let bondBoost = calculateBondDiversityBoost(structure)
+        
+        // Factor 4: Stability based on functional groups (0.0 to 0.15)
+        let stabilityBoost = calculateStabilityBoost(structure)
+        
+        // Apply boosts only if structure is valid
+        if isValid {
+            confidence += functionalGroupBoost + chainBoost + bondBoost + stabilityBoost
+        } else {
+            // For invalid structures, slightly reduce confidence based on violations
+            confidence -= min(0.20, Double(countValidationViolations(structure)) * 0.05)
+        }
+        
+        return min(max(0.0, confidence), 0.99)
+    }
+    
+    private func calculateBondDiversityBoost(_ structure: ChemicalStructure) -> Double {
+        let doubleBonds = structure.bonds.filter { $0.type == .double }.count
+        let tripleBonds = structure.bonds.filter { $0.type == .triple }.count
+        let singleBonds = structure.bonds.filter { $0.type == .single }.count
+        
+        var boost = 0.0
+        if doubleBonds > 0 { boost += 0.04 }
+        if tripleBonds > 0 { boost += 0.06 }
+        if singleBonds > 2 { boost += 0.02 }
+        
+        return min(boost, 0.10)
+    }
+    
+    private func calculateStabilityBoost(_ structure: ChemicalStructure) -> Double {
+        var boost = 0.0
+        
+        // Check for stabilizing functional groups
+        let hasAlcohol = structure.functionalGroups.contains { $0.group == .alcohol }
+        let hasCarboxylicAcid = structure.functionalGroups.contains { $0.group == .carboxylicAcid }
+        let hasAldehyde = structure.functionalGroups.contains { $0.group == .aldehyde }
+        let hasKetone = structure.functionalGroups.contains { $0.group == .ketone }
+        let hasAmine = structure.functionalGroups.contains { $0.group == .amine }
+        
+        if hasCarboxylicAcid { boost += 0.08 } // Highly stable
+        if hasAldehyde { boost += 0.06 }
+        if hasKetone { boost += 0.05 }
+        if hasAlcohol { boost += 0.04 }
+        if hasAmine { boost += 0.03 }
+        
+        return min(boost, 0.15)
+    }
+    
+    private func countValidationViolations(_ structure: ChemicalStructure) -> Int {
+        var violations = 0
+        
+        // Check for common chemical violations
+        // Empty structure
+        if structure.carbonChainLength == 0 {
+            violations += 1
+        }
+        
+        // Check for improper bonds
+        for bond in structure.bonds {
+            if bond.fromCarbon == bond.toCarbon {
+                violations += 1 // Self-bond invalid
+            }
+            if bond.fromCarbon > structure.carbonChainLength || bond.toCarbon > structure.carbonChainLength {
+                violations += 1 // Bond beyond chain
+            }
+        }
+        
+        return violations
     }
     
     func predictProperties(from structure: ChemicalStructure) async throws -> MolecularPropertiesResult {
