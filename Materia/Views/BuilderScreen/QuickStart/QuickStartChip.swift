@@ -8,22 +8,27 @@ import SwiftUI
 
 struct QuickStartChip: View {
     let title: String
-    let subtitle: String
+    let structure: ChemicalStructure
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 10) {
+                // Structure Preview
+                StructureDiagramView(structure: structure)
+                    .frame(height: 100)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                
+                // Title
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(AppColors.textPrimary)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundColor(AppColors.textSecondary)
+                    .lineLimit(1)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(12)
+            .frame(width: 140)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(AppColors.accentLight)
