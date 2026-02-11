@@ -176,10 +176,6 @@ struct ValidationStatusSection: View {
                 }
             }
         }
-//        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(AppConstants.defaultCornerRadius)
-//        .padding(.horizontal)
     }
     private var validationStatusText: String {
         if viewModel.isValidating {

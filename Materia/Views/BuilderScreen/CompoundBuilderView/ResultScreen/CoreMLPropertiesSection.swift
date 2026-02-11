@@ -164,7 +164,6 @@ struct CoreMLPropertiesSection: View {
                     } label: {
                         Text("Analyze Properties")
                     }
-                    .liquidGlassPrimaryButton(tint: .blue, size: .regular, isEnabled: true)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 20)

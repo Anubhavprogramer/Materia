@@ -22,9 +22,11 @@ struct InfoCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .foregroundColor(accentColor)
-                    .font(.system(size: 16))
+                if icon != "none"{
+                    Image(systemName: icon)
+                        .foregroundColor(accentColor)
+                        .font(.system(size: 16))
+                }
 
                 Text(title)
                     .font(.subheadline)

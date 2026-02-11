@@ -132,7 +132,7 @@ struct AppTips {
     static let buildTabTip = Tip(
         title: "Your Chemistry Buddy",
         message: "Build and save compounds here. Your saved compounds will appear in the Saved tab.",
-        icon: "noe"
+        icon: "none"
     )
     static let searchTabTip = Tip(
         title: "Search Tab",

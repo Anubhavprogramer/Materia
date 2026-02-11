@@ -68,12 +68,11 @@ struct CompoundBuilderView: View {
                         }
                     }
                     .disabled(!viewModel.isValidStructure || viewModel.isBuilding)
-                    .liquidGlassPrimaryButton(
-                        tint: viewModel.isValidStructure && !viewModel.isBuilding ? AppColors.PrimaryButton : .gray,
+                    .liquidGlassButton(
+                        color: viewModel.isValidStructure && !viewModel.isBuilding ? AppColors.accent : Color.gray,
                         size: .large,
                         isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
                     )
-//                    .padding(.horizontal)
                     .padding(.bottom)
                 }
             }
