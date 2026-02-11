@@ -30,13 +30,13 @@ struct BuildTabView: View {
                 .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 16) {
+                    VStack(spacing: AppConstants.defaultPadding) {
                         // Header
                         VStack(alignment: .leading) {
                             HStack {
-                                Image("HomeScreenIcon")
-                                    .frame(width: 1, height: 1)
-                                    .opacity(0.3)
+//                                Image("HomeScreenIcon")
+//                                    .frame(width: 1, height: 1)
+//                                    .opacity(0.3)
 
                                 VStack(alignment: .leading, spacing: 4) {
 //                                    Text("Materia")
@@ -47,7 +47,7 @@ struct BuildTabView: View {
                                         .font(.subheadline)
                                         .foregroundColor(AppColors.textPrimary)
                                 }
-
+//
                                 Spacer()
                             }
                         }

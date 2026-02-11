@@ -31,6 +31,8 @@ final class AppColors {
     
     static let Card = Color("CardColor")
     
+    static let PrimaryButton = Color("PrimaryButton")
+    
     // MARK: - Utility Colors (Green Theme Variants)
     static let primaryLight = primary.opacity(0.15)        // Light primary for backgrounds
     static let primaryMuted = primary.opacity(0.3)         // Muted primary for borders

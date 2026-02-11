@@ -228,7 +228,7 @@ struct CompoundResultView: View {
                         
                         StructureDiagramView(structure: compound.structure)
                             .frame(height: 200)
-                            .background(Color.white)
+                            .background(AppColors.Card)
                             .cornerRadius(12)
                             .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                     }
@@ -257,18 +257,6 @@ struct CompoundResultView: View {
                                 .cornerRadius(12)
                             }
                             .disabled(isSaved)
-                        }
-                        
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Text("Done")
-                                .fontWeight(.medium)
-                                .foregroundColor(.blue)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(12)
                         }
                     }
                     .padding(.horizontal)
@@ -312,6 +300,19 @@ struct CompoundResultView: View {
 
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.impactOccurred()
+    }
+    
+    private func resetForm() {
+        // Reset all states
+        withAnimation {
+            isSaved = false
+            showIUPACExplanation = false
+            currentToast = Toast(message: "Form reset", type: .info, duration: AppConstants.toastDuration)
+        }
+        
+        // Haptic feedback
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
         impactFeedback.impactOccurred()
     }
 }

@@ -71,7 +71,7 @@ struct CompoundBuilderView: View {
                     }
                     .disabled(!viewModel.isValidStructure || viewModel.isBuilding)
                     .liquidGlassPrimaryButton(
-                        tint: viewModel.isValidStructure && !viewModel.isBuilding ? .blue : .gray,
+                        tint: viewModel.isValidStructure && !viewModel.isBuilding ? AppColors.PrimaryButton : .gray,
                         size: .large,
                         isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
                     )

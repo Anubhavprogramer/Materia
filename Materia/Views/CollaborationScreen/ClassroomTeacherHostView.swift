@@ -71,7 +71,7 @@ struct ClassroomTeacherHostView: View {
                             if let structure = q.structure {
                                 StructureDiagramView(structure: structure)
                                     .frame(height: 150)
-                                    .background(Color.white)
+                                    .background(AppColors.Card)
                                     .cornerRadius(12)
                             }
                         }
