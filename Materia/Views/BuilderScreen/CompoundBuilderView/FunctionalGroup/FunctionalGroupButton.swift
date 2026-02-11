@@ -14,7 +14,7 @@ struct FunctionalGroupButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: AppConstants.defaultGap / 2) {
                 Text(group.rawValue)
                     .font(.headline)
                     .fontWeight(.semibold)
@@ -27,19 +27,19 @@ struct FunctionalGroupButton: View {
             .padding(.vertical, 12)
             .background(
                 isAttached
-                    ? Color.green.opacity(0.2)
-                    : Color(.systemGray5)
+                ? AppColors.accent.opacity(0.3)
+                : AppColors.secondary
             )
             .foregroundColor(
                 isAttached
-                    ? .green
-                    : .primary
+                ? AppColors.accent
+                : AppColors.textPrimary
             )
-            .cornerRadius(10)
+            .cornerRadius(AppConstants.defaultCornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: AppConstants.defaultCornerRadius)
                     .stroke(
-                        isAttached ? Color.green : Color.clear,
+                        isAttached ? AppColors.accent: Color.clear,
                         lineWidth: 2
                     )
             )

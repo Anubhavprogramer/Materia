@@ -65,7 +65,7 @@ struct AppStrings {
     static let bondConfiguration = "Bond Configuration"
     static let noCarbonAtoms = "Add carbon atoms to start building"
 
-    static let functionalGroupsSection = "Functional Groups"
+    static let functionalGroupstext = "Add to Carbon at position :"
     static let validationStatus = "Validation Status"
     static let structurePreview = "Structure Preview"
     
@@ -164,6 +164,7 @@ struct AppConstants {
 
     // MARK: - Gap
     static let smallGap: CGFloat = 2
+    static let defaultGap: CGFloat = 8
     static let mediumGap: CGFloat = 12
     static let largeGap: CGFloat = 16
 
@@ -180,4 +181,7 @@ struct AppConstants {
     //MARK: - Carbon Attom Size
     static let carbonAtomSize: CGFloat = 32
     static let carbonAttomNumber = 10
+
+    static let functionalGroupCardHeight: CGFloat = 32
+    static let functionalGroupCardWidth: CGFloat = 40
 }

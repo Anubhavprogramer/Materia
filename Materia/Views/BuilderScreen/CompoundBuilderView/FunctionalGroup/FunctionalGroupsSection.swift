@@ -13,13 +13,13 @@ struct FunctionalGroupsSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Functional Groups")
+            Text(AppStrings.functionalGroups)
                 .font(.headline)
                 .fontWeight(.semibold)
             
             // Carbon position selector
             VStack(alignment: .leading, spacing: 8) {
-                Text("Add to carbon position:")
+                Text(AppStrings.functionalGroupstext)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
@@ -32,27 +32,27 @@ struct FunctionalGroupsSection: View {
                                 Text("C\(carbon)")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .frame(width: 40, height: 32)
+                                    .frame(width: AppConstants.functionalGroupCardWidth, height: AppConstants.functionalGroupCardHeight)
                                     .background(
                                         selectedCarbon == carbon
-                                        ? AppColors.accent
-                                            : Color(.systemGray5)
+                                        ? AppColors.white
+                                        : Color(AppColors.secondary)
                                     )
                                     .foregroundColor(
                                         selectedCarbon == carbon
-                                            ? .white
-                                            : .primary
+                                        ? AppColors.accent
+                                        : AppColors.textPrimary
                                     )
-                                    .cornerRadius(8)
+                                    .cornerRadius(AppConstants.smallCornerRadius)
                             }
                         }
                     }
-                    .padding(.horizontal)
+//                    .padding(.horizontal)
                 }
             }
             
             // Functional groups grid
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 12) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: AppConstants.defaultPadding) {
                 ForEach(FunctionalGroup.allCases, id: \.self) { group in
                     FunctionalGroupButton(
                         group: group,
@@ -70,31 +70,28 @@ struct FunctionalGroupsSection: View {
             
             // Current attachments for selected carbon
             if !viewModel.getFunctionalGroups(at: selectedCarbon).isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
                     Text("Attached to C\(selectedCarbon):")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(viewModel.getFunctionalGroups(at: selectedCarbon), id: \.self) { group in
-                                Text(group.rawValue)
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.blue.opacity(0.1))
-                                    .foregroundColor(.blue)
-                                    .cornerRadius(6)
-                            }
+                
+                    HStack(spacing: 8) {
+                        ForEach(viewModel.getFunctionalGroups(at: selectedCarbon), id: \.self) { group in
+                            Text(group.rawValue)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(AppColors.accent)
+                                .foregroundColor(AppColors.white)
+                                .cornerRadius(AppConstants.smallCornerRadius)
                         }
-                        .padding(.horizontal)
                     }
                 }
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .background(AppColors.Card)
+        .cornerRadius(AppConstants.largeCornerRadius)
 //        .padding(.horizontal)
         .onAppear {
             selectedCarbon = min(selectedCarbon, viewModel.carbonChainLength)

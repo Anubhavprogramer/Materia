@@ -146,7 +146,7 @@ struct MolecularWeightCalculatorView: View {
                             
                             // MARK: - Functional Groups
                             VStack(alignment: .leading, spacing: 12) {
-                                Label(AppStrings.functionalGroupsSection, systemImage: "cube.transparent")
+                                Label(AppStrings.functionalGroups, systemImage: "cube.transparent")
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.textPrimary)
