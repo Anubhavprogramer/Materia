@@ -11,13 +11,13 @@ struct BondConfigurationSection: View {
     @ObservedObject var viewModel: CompoundBuilderViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Bond Configuration")
+        VStack(alignment: .leading, spacing: AppConstants.mediumGap) {
+            Text(AppStrings.bondConfiguration)
                 .font(.headline)
                 .fontWeight(.semibold)
             
             if viewModel.carbonChainLength > 1 {
-                VStack(spacing: 12) {
+                VStack(spacing: AppConstants.mediumGap) {
                     ForEach(1..<viewModel.carbonChainLength, id: \.self) { carbon in
                         BondConfigRow(
                             fromCarbon: carbon,
@@ -26,17 +26,19 @@ struct BondConfigurationSection: View {
                         )
                     }
                 }
+                .frame(maxWidth: .infinity)
             } else {
-                Text("Add more carbons to configure bonds")
+                Text(AppStrings.noCarbonAtoms)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .italic()
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-//        .padding(.horizontal)
+        .padding(AppConstants.defaultPadding)
+        .background(AppColors.Card)
+        .cornerRadius(AppConstants.largeCornerRadius)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

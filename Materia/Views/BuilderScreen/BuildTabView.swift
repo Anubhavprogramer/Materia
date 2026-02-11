@@ -37,29 +37,19 @@ struct BuildTabView: View {
                     ScrollView {
                         
                         // MARK: - Sticky Collapsing Header
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: AppConstants.mediumGap) {
                             // Title with animation
-                            Text("Materia")
+                            Text(AppStrings.AppName)
                                 .font(.system(size: max(20, 36 - abs(scrollOffset) / 5), weight: .bold, design: .default))
                                 .foregroundColor(AppColors.primary)
                             
-                            // Subtitle with fade
-                            Text("Chemical Structure Identifier")
-                                .font(.subheadline)
-                                .foregroundColor(AppColors.textPrimary)
-                                .opacity(max(0, 1 - abs(scrollOffset) * 0.01))
+                            InfoCardView(icon: AppTips.buildTabTip.icon, title: AppTips.buildTabTip.title, message: AppTips.buildTabTip.message , accentColor: AppColors.accentLight)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 20)
                         
                         
                         VStack(spacing: AppConstants.defaultPadding) {
-                            GeometryReader { geometry in
-                                Color.clear
-                                    .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).minY)
-                            }
-                            .frame(height: 0)
 
                             QuickStartSection { structure in
                                 initialStructure = structure
@@ -74,14 +64,14 @@ struct BuildTabView: View {
 
                             // Small hint to access saved compounds
                             InfoCardView(
-                                icon: "lightbulb.fill",
-                                title: "Tip",
-                                message: "Your saved compounds are available in the Saved tab."
+                                icon: AppTips.savedTabTip.icon,
+                                title: AppTips.savedTabTip.title,
+                                message: AppTips.savedTabTip.message
                             )
                         }
                         .padding()
                     }
-                    .coordinateSpace(name: "scroll")
+                    .coordinateSpace(name: AppStrings.scroll)
                     .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                         scrollOffset = value
                     }

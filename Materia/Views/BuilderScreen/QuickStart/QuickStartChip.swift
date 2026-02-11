@@ -1,9 +1,3 @@
-//
-//  QuickStartChip.swift
-//  Materia
-//
-//  Created by Anubhav Dubey on 01/02/26.
-//
 import SwiftUI
 
 struct QuickStartChip: View {
@@ -12,14 +6,16 @@ struct QuickStartChip: View {
     let action: () -> Void
 
     var body: some View {
+            
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
+                
                 // Structure Preview
                 StructureDiagramView(structure: structure)
-                    .frame(height: 100)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                
+                    .frame(height: 180)
+                    .background(AppColors.Card)
+                    .cornerRadius(AppConstants.largeCornerRadius)
+
                 // Title
                 Text(title)
                     .font(.subheadline)
@@ -27,16 +23,8 @@ struct QuickStartChip: View {
                     .foregroundColor(AppColors.textPrimary)
                     .lineLimit(1)
             }
-            .padding(12)
-            .frame(width: 140)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(AppColors.accentLight)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(AppColors.primaryMuted, lineWidth: 1.5)
-            )
+            .frame(width: 210)
         }
+        .frame(height: 230) // Set a fixed height for GeometryReader container
     }
 }

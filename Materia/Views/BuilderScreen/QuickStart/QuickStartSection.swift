@@ -11,26 +11,21 @@ struct QuickStartSection: View {
     let onSelect: (ChemicalStructure) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-//                Image(systemName: "bolt.fill")
-//                    .foregroundColor(AppColors.primary)
+        VStack(alignment: .leading, spacing: AppConstants.smallPadding) {
                 
-                Text("Quick Start")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(AppColors.textPrimary)
-                Spacer()
-            }
-
-            Text("Tap an example to prefill the builder")
+            Text(AppStrings.quickStart)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(AppColors.textPrimary)
+            
+            Text(AppStrings.quickStartTemplates)
                 .font(.caption)
                 .foregroundColor(AppColors.textSecondary)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: AppConstants.largeGap) {
                     QuickStartChip(
-                        title: "Ethanol",
+                        title: AppStrings.ethanol,
                         structure: {
                             var s = ChemicalStructure(carbonChainLength: 2)
                             s.functionalGroups.append(FunctionalGroupAttachment(position: 2, group: .alcohol))
@@ -44,7 +39,7 @@ struct QuickStartSection: View {
                     )
 
                     QuickStartChip(
-                        title: "Ethene",
+                        title: AppStrings.ethene,
                         structure: {
                             var s = ChemicalStructure(carbonChainLength: 2)
                             s.bonds.removeAll()
@@ -60,7 +55,7 @@ struct QuickStartSection: View {
                     )
 
                     QuickStartChip(
-                        title: "Ethyne",
+                        title: AppStrings.ethene,
                         structure: {
                             var s = ChemicalStructure(carbonChainLength: 2)
                             s.bonds.removeAll()
@@ -76,7 +71,7 @@ struct QuickStartSection: View {
                     )
 
                     QuickStartChip(
-                        title: "Acetic acid",
+                        title: AppStrings.aceticAcid,
                         structure: {
                             var s = ChemicalStructure(carbonChainLength: 2)
                             s.functionalGroups.append(FunctionalGroupAttachment(position: 2, group: .carboxylicAcid))
@@ -89,17 +84,7 @@ struct QuickStartSection: View {
                         }
                     )
                 }
-                .padding(.vertical, 2)
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(AppColors.secondaryLight)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(AppColors.primaryMuted, lineWidth: 1)
-                )
-        )
     }
 }

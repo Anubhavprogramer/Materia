@@ -11,7 +11,7 @@ struct CarbonChainSection: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Carbon Chain")
+            Text(AppStrings.carbonChain)
                 .font(.headline)
                 .fontWeight(.semibold)
                 .foregroundColor(AppColors.textPrimary)
@@ -22,9 +22,9 @@ struct CarbonChainSection: View {
                         get: { Double(viewModel.carbonChainLength) },
                         set: { viewModel.updateCarbonChainLength(Int($0)) }
                     ),
-                    in: 1...10,
+                    in: 1...Double(AppConstants.carbonAttomNumber),
                     step: 1,
-                    label: "Chain Length",
+                    label: AppStrings.carbonChainLength,
                     tintColor: AppColors.accent,
                     trackHeight: 8
                 )
@@ -36,7 +36,7 @@ struct CarbonChainSection: View {
                             VStack(spacing: 4) {
                                 Circle()
                                     .fill(AppColors.carbon)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: AppConstants.carbonAtomSize, height: AppConstants.carbonAtomSize)
                                     .overlay(
                                         Text("C\(carbon)")
                                             .font(.caption)
@@ -56,9 +56,9 @@ struct CarbonChainSection: View {
                 }
             }
         }
-        .padding()
-        .background(AppColors.surface)
-        .cornerRadius(12)
+        .padding(AppConstants.defaultPadding)
+        .background(AppColors.Card)
+        .cornerRadius(AppConstants.largeCornerRadius)
 //        .padding(.horizontal)
     }
 }

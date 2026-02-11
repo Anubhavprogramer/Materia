@@ -5,10 +5,11 @@
 //  Centralized constants for strings, numbers, and configuration values
 
 import Foundation
+import UIKit
 
 struct AppStrings {
     // MARK: - Navigation & Tabs
-    static let materia = "Materia"
+    static let AppName = "Materia"
     static let search = "Search"
     static let weight = "Weight"
     static let live = "Live"
@@ -60,7 +61,10 @@ struct AppStrings {
     static let identifyCompound = "Identify Compound"
     static let identifying = "Identifying..."
     static let carbonChain = "Carbon Chain"
+
     static let bondConfiguration = "Bond Configuration"
+    static let noCarbonAtoms = "Add carbon atoms to start building"
+
     static let functionalGroupsSection = "Functional Groups"
     static let validationStatus = "Validation Status"
     static let structurePreview = "Structure Preview"
@@ -77,11 +81,12 @@ struct AppStrings {
     
     // MARK: - Quick Start
     static let quickStart = "Quick Start"
-    static let quickStartTemplates = "Quick Start Templates"
+    static let quickStartTemplates = "Tap an example to prefill the builder"
     static let ethanol = "Ethanol"
-    static let methane = "Methane"
-    static let propane = "Propane"
-    
+    static let ethene = "Ethene"
+    static let ethyne = "Ethyne"
+    static let aceticAcid = "Acetic Acid"
+
     // MARK: - Weight Calculator
     static let molecularWeightCalculator = "Molecular Weight"
     static let calculateWeight = "Calculate Weight"
@@ -97,6 +102,39 @@ struct AppStrings {
     static let loading = "Loading..."
     static let preSavedIndicator = "Pre-saved"
     static let userCompound = "Your Compound"
+    static let scroll = "scroll"
+}
+struct Tip {
+    let title: String
+    let message: String
+    let icon: String
+}
+struct AppTips {
+    static let savedTabTip = Tip(
+        title: "Saved Tab",
+        message: "Your saved compounds are available in the Saved tab.",
+        icon: "bookmark.fill"
+    )
+    static let buildTabTip = Tip(
+        title: "Your Chemistry Buddy",
+        message: "Build and save compounds here. Your saved compounds will appear in the Saved tab.",
+        icon: "noe"
+    )
+    static let searchTabTip = Tip(
+        title: "Search Tab",
+        message: "Search for compounds by name or formula. Tap a result to view details.",
+        icon: "magnifyingglass"
+    )
+    static let compoundDetailsTip = Tip(
+        title: "Compound Details",
+        message: "View detailed information about the compound, including its structure, properties, and identifiers.",
+        icon: "info.circle"
+    )
+    static let quickStartTip = Tip(
+        title: "Quick Start",
+        message: "Use these templates to quickly start building common compounds. Tap one to prefill the builder.",
+        icon: "bolt.fill"
+    )
 }
 
 struct AppConstants {
@@ -116,13 +154,21 @@ struct AppConstants {
     
     // MARK: - Spacing
     static let defaultPadding: CGFloat = 16
-    static let smallPadding: CGFloat = 8
+    static let smallPadding: CGFloat = 12
     static let largePadding: CGFloat = 20
     
     // MARK: - Corner Radius
     static let defaultCornerRadius: CGFloat = 12
     static let smallCornerRadius: CGFloat = 8
-    static let largeCornerRadius: CGFloat = 16
+    static let largeCornerRadius: CGFloat = 30
+
+    // MARK: - Gap
+    static let smallGap: CGFloat = 2
+    static let mediumGap: CGFloat = 12
+    static let largeGap: CGFloat = 16
+
+    // MARK: - LineHeight
+    static let defaultLineHeight: CGFloat = 1
     
     // MARK: - Toast Duration
     static let toastDuration: Double = 2.5
@@ -130,4 +176,8 @@ struct AppConstants {
     
     // MARK: - UserDefaults Keys
     static let savedCompoundsKey = "SavedCompounds"
+
+    //MARK: - Carbon Attom Size
+    static let carbonAtomSize: CGFloat = 32
+    static let carbonAttomNumber = 10
 }

@@ -14,10 +14,10 @@ struct CarbonAtomView: View {
     let functionalGroups: [FunctionalGroup]
     
     var body: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: AppConstants.smallGap * 2) {
             // Functional groups above
             if !functionalGroups.isEmpty {
-                VStack(spacing: 1) {
+                VStack(spacing: AppConstants.smallGap) {
                     ForEach(Array(functionalGroups.enumerated()), id: \.offset) { index, group in
                         Text(group.rawValue)
                             .font(.caption2)
@@ -29,13 +29,13 @@ struct CarbonAtomView: View {
             
             // Carbon atom
             Circle()
-                .fill(Color.gray.opacity(0.8))
-                .frame(width: 24, height: 24)
+                .fill(AppColors.carbon)
+                .frame(width: AppConstants.carbonAtomSize, height: AppConstants.carbonAtomSize)
                 .overlay(
                     Text("C")
                         .font(.caption)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.carbonTextColor)
                 )
             
             // Carbon number

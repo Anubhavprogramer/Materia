@@ -29,7 +29,7 @@ struct CompoundBuilderView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: AppConstants.mediumGap) {
                     // Carbon Chain Section
                     CarbonChainSection(viewModel: viewModel)
                     
