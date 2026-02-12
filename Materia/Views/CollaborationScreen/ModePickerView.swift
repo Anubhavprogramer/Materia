@@ -45,17 +45,21 @@ struct ModePickerView: View {
                                 .foregroundColor(AppColors.primary)
                             Text("Offline-first. Nearby-only. No backend.")
                         }
+                        
                         HStack {
                             Image(systemName: "lock.fill")
                                 .foregroundColor(AppColors.accent)
                             Text("All sessions are encrypted using Multipeer Connectivity.")
                         }
                     }
+                    .padding(AppConstants.defaultPadding)
+                    .background(AppColors.Card)
+                    .cornerRadius(AppConstants.largeCornerRadius)
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
             }
-            .navigationTitle("Materia Live")
+            .navigationTitle(AppStrings.live)
             .sheet(isPresented: $showingBuilderMode) {
                 CollaborativeBuilderLobbyView()
             }

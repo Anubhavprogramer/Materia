@@ -48,29 +48,35 @@ struct MolecularWeightCalculatorView: View {
                 
                 VStack(spacing: 0) {
                     ScrollView {
+                        
+                        InfoCardView(icon: AppTips.molecularWeightTip.icon, title: AppTips.molecularWeightTip.title, message: AppTips.molecularWeightTip.message, accentColor: AppColors.accentLight, borderColor: AppColors.accent)
+                            .padding(.horizontal ,AppConstants.defaultPadding)
+                        
                         VStack(spacing: 20) {
                             // MARK: - Molecular Weight Card (Prominent)
-                            VStack(spacing: 16) {
-                                VStack(spacing: 8) {
-                                    Text("Molecular Weight")
+                            VStack(spacing: AppConstants.defaultGap) {
+                                VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
+                                    Text(AppStrings.molecularWeightCalculator)
                                         .font(.subheadline)
                                         .foregroundColor(AppColors.textSecondary)
                                     
-                                    Text(String(format: "%.2f", molecularWeight))
-                                        .font(.system(size: 44, weight: .bold, design: .monospaced))
-                                        .foregroundColor(AppColors.primary)
-                                    
-                                    Text("g/mol")
-                                        .font(.subheadline)
-                                        .foregroundColor(AppColors.textSecondary)
+                                    HStack(alignment: .bottom){
+                                        Text(String(format: "%.2f", molecularWeight))
+                                            .font(.system(size: 44, weight: .bold, design: .monospaced))
+                                            .foregroundColor(AppColors.primary)
+                                        
+                                        Text("g/mol")
+                                            .font(.subheadline)
+                                            .foregroundColor(AppColors.textSecondary)
+                                    }
                                 }
                                 
                                 Divider()
-                                    .padding(.vertical, 8)
+                                    .padding(.vertical, AppConstants.smallGap)
                                 
                                 VStack(spacing: 12) {
                                     HStack {
-                                        Text("Molecular Formula")
+                                        Text(AppStrings.molecularFormula)
                                             .font(.subheadline)
                                             .foregroundColor(AppColors.textSecondary)
                                         
@@ -86,7 +92,7 @@ struct MolecularWeightCalculatorView: View {
                                     }
                                     
                                     HStack {
-                                        Text("Total Atoms")
+                                        Text(AppStrings.totalBonds)
                                             .font(.subheadline)
                                             .foregroundColor(AppColors.textSecondary)
                                         
@@ -99,27 +105,25 @@ struct MolecularWeightCalculatorView: View {
                                     }
                                 }
                             }
-                            .padding(20)
-                            .background(AppColors.surface)
-                            .cornerRadius(16)
+                            .padding(AppConstants.defaultPadding)
+                            .background(AppColors.Card)
+                            .cornerRadius(AppConstants.largeCornerRadius)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 16)
+                                RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
                                     .stroke(AppColors.primary.opacity(0.2), lineWidth: 2)
                             )
-                            .shadow(color: AppColors.primary.opacity(0.1), radius: 8, x: 0, y: 4)
-                            .padding(.horizontal)
-                            .padding(.top, 16)
+                            .padding(.horizontal, AppConstants.defaultPadding)
                             
                             // MARK: - Carbon Chain Length
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
                                 Label(AppStrings.carbonChain, systemImage: "chain")
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.textPrimary)
                                 
-                                HStack(spacing: 16) {
+                                HStack(spacing: AppConstants.largeGap) {
                                     Button(action: { if carbonChainLength > 1 { carbonChainLength -= 1 } }) {
-                                        Image(systemName: "minus.circle.fill")
+                                        Image(systemName: AppIcons.minus)
                                             .font(.system(size: 24))
                                             .foregroundColor(AppColors.primary)
                                     }
@@ -133,20 +137,20 @@ struct MolecularWeightCalculatorView: View {
                                         .foregroundColor(AppColors.primary)
                                     
                                     Button(action: { if carbonChainLength < 20 { carbonChainLength += 1 } }) {
-                                        Image(systemName: "plus.circle.fill")
+                                        Image(systemName: AppIcons.plus)
                                             .font(.system(size: 24))
                                             .foregroundColor(AppColors.primary)
                                     }
                                 }
                             }
                             .padding()
-                            .background(AppColors.surface)
-                            .cornerRadius(12)
+                            .background(AppColors.Card)
+                            .cornerRadius(AppConstants.largeCornerRadius)
                             .padding(.horizontal)
                             
                             // MARK: - Functional Groups
-                            VStack(alignment: .leading, spacing: 12) {
-                                Label(AppStrings.functionalGroups, systemImage: "cube.transparent")
+                            VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
+                                Label(AppStrings.functionalGroups, systemImage: AppIcons.cube)
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.textPrimary)
@@ -154,7 +158,7 @@ struct MolecularWeightCalculatorView: View {
                                 VStack(spacing: 8) {
                                     ForEach(FunctionalGroup.allCases, id: \.self) { group in
                                         HStack {
-                                            VStack(alignment: .leading, spacing: 2) {
+                                            VStack(alignment: .leading, spacing: AppConstants.smallGap) {
                                                 Text(group.displayName)
                                                     .font(.subheadline)
                                                     .fontWeight(.medium)
@@ -167,7 +171,7 @@ struct MolecularWeightCalculatorView: View {
                                             
                                             Spacer()
                                             
-                                            Image(systemName: selectedFunctionalGroups.contains(group) ? "checkmark.circle.fill" : "circle")
+                                            Image(systemName: selectedFunctionalGroups.contains(group) ? AppIcons.checkmark : "circle")
                                                 .font(.system(size: 20))
                                                 .foregroundColor(
                                                     selectedFunctionalGroups.contains(group)
@@ -185,8 +189,8 @@ struct MolecularWeightCalculatorView: View {
                                                 }
                                             }
                                         }
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, AppConstants.smallPadding)
+                                        .padding(.horizontal, AppConstants.defaultPadding)
                                         .background(
                                             selectedFunctionalGroups.contains(group)
                                                 ? AppColors.accentLight
@@ -197,40 +201,40 @@ struct MolecularWeightCalculatorView: View {
                                 }
                             }
                             .padding()
-                            .background(AppColors.surface)
-                            .cornerRadius(12)
+                            .background(AppColors.Card)
+                            .cornerRadius(AppConstants.largeCornerRadius)
                             .padding(.horizontal)
                             
                             // MARK: - Information Card
-                            VStack(alignment: .leading, spacing: 12) {
-                                Label("Molecular Weight Info", systemImage: "info.circle")
+                            VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
+                                Label(AppStrings.molecularWeightInfo, systemImage: AppIcons.info)
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.textPrimary)
                                 
-                                VStack(alignment: .leading, spacing: 10) {
-                                    MWInfoRow(label: "Total Atoms", value: "\(getTotalAtoms())")
+                                VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
+                                    MWInfoRow(label: AppStrings.totalAtoms, value: "\(getTotalAtoms())")
                                     Divider()
-                                    MWInfoRow(label: "Carbon Atoms", value: "\(carbonChainLength)")
+                                    MWInfoRow(label: AppStrings.carbonAtoms, value: "\(carbonChainLength)")
                                     Divider()
-                                    MWInfoRow(label: "Functional Groups", value: "\(selectedFunctionalGroups.count)")
+                                    MWInfoRow(label: AppStrings.functionalGroups, value: "\(selectedFunctionalGroups.count)")
                                 }
                                 .padding(.vertical, 8)
                             }
                             .padding()
-                            .background(AppColors.surface)
-                            .cornerRadius(12)
+                            .background(AppColors.Card)
+                            .cornerRadius(AppConstants.largeCornerRadius)
                             .padding(.horizontal)
-                            .padding(.bottom, 20)
+                            .padding(.bottom, AppConstants.defaultPadding * 2)
                         }
-                        .padding(.vertical, 16)
+                        .padding(.vertical, AppConstants.defaultPadding)
                     }
                 }
             }
-            .navigationTitle("Molecular Weight")
+            .navigationTitle(AppStrings.weight)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Reset") {
+                    Button(AppStrings.resetButton) {
                         resetCalculator()
                     }
                     .foregroundColor(AppColors.primary)

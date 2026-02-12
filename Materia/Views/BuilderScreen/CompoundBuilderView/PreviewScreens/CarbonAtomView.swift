@@ -21,7 +21,7 @@ struct CarbonAtomView: View {
                     ForEach(Array(functionalGroups.enumerated()), id: \.offset) { index, group in
                         Text(group.rawValue)
                             .font(.caption2)
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppColors.accent)
                             .fontWeight(.medium)
                     }
                 }

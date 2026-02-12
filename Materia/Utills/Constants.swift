@@ -51,6 +51,8 @@ struct AppStrings {
     static let structureDetails = "Structure Details"
     static let carbonChainLength = "Carbon Chain Length"
     static let totalBonds = "Total Bonds"
+    static let totalAtoms = "Total Atoms"
+    static let carbonAtoms = "Carbon Atoms"
     static let functionalGroups = "Functional Groups"
     static let structureDiagram = "Structure Diagram"
     
@@ -82,6 +84,7 @@ struct AppStrings {
     static let aiAnalysisIssues = "Structure may have issues"
     static let aiAnalysisWaiting = "Waiting for structure analysis..."
     static let validationDetails = "Validation Details"
+    static let molecularWeightInfo = "Molecular Weight Info"
 
     // MARK: - Toast Messages
     static let compoundSaved = "Compound saved successfully"
@@ -144,10 +147,10 @@ struct AppTips {
         message: "View detailed information about the compound, including its structure, properties, and identifiers.",
         icon: "info.circle"
     )
-    static let quickStartTip = Tip(
-        title: "Quick Start",
-        message: "Use these templates to quickly start building common compounds. Tap one to prefill the builder.",
-        icon: "bolt.fill"
+    static let molecularWeightTip = Tip(
+        title: "Molecular Weight Calculator",
+        message: "Calculate the molecular weight of a compound by entering its formula.",
+        icon: "scalemass.fill"
     )
 }
 
@@ -209,4 +212,7 @@ struct AppIcons {
     static let magnifyingGlass = "magnifyingglass"
     static let info = "info.circle"
     static let bolt = "bolt.fill"
+    static let plus = "plus.circle.fill"
+    static let minus = "minus.circle.fill"
+    static let cube = "cube.transparent"
 }
