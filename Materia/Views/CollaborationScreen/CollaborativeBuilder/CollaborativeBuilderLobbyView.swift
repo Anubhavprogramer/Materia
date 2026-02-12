@@ -18,15 +18,13 @@ struct CollaborativeBuilderLobbyView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Collaborative Builder")
-                    .font(.title2)
-                    .fontWeight(.semibold)
 
                 Picker("Role", selection: $isHost) {
                     Text("Host (Builder A)").tag(true)
                     Text("Join (Builder B)").tag(false)
                 }
                 .pickerStyle(.segmented)
+                .background(AppColors.accentLight)
 
                 Text(viewModel.statusText)
                     .font(.caption)
@@ -76,6 +74,8 @@ struct CollaborativeBuilderLobbyView: View {
                         }
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(AppColors.accent)
+
 
                     Button("Connect") {
                         mpc.connectToFirstFoundPeer()
@@ -87,6 +87,7 @@ struct CollaborativeBuilderLobbyView: View {
                         viewModel.sendJoin()
                     }
                     .buttonStyle(.bordered)
+                    .foregroundColor(AppColors.accent)
                 }
 
                 Divider()
@@ -97,7 +98,8 @@ struct CollaborativeBuilderLobbyView: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle("Pair Mode")
+            .navigationTitle(AppStrings.pairMode)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Close") {

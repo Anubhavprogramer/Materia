@@ -32,7 +32,7 @@ struct CollaborativeBuilderLiveView: View {
             StructureDiagramView(structure: viewModel.sessionState.structure)
                 .frame(height: 150)
                 .background(AppColors.Card)
-                .cornerRadius(12)
+                .cornerRadius(AppConstants.largeCornerRadius)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(.systemGray4), lineWidth: 1)

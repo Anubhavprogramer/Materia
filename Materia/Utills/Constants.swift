@@ -110,7 +110,12 @@ struct AppStrings {
     
     // MARK: - Collaboration
     static let collaboration = "Collaboration"
-    
+    static let modeSection = "Modes"
+    static let collaborativeMoleculeBuilder = "Mode 1 — Collaborative Molecule Builder"
+    static let teacherMode = "Mode 2 — Teacher (Host Classroom)"
+    static let studentMode = "Mode 2 — Student (Join Classroom)"
+    static let pairMode = "Pair Mode"
+
     // MARK: - Empty States
     static let startSearching = "Start Searching"
     static let enterCompoundName = "Enter a compound name or formula to get started"
@@ -152,6 +157,12 @@ struct AppTips {
         message: "Calculate the molecular weight of a compound by entering its formula.",
         icon: "scalemass.fill"
     )
+    static let collaborationTip = Tip(
+        title: "info",
+        message: "Offline-first. Nearby-only. No backend. \n\nAll sessions are encrypted using Multipeer Connectivity.",
+        icon: "info.circle.fill"
+    )
+    
 }
 
 struct AppConstants {

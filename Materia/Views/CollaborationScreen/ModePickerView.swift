@@ -17,47 +17,39 @@ struct ModePickerView: View {
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
+                VStack{
                 
-                List {
-                    Section("Modes") {
-                        Button("Mode 1 — Collaborative Molecule Builder") {
-                            showingBuilderMode = true
-                        }
-                        .foregroundColor(AppColors.primary)
-                        .fontWeight(.semibold)
+                    List {
+                        Section(AppStrings.modeSection) {
+                            Button(AppStrings.collaborativeMoleculeBuilder) {
+                                showingBuilderMode = true
+                            }
+                            .foregroundColor(AppColors.primary)
+                            .fontWeight(.semibold)
 
-                        Button("Mode 2 — Teacher (Host Classroom)") {
-                            showingTeacherMode = true
-                        }
-                        .foregroundColor(AppColors.primary)
-                        .fontWeight(.semibold)
+                            Button(AppStrings.teacherMode) {
+                                showingTeacherMode = true
+                            }
+                            .foregroundColor(AppColors.primary)
+                            .fontWeight(.semibold)
 
-                        Button("Mode 2 — Student (Join Classroom)") {
-                            showingStudentMode = true
+                            Button(AppStrings.studentMode) {
+                                showingStudentMode = true
+                            }
+                            .foregroundColor(AppColors.primary)
+                            .fontWeight(.semibold)
                         }
-                        .foregroundColor(AppColors.primary)
-                        .fontWeight(.semibold)
+                        .listRowBackground(AppColors.Card) // ✅ correct placement
                     }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
 
-                    Section("Notes") {
-                        HStack {
-                            Image(systemName: "info.circle.fill")
-                                .foregroundColor(AppColors.primary)
-                            Text("Offline-first. Nearby-only. No backend.")
-                        }
-                        
-                        HStack {
-                            Image(systemName: "lock.fill")
-                                .foregroundColor(AppColors.accent)
-                            Text("All sessions are encrypted using Multipeer Connectivity.")
-                        }
-                    }
-                    .padding(AppConstants.defaultPadding)
-                    .background(AppColors.Card)
-                    .cornerRadius(AppConstants.largeCornerRadius)
+                    
+                InfoCardView(icon: AppTips.collaborationTip.icon, title: AppTips.collaborationTip.title, message: AppTips.collaborationTip.message)
+                    .padding(.horizontal, AppConstants.defaultPadding)
+                    .padding(.bottom, AppConstants.largeGap)
                 }
-                .listStyle(.insetGrouped)
-                .scrollContentBackground(.hidden)
+                
             }
             .navigationTitle(AppStrings.live)
             .sheet(isPresented: $showingBuilderMode) {
