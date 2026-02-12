@@ -46,6 +46,10 @@ final class CollaborativeBuilderViewModel: ObservableObject {
         // Joiner will be assigned Builder B by host after connection.
     }
 
+    func setRole(_ newRole: BuilderRole) {
+        self.role = newRole
+    }
+
     func sendJoin() {
         guard let role else {
             // Joiner announces intent; host will assign.
@@ -92,6 +96,15 @@ final class CollaborativeBuilderViewModel: ObservableObject {
                 functionalGroup: nil, carbonPosition: nil
             )
         )
+    }
+
+    func getBondType(from: Int, to: Int) -> BondType? {
+        for bond in sessionState.structure.bonds {
+            if (bond.fromCarbon == from && bond.toCarbon == to) || (bond.fromCarbon == to && bond.toCarbon == from) {
+                return bond.type
+            }
+        }
+        return nil
     }
 
     func addFunctionalGroup(_ group: FunctionalGroup, at position: Int) {
@@ -193,58 +206,65 @@ final class CollaborativeBuilderViewModel: ObservableObject {
     private func handle(_ message: MPCMessage, from peer: MCPeerID) {
         switch message.type {
         case .builderJoin:
-            // Host assigns Builder B to the joiner.
-            guard role == .builderA else { return }
-            let assigned = BuilderRoleAssigned(sessionID: sessionState.sessionID, role: .builderB)
-            if let msg = try? MPCMessage(type: .builderRoleAssigned, payload: assigned) {
-                mpc.send(msg, to: [peer], reliably: true)
-            }
-
-            // Host also sends the current full state.
-            if let stateMsg = try? MPCMessage(type: .builderState, payload: sessionState) {
-                mpc.send(stateMsg, to: [peer], reliably: true)
-            }
-
-            broadcastValidation()
-            statusText = "Connected (pair mode)"
-
+            handleBuilderJoin(peer)
         case .builderRoleAssigned:
-            if let assigned = try? message.decodePayload(BuilderRoleAssigned.self) {
-                role = assigned.role
-                statusText = "Assigned role: \(assigned.role.rawValue)"
-
-                // Send join ack
-                sendJoin()
-            }
-
+            handleRoleAssigned(message)
         case .builderState:
-            if let state = try? message.decodePayload(BuilderSessionState.self) {
-                // Authority: host for MVP. Accept latest revision.
-                if state.revision >= sessionState.revision {
-                    sessionState = state
-                }
-            }
-
+            handleStateUpdate(message)
         case .builderPatch:
-            if let patch = try? message.decodePayload(BuilderPatch.self) {
-                // Accept remote patch.
-                applyPatch(patch)
-
-                // Host remains authority for validation broadcast.
-                if role == .builderA {
-                    broadcastValidation()
-                }
-            }
-
+            handlePatch(message)
         case .builderValidation:
-            if let v = try? message.decodePayload(BuilderValidationBroadcast.self) {
-                if v.revision >= (lastValidation?.revision ?? 0) {
-                    lastValidation = v
-                }
-            }
-
+            handleValidation(message)
         default:
             break
+        }
+    }
+
+    private func handleBuilderJoin(_ peer: MCPeerID) {
+        guard role == .builderA else { return }
+        let assigned = BuilderRoleAssigned(sessionID: sessionState.sessionID, role: .builderB)
+        if let msg = try? MPCMessage(type: .builderRoleAssigned, payload: assigned) {
+            mpc.send(msg, to: [peer], reliably: true)
+        }
+
+        if let stateMsg = try? MPCMessage(type: .builderState, payload: sessionState) {
+            mpc.send(stateMsg, to: [peer], reliably: true)
+        }
+
+        broadcastValidation()
+        statusText = "Connected (pair mode)"
+    }
+
+    private func handleRoleAssigned(_ message: MPCMessage) {
+        if let assigned = try? message.decodePayload(BuilderRoleAssigned.self) {
+            role = assigned.role
+            statusText = "Assigned role: \(assigned.role.rawValue)"
+            sendJoin()
+        }
+    }
+
+    private func handleStateUpdate(_ message: MPCMessage) {
+        if let state = try? message.decodePayload(BuilderSessionState.self) {
+            if state.revision >= sessionState.revision {
+                sessionState = state
+            }
+        }
+    }
+
+    private func handlePatch(_ message: MPCMessage) {
+        if let patch = try? message.decodePayload(BuilderPatch.self) {
+            applyPatch(patch)
+            if role == .builderA {
+                broadcastValidation()
+            }
+        }
+    }
+
+    private func handleValidation(_ message: MPCMessage) {
+        if let v = try? message.decodePayload(BuilderValidationBroadcast.self) {
+            if v.revision >= (lastValidation?.revision ?? 0) {
+                lastValidation = v
+            }
         }
     }
 }

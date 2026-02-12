@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct CompoundResultView: View {
-    let compound: IdentifiedCompound
+    let compound: IdentifiedCompound?
+    let structure: ChemicalStructure?
     let canSave: Bool
     let onSave: (IdentifiedCompound) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -17,20 +18,51 @@ struct CompoundResultView: View {
     @State private var showToast = false
 
     @State private var showIUPACExplanation = false
+    @State private var modifiedStructure: ChemicalStructure?
+
+    private var activeStructure: ChemicalStructure {
+        modifiedStructure ?? structure ?? compound?.structure ?? ChemicalStructure(carbonChainLength: 1)
+    }
 
     private var iupacExplanation: IUPACExplanation {
         // Deterministic + offline explanation.
         let service = CoreMLChemistryServiceFactory.createService()
-        return service.explainIUPAC(from: compound.structure)
+        return service.explainIUPAC(from: activeStructure)
     }
     
-    init(compound: IdentifiedCompound,
+    private var currentCompound: IdentifiedCompound? {
+        if let compound = compound {
+            return compound
+        }
+        
+        let structure = activeStructure
+        let iupac = iupacExplanation.finalName
+        
+        // Calculate molecular formula from structure
+        let carbonCount = structure.carbonChainLength
+        let hydrogenCount = (carbonCount * 2) + 2 // Simplified: CnH(2n+2)
+        let formula = "C\(carbonCount)H\(hydrogenCount)"
+        
+        return IdentifiedCompound(
+            structure: structure,
+            name: "Modified Structure",
+            iupacName: iupac,
+            formula: formula,
+            category: "Custom"
+        )
+    }
+    
+    init(compound: IdentifiedCompound? = nil,
+         structure: ChemicalStructure? = nil,
          canSave: Bool = true,
          onSave: @escaping (IdentifiedCompound) -> Void = { _ in }) {
         self.compound = compound
+        self.structure = structure
         self.canSave = canSave
         self.onSave = onSave
+        _modifiedStructure = State(initialValue: structure ?? compound?.structure)
     }
+
     
     var body: some View {
         ZStack {
@@ -126,7 +158,7 @@ struct CompoundResultView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
-                                Text(compound.compoundName)
+                                Text(currentCompound?.compoundName ?? "—")
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .multilineTextAlignment(.center)
@@ -140,7 +172,7 @@ struct CompoundResultView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
-                                Text(compound.iupacName)
+                                Text(currentCompound?.iupacName ?? "—")
                                     .font(.title2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.purple)
@@ -155,7 +187,7 @@ struct CompoundResultView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
-                                Text(compound.molecularFormula)
+                                Text(currentCompound?.molecularFormula ?? "—")
                                     .font(.title)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.blue)
@@ -169,7 +201,7 @@ struct CompoundResultView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
-                                Text(compound.category)
+                                Text(currentCompound?.category ?? "—")
                                     .font(.title2)
                                     .fontWeight(.medium)
                                     .padding(.horizontal, 16)
@@ -193,22 +225,22 @@ struct CompoundResultView: View {
                             VStack(spacing: 12) {
                                 InfoRow(
                                     title: "Carbon Chain Length",
-                                    value: "\(compound.structure.carbonChainLength)"
+                                    value: "\(activeStructure.carbonChainLength)"
                                 )
                                 
                                 InfoRow(
                                     title: "Total Bonds",
-                                    value: "\(compound.structure.bonds.count)"
+                                    value: "\(activeStructure.bonds.count)"
                                 )
                                 
                                 InfoRow(
                                     title: "Functional Groups",
-                                    value: "\(compound.structure.functionalGroups.count)"
+                                    value: "\(activeStructure.functionalGroups.count)"
                                 )
                                 
                                 InfoRow(
                                     title: "Structure Notation",
-                                    value: compound.structure.toSMILESLike()
+                                    value: activeStructure.toSMILESLike()
                                 )
                             }
                         }
@@ -226,7 +258,7 @@ struct CompoundResultView: View {
                                 .font(.headline)
                                 .fontWeight(.semibold)
                             
-                            StructureDiagramView(structure: compound.structure)
+                            StructureDiagramView(structure: activeStructure)
                                 .frame(height: 200)
                                 .background(AppColors.Card)
                                 .cornerRadius(12)
@@ -234,6 +266,71 @@ struct CompoundResultView: View {
                         }
                         .padding()
                         .background(Color(.systemGray6))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                        
+                        // Add Functional Groups Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label("Add Functional Groups", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(AppColors.textPrimary)
+                            
+                            Text("Select a carbon position and add functional groups to modify the structure")
+                                .font(.caption)
+                                .foregroundColor(AppColors.textSecondary)
+                            
+                            VStack(spacing: 10) {
+                                ForEach(1...activeStructure.carbonChainLength, id: \.self) { carbon in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Carbon \(carbon)")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(AppColors.textPrimary)
+                                        
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 8) {
+                                                ForEach([FunctionalGroup.methyl, .alcohol, .amine, .carboxylicAcid, .aldehyde, .ketone, .nitrile, .nitro], id: \.self) { group in
+                                                    let isAttached = activeStructure.functionalGroups.contains { $0.carbonPosition == carbon && $0.group == group }
+                                                    
+                                                    Button(action: {
+                                                        var newStruct = modifiedStructure ?? activeStructure
+                                                        if isAttached {
+                                                            newStruct.functionalGroups.removeAll { $0.carbonPosition == carbon && $0.group == group }
+                                                        } else {
+                                                            newStruct.functionalGroups.append(FunctionalGroupAttachment(position: carbon, group: group))
+                                                        }
+                                                        modifiedStructure = newStruct
+                                                        toastManager.show("\(group.displayName) \(isAttached ? "removed" : "added") to C\(carbon)", type: .info)
+                                                    }) {
+                                                        VStack(spacing: 4) {
+                                                            Image(systemName: isAttached ? "checkmark.circle.fill" : "circle")
+                                                                .font(.system(size: 14, weight: .bold))
+                                                            
+                                                            Text(group.rawValue)
+                                                                .font(.caption2)
+                                                                .fontWeight(.semibold)
+                                                                .lineLimit(1)
+                                                        }
+                                                        .foregroundColor(isAttached ? AppColors.white : AppColors.accent)
+                                                        .frame(width: 50)
+                                                        .padding(.vertical, 8)
+                                                        .background(isAttached ? AppColors.accent : AppColors.accent.opacity(0.1))
+                                                        .cornerRadius(AppConstants.smallCornerRadius)
+                                                    }
+                                                }
+                                            }
+                                            .padding(.vertical, 4)
+                                        }
+                                    }
+                                    .padding(AppConstants.defaultPadding)
+                                    .background(AppColors.Card)
+                                    .cornerRadius(AppConstants.defaultCornerRadius)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(AppColors.accent.opacity(0.1))
                         .cornerRadius(12)
                         .padding(.horizontal)
                         
@@ -277,7 +374,8 @@ struct CompoundResultView: View {
     
 
     private func saveCompound() {
-        onSave(compound)
+        guard let comp = currentCompound else { return }
+        onSave(comp)
         isSaved = true
         
         // Show toast

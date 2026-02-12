@@ -111,9 +111,9 @@ struct AppStrings {
     // MARK: - Collaboration
     static let collaboration = "Collaboration"
     static let modeSection = "Modes"
-    static let collaborativeMoleculeBuilder = "Mode 1 — Collaborative Molecule Builder"
-    static let teacherMode = "Mode 2 — Teacher (Host Classroom)"
-    static let studentMode = "Mode 2 — Student (Join Classroom)"
+    static let collaborativeMoleculeBuilder = "Build with friend"
+    static let teacherMode = "Teacher"
+    static let studentMode = "Student"
     static let pairMode = "Pair Mode"
 
     // MARK: - Empty States
