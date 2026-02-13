@@ -1,5 +1,6 @@
 import Foundation
 import MultipeerConnectivity
+import Combine
 
 /// Mode 2: Student peer.
 @MainActor
@@ -8,12 +9,15 @@ final class ClassroomStudentViewModel: ObservableObject {
     @Published private(set) var currentQuestion: ClassroomQuestion?
     @Published private(set) var roster: ClassroomRoster?
     @Published private(set) var lastResults: ClassroomResults?
+    @Published private(set) var isConnected: Bool = false
 
     @Published var studentName: String
     @Published var statusText: String = "Not connected"
 
     private let classroomID: UUID
     private let mpc: MPCSessionManager
+    
+    var cancellables = Set<AnyCancellable>()
 
     init(classroomID: UUID, mpc: MPCSessionManager, studentName: String = UIDevice.current.name) {
         self.classroomID = classroomID
@@ -34,6 +38,7 @@ final class ClassroomStudentViewModel: ObservableObject {
         let join = ClassroomJoin(classroomID: classroomID, displayName: studentName)
         if let msg = try? MPCMessage(type: .classroomJoin, payload: join) {
             mpc.send(msg, reliably: true)
+            isConnected = true
         }
     }
 

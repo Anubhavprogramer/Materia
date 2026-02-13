@@ -28,6 +28,7 @@ final class MPCSessionManager: NSObject, ObservableObject {
     @Published private(set) var mode: Mode = .idle
     @Published private(set) var connectedPeers: [MCPeerID] = []
     @Published private(set) var foundPeers: [MCPeerID] = []
+    @Published private(set) var foundPeersInfo: [MCPeerID: [String: String]] = [:]
     @Published var lastError: String?
 
     // MARK: MPC primitives
@@ -194,6 +195,9 @@ extension MPCSessionManager: MCNearbyServiceBrowserDelegate {
         Task { @MainActor in
             if !self.foundPeers.contains(peerID) {
                 self.foundPeers.append(peerID)
+                if let info = info {
+                    self.foundPeersInfo[peerID] = info
+                }
             }
         }
     }
@@ -201,6 +205,7 @@ extension MPCSessionManager: MCNearbyServiceBrowserDelegate {
     nonisolated func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         Task { @MainActor in
             self.foundPeers.removeAll { $0 == peerID }
+            self.foundPeersInfo.removeValue(forKey: peerID)
         }
     }
 

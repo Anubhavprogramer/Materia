@@ -9,6 +9,7 @@ final class ClassroomHostViewModel: ObservableObject {
     @Published private(set) var connectedStudents: [String] = []
     @Published private(set) var currentQuestion: ClassroomQuestion?
     @Published private(set) var lastResults: ClassroomResults?
+    @Published private(set) var isHosting: Bool = false
 
     @Published var statusText: String = "Not hosting"
 
@@ -29,7 +30,17 @@ final class ClassroomHostViewModel: ObservableObject {
 
     func startHosting() {
         statusText = "Hosting classroom…"
+        isHosting = true
         mpc.startAdvertising(discoveryInfo: ["mode": "classroom", "role": "teacher"])
+    }
+
+    func stopHosting() {
+        statusText = "Not hosting"
+        isHosting = false
+        connectedStudents = []
+        currentQuestion = nil
+        lastResults = nil
+        mpc.shutdown()
     }
 
     func sendQuestion(prompt: String, structure: ChemicalStructure? = nil) {
@@ -49,6 +60,11 @@ final class ClassroomHostViewModel: ObservableObject {
         if let msg = try? MPCMessage(type: .classroomQuestion, payload: q) {
             mpc.send(msg, reliably: true)
         }
+    }
+
+    func endQuestion() {
+        currentQuestion = nil
+        lastResults = nil
     }
 
     private func broadcastRoster() {

@@ -12,8 +12,8 @@ struct ModePickerView: View {
                 // Gradient background matching the app theme
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        AppColors.gradientStart.opacity(0.15),
-                        AppColors.gradientEnd.opacity(0.15)
+                        AppColors.gradientStart,
+                        AppColors.gradientEnd
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -61,28 +61,28 @@ struct ModePickerView: View {
                             .padding(.horizontal, AppConstants.defaultPadding)
                             
                             // Teacher Mode Card
-                            ModeCardView(
-                                icon: "person.fill.badge.plus",
-                                title: AppStrings.teacherMode,
-                                description: "Host a classroom session and guide students",
-                                action: {
-                                    showingTeacherMode = true
-                                    toastManager.show("Opening Teacher Mode...", type: .info)
-                                }
-                            )
-                            .padding(.horizontal, AppConstants.defaultPadding)
+//                            ModeCardView(
+//                                icon: "person.fill.badge.plus",
+//                                title: AppStrings.teacherMode,
+//                                description: "Host a classroom session and guide students",
+//                                action: {
+//                                    showingTeacherMode = true
+//                                    toastManager.show("Opening Teacher Mode...", type: .info)
+//                                }
+//                            )
+//                            .padding(.horizontal, AppConstants.defaultPadding)
                             
                             // Student Mode Card
-                            ModeCardView(
-                                icon: "person.fill.checkmark",
-                                title: AppStrings.studentMode,
-                                description: "Join a classroom session as a student",
-                                action: {
-                                    showingStudentMode = true
-                                    toastManager.show("Opening Student Mode...", type: .info)
-                                }
-                            )
-                            .padding(.horizontal, AppConstants.defaultPadding)
+//                            ModeCardView(
+//                                icon: "person.fill.checkmark",
+//                                title: AppStrings.studentMode,
+//                                description: "Join a classroom session as a student",
+//                                action: {
+//                                    showingStudentMode = true
+//                                    toastManager.show("Opening Student Mode...", type: .info)
+//                                }
+//                            )
+//                            .padding(.horizontal, AppConstants.defaultPadding)
                             
                             Spacer()
                                 .frame(height: AppConstants.largePadding)
