@@ -17,7 +17,8 @@ struct ContentView: View {
                 MolecularWeightCalculatorView()
             }
             Tab ("Live", systemImage: "person.2.wave.2"){
-                CollaborationTabView()
+//                CollaborationTabView()
+                ModePickerView()
             }
             Tab ("Saved", systemImage: "bookmark"){
                 SavedCompoundsTabView()

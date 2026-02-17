@@ -48,7 +48,7 @@ struct SearchTabView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .navigationTitle("Search Compounds")
+            .navigationTitle("Search")
             .searchable(text: $searchText, prompt: "Name, formula...")
             .onChange(of: searchText) { _, newValue in
                 searchService.search(query: newValue)
