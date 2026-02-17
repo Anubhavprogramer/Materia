@@ -81,10 +81,14 @@ struct CompoundBuilderView: View {
         }
         .sheet(isPresented: $showingResult) {
             if let compound = identifiedCompound {
-                CompoundResultView(compound: compound) { savedCompound in
-                    onCompoundSaved(savedCompound)
-                    dismiss()
+                NavigationStack {
+                    CompoundResultView(compound: compound) { savedCompound in
+                                        onCompoundSaved(savedCompound)
+                                        dismiss()
+                                    }
+
                 }
+                
             }
         }
     }

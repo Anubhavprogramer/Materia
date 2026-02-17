@@ -40,7 +40,7 @@ struct CompoundResultView: View {
         
         // Calculate molecular formula from structure
         let carbonCount = structure.carbonChainLength
-        let hydrogenCount = (carbonCount * 2) + 2 // Simplified: CnH(2n+2)
+        let hydrogenCount = (carbonCount * 2) + 2
         let formula = "C\(carbonCount)H\(hydrogenCount)"
         
         return IdentifiedCompound(
@@ -65,24 +65,12 @@ struct CompoundResultView: View {
 
     
     var body: some View {
-        ZStack {
-            NavigationStack {
+        // ZStack {
+            // NavigationStack {
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Success Header
-                        VStack(spacing: 16) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(.green)
-                            
-                            Text("Compound Identified!")
-                                .font(.title)
-                                .fontWeight(.bold)
-                        }
-                        .padding(.top)
-                        
                         // Educational Mode: IUPAC explanation
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
                             HStack {
                                 Image(systemName: "graduationcap")
                                     .foregroundColor(.purple)
@@ -145,18 +133,20 @@ struct CompoundResultView: View {
                                 
                             }
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(16)
+                        .padding(AppConstants.defaultPadding)
+                        .background(AppColors.surface)
+                        .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
                         // Compound Information Card
                         VStack(spacing: 20) {
                             // Common Name
-                            VStack(spacing: 8) {
+                            HStack(spacing: 8) {
                                 Text("Common Name")
                                     .font(.headline)
                                     .foregroundColor(.secondary)
+                                
+                                Spacer()
                                 
                                 Text(currentCompound?.compoundName ?? "—")
                                     .font(.largeTitle)
@@ -167,11 +157,13 @@ struct CompoundResultView: View {
                             Divider()
                             
                             // IUPAC Name
-                            VStack(spacing: 8) {
+                            HStack(spacing: 8) {
                                 Text("IUPAC Name")
                                     .font(.headline)
                                     .foregroundColor(.secondary)
-                                
+
+                                Spacer()
+
                                 Text(currentCompound?.iupacName ?? "—")
                                     .font(.title2)
                                     .fontWeight(.semibold)
@@ -182,11 +174,13 @@ struct CompoundResultView: View {
                             Divider()
                             
                             // Molecular Formula
-                            VStack(spacing: 8) {
+                            HStack(spacing: 8) {
                                 Text("Molecular Formula")
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                 
+                                Spacer()
+
                                 Text(currentCompound?.molecularFormula ?? "—")
                                     .font(.title)
                                     .fontWeight(.semibold)
@@ -196,10 +190,12 @@ struct CompoundResultView: View {
                             Divider()
                             
                             // Category
-                            VStack(spacing: 8) {
+                            HStack(spacing: 8) {
                                 Text("Category")
                                     .font(.headline)
                                     .foregroundColor(.secondary)
+                                
+                                Spacer()
                                 
                                 Text(currentCompound?.category ?? "—")
                                     .font(.title2)
@@ -211,9 +207,9 @@ struct CompoundResultView: View {
                                     .cornerRadius(12)
                             }
                         }
-                        .padding(24)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(16)
+                        .padding(AppConstants.defaultPadding)
+                        .background(AppColors.surface)
+                        .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
                         // Structure Information with CoreML Properties
@@ -244,9 +240,9 @@ struct CompoundResultView: View {
                                 )
                             }
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .padding(AppConstants.defaultPadding)
+                        .background(AppColors.surface)
+                        .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
                         // CoreML Properties Section
@@ -264,112 +260,33 @@ struct CompoundResultView: View {
                                 .cornerRadius(12)
                                 .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .padding(AppConstants.defaultPadding)
+                        .background(AppColors.surface)
+                        .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
-                        // Add Functional Groups Section
-                        VStack(alignment: .leading, spacing: 12) {
-                            Label("Add Functional Groups", systemImage: "plus.circle.fill")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(AppColors.textPrimary)
-                            
-                            Text("Select a carbon position and add functional groups to modify the structure")
-                                .font(.caption)
-                                .foregroundColor(AppColors.textSecondary)
-                            
-                            VStack(spacing: 10) {
-                                ForEach(1...activeStructure.carbonChainLength, id: \.self) { carbon in
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Carbon \(carbon)")
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(AppColors.textPrimary)
-                                        
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 8) {
-                                                ForEach([FunctionalGroup.methyl, .alcohol, .amine, .carboxylicAcid, .aldehyde, .ketone, .nitrile, .nitro], id: \.self) { group in
-                                                    let isAttached = activeStructure.functionalGroups.contains { $0.carbonPosition == carbon && $0.group == group }
-                                                    
-                                                    Button(action: {
-                                                        var newStruct = modifiedStructure ?? activeStructure
-                                                        if isAttached {
-                                                            newStruct.functionalGroups.removeAll { $0.carbonPosition == carbon && $0.group == group }
-                                                        } else {
-                                                            newStruct.functionalGroups.append(FunctionalGroupAttachment(position: carbon, group: group))
-                                                        }
-                                                        modifiedStructure = newStruct
-                                                        toastManager.show("\(group.displayName) \(isAttached ? "removed" : "added") to C\(carbon)", type: .info)
-                                                    }) {
-                                                        VStack(spacing: 4) {
-                                                            Image(systemName: isAttached ? "checkmark.circle.fill" : "circle")
-                                                                .font(.system(size: 14, weight: .bold))
-                                                            
-                                                            Text(group.rawValue)
-                                                                .font(.caption2)
-                                                                .fontWeight(.semibold)
-                                                                .lineLimit(1)
-                                                        }
-                                                        .foregroundColor(isAttached ? AppColors.white : AppColors.accent)
-                                                        .frame(width: 50)
-                                                        .padding(.vertical, 8)
-                                                        .background(isAttached ? AppColors.accent : AppColors.accent.opacity(0.1))
-                                                        .cornerRadius(AppConstants.smallCornerRadius)
-                                                    }
-                                                }
-                                            }
-                                            .padding(.vertical, 4)
-                                        }
-                                    }
-                                    .padding(AppConstants.defaultPadding)
-                                    .background(AppColors.Card)
-                                    .cornerRadius(AppConstants.defaultCornerRadius)
-                                }
-                            }
-                        }
-                        .padding()
-                        .background(AppColors.accent.opacity(0.1))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                         
-                        // Action Buttons
-                        VStack(spacing: 12) {
-                            if canSave {
-                                Button(action: saveCompound) {
-                                    HStack {
-                                        Image(systemName: isSaved ? "checkmark" : "square.and.arrow.down")
-                                        Text(isSaved ? "Saved!" : "Save Compound")
-                                            .fontWeight(.semibold)
-                                    }
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(
-                                        isSaved
-                                        ? LinearGradient(colors: [.green], startPoint: .leading, endPoint: .trailing)
-                                        : LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                                    )
-                                    .cornerRadius(12)
-                                }
-                                .disabled(isSaved)
-                            }
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom)
+                    
+                        
+                    }
+                    .padding(.vertical, AppConstants.defaultPadding)
+                }
+            // }
+            .navigationTitle("Compound details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Save") {
+                        saveCompound()
                     }
                 }
             }
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Close") {
-                            dismiss()
-                        }
-                    }
-                }
-            }
+            // }
         }
     
 
@@ -386,16 +303,16 @@ struct CompoundResultView: View {
         impactFeedback.impactOccurred()
     }
     
-    private func resetForm() {
-        // Reset all states
-        isSaved = false
-        showIUPACExplanation = false
-        toastManager.show("Form reset", type: .info)
+    // private func resetForm() {
+    //     // Reset all states
+    //     isSaved = false
+    //     showIUPACExplanation = false
+    //     toastManager.show("Form reset", type: .info)
         
-        // Haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-        impactFeedback.impactOccurred()
-    }
+    //     // Haptic feedback
+    //     let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+    //     impactFeedback.impactOccurred()
+    // }
 }
 
 #Preview {

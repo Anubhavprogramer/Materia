@@ -7,19 +7,20 @@
 import SwiftUI
 
 struct CompoundDetailView: View {
-    let compound: IdentifiedCompound
+    @State var compound: IdentifiedCompound
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            CompoundResultView(compound: compound, canSave: false)
-                .navigationTitle("Details")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("Done") { dismiss() }
-                    }
+            ScrollView {
+                VStack(spacing: AppConstants.defaultGap) {
+                    CompoundResultView(compound: compound, canSave: false)
+                    
+                    SwipeableNoteCardView(notes: $compound.notes)
                 }
+            }
+            .navigationTitle("Details")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

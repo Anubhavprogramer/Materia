@@ -187,6 +187,7 @@ struct IdentifiedCompound: Identifiable, Codable {
     let identifiedAt: Date
     let confidence: Double?
     let isValidated: Bool?
+    var notes: [CompoundNote]
     
     init(structure: ChemicalStructure, name: String, iupacName: String, formula: String, category: String, confidence: Double? = nil, isValidated: Bool? = nil) {
         self.id = UUID()
@@ -198,5 +199,21 @@ struct IdentifiedCompound: Identifiable, Codable {
         self.identifiedAt = Date()
         self.confidence = confidence
         self.isValidated = isValidated
+        self.notes = []
+    }
+    
+    mutating func addNote(content: String) {
+        let note = CompoundNote(compoundId: self.id, content: content)
+        self.notes.append(note)
+    }
+    
+    mutating func updateNote(_ note: CompoundNote) {
+        if let index = self.notes.firstIndex(where: { $0.id == note.id }) {
+            self.notes[index] = note
+        }
+    }
+    
+    mutating func deleteNote(_ noteId: UUID) {
+        self.notes.removeAll { $0.id == noteId }
     }
 }

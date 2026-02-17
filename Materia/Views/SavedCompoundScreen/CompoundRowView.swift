@@ -67,7 +67,7 @@ struct CompoundRowView: View {
                 }
             }
             
-            // Structure preview
+            // Structure preview and notes indicator
             HStack {
                 Text("Structure:")
                     .font(.caption)
@@ -81,6 +81,23 @@ struct CompoundRowView: View {
                     .cornerRadius(4)
                 
                 Spacer()
+                
+                // Notes indicator
+                if !compound.notes.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "note.text.badge.plus")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        
+                        Text("\(compound.notes.count)")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(4)
+                }
             }
         }
         .padding(.vertical, 4)
