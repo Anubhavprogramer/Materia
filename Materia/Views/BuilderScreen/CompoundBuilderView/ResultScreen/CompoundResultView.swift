@@ -285,14 +285,16 @@ struct CompoundResultView: View {
             .navigationTitle("Compound details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
+                if canSave {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Close") {
+                            dismiss()
+                        }
                     }
-                }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Save") {
-                        saveCompound()
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Save") {
+                            saveCompound()
+                        }
                     }
                 }
             }

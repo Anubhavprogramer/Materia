@@ -21,11 +21,16 @@ struct CompoundDetailView: View {
             .navigationTitle("Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button("Save") {
                         saveAndDismiss()
                     }
                     .fontWeight(.semibold)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Close") {
+                        dismiss()
+                    }
                 }
             }
         }
