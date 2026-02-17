@@ -19,4 +19,29 @@ enum CommonFunctions {
     static func MessagePrint(load: String, message: String ){
         print("MESSAGE PRINT: \(load.uppercased()) :: \(message)")
     }
+    
+    // MARK: - Notes Feature Debugging
+    static func debugNote(action: String, noteId: String, compoundId: String, message: String) {
+        print("📝 NOTE DEBUG [\(action)] :: CompoundId: \(compoundId) :: NoteId: \(noteId) :: \(message)")
+    }
+    
+    static func debugNoteAdd(noteId: String, compoundId: String, content: String) {
+        print("✅ NOTE ADDED :: CompoundId: \(compoundId) :: NoteId: \(noteId) :: Content: \(content)")
+    }
+    
+    static func debugNoteUpdate(noteId: String, oldContent: String, newContent: String) {
+        print("🔄 NOTE UPDATED :: NoteId: \(noteId) :: Old: \(oldContent) → New: \(newContent)")
+    }
+    
+    static func debugNoteDelete(noteId: String, compoundId: String) {
+        print("🗑️ NOTE DELETED :: CompoundId: \(compoundId) :: NoteId: \(noteId)")
+    }
+    
+    static func debugNoteSave(compoundId: String, noteCount: Int) {
+        print("💾 NOTES SAVED :: CompoundId: \(compoundId) :: Total Notes: \(noteCount)")
+    }
+    
+    static func debugNoteError(action: String, error: String) {
+        print("❌ NOTE ERROR [\(action)] :: \(error)")
+    }
 }

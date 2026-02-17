@@ -12,6 +12,7 @@ struct CompoundResultView: View {
     let structure: ChemicalStructure?
     let canSave: Bool
     let onSave: (IdentifiedCompound) -> Void
+    @Binding var notes: [CompoundNote]
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var toastManager: ToastManager
     @State private var isSaved = false
@@ -32,7 +33,10 @@ struct CompoundResultView: View {
     
     private var currentCompound: IdentifiedCompound? {
         if let compound = compound {
-            return compound
+            // If we have an existing compound, update its notes
+            var updatedCompound = compound
+            updatedCompound.notes = notes
+            return updatedCompound
         }
         
         let structure = activeStructure
@@ -43,22 +47,27 @@ struct CompoundResultView: View {
         let hydrogenCount = (carbonCount * 2) + 2
         let formula = "C\(carbonCount)H\(hydrogenCount)"
         
-        return IdentifiedCompound(
+        var newCompound = IdentifiedCompound(
             structure: structure,
             name: "Modified Structure",
             iupacName: iupac,
             formula: formula,
             category: "Custom"
         )
+        // Include notes in the new compound
+        newCompound.notes = notes
+        return newCompound
     }
     
     init(compound: IdentifiedCompound? = nil,
          structure: ChemicalStructure? = nil,
          canSave: Bool = true,
+         notes: Binding<[CompoundNote]> = .constant([]),
          onSave: @escaping (IdentifiedCompound) -> Void = { _ in }) {
         self.compound = compound
         self.structure = structure
         self.canSave = canSave
+        self._notes = notes
         self.onSave = onSave
         _modifiedStructure = State(initialValue: structure ?? compound?.structure)
     }
@@ -265,7 +274,8 @@ struct CompoundResultView: View {
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
-                        
+                        // Notes Section
+                        notesSection
                     
                         
                     }
@@ -286,14 +296,32 @@ struct CompoundResultView: View {
                     }
                 }
             }
-            // }
         }
     
+    private var notesSection: some View {
+        VStack {
+            let compId = currentCompound?.id.uuidString ?? "UNKNOWN"
+            if currentCompound != nil {
+                let _ = CommonFunctions.debugNote(
+                    action: "INIT",
+                    noteId: "N/A",
+                    compoundId: compId,
+                    message: "CompoundResultView initialized with \(notes.count) notes"
+                )
+            }
+            SwipeableNoteCardView(notes: $notes, compoundId: currentCompound?.id ?? UUID())
+        }
+    }
 
     private func saveCompound() {
         guard let comp = currentCompound else { return }
         onSave(comp)
         isSaved = true
+        
+        CommonFunctions.debugNoteSave(
+            compoundId: comp.id.uuidString,
+            noteCount: comp.notes.count
+        )
         
         // Show toast
         toastManager.show(AppStrings.compoundSaved, type: .success)
@@ -301,6 +329,11 @@ struct CompoundResultView: View {
         // Haptic feedback
         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
+        
+        // Dismiss after a short delay to allow toast to show
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            dismiss()
+        }
     }
     
     // private func resetForm() {
@@ -313,17 +346,4 @@ struct CompoundResultView: View {
     //     let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     //     impactFeedback.impactOccurred()
     // }
-}
-
-#Preview {
-    let sampleStructure = ChemicalStructure(carbonChainLength: 2)
-    let sampleCompound = IdentifiedCompound(
-        structure: sampleStructure,
-        name: "Ethanol",
-        iupacName: "ethanol",
-        formula: "C₂H₆O",
-        category: "Organic"
-    )
-    
-    CompoundResultView(compound: sampleCompound) { _ in }
 }

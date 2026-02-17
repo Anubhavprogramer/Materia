@@ -12,6 +12,7 @@ struct CompoundBuilderView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingResult = false
     @State private var identifiedCompound: IdentifiedCompound?
+    @State private var compoundNotes: [CompoundNote] = []
     
     let onCompoundSaved: (IdentifiedCompound) -> Void
     
@@ -82,13 +83,11 @@ struct CompoundBuilderView: View {
         .sheet(isPresented: $showingResult) {
             if let compound = identifiedCompound {
                 NavigationStack {
-                    CompoundResultView(compound: compound) { savedCompound in
-                                        onCompoundSaved(savedCompound)
-                                        dismiss()
-                                    }
-
+                    CompoundResultView(compound: compound, notes: $compoundNotes) { savedCompound in
+                        onCompoundSaved(savedCompound)
+                        dismiss()
+                    }
                 }
-                
             }
         }
     }

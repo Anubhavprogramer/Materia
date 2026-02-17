@@ -9,6 +9,7 @@ import SwiftUI
 struct SavedCompoundsTabView: View {
     @StateObject private var viewModel = HomeViewModel()
     @State private var selectedCompound: IdentifiedCompound?
+    @State private var editingCompound: IdentifiedCompound?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -33,7 +34,7 @@ struct SavedCompoundsTabView: View {
                             Section {
                                 ForEach(viewModel.savedCompounds) { compound in
                                     Button {
-                                        selectedCompound = compound
+                                        editingCompound = compound
                                     } label: {
                                         CompoundRowView(compound: compound)
                                     }
@@ -76,8 +77,9 @@ struct SavedCompoundsTabView: View {
             }
             .navigationTitle("Saved")
         }
-        .sheet(item: $selectedCompound) { compound in
+        .sheet(item: $editingCompound) { compound in
             CompoundDetailView(compound: compound)
+                .environmentObject(viewModel)
         }
         .onAppear {
             // Reload when tab appears

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SwipeableNoteCardView: View {
     @Binding var notes: [CompoundNote]
+    let compoundId: UUID
     @State private var showAddNote = false
     @State private var selectedNote: CompoundNote?
     @State private var isEditingNote = false
@@ -109,12 +110,25 @@ struct SwipeableNoteCardView: View {
             }
         }
         .padding(.horizontal, AppConstants.defaultPadding)
+        .onAppear {
+            CommonFunctions.debugNote(
+                action: "VIEW_APPEAR",
+                noteId: "N/A",
+                compoundId: compoundId.uuidString,
+                message: "SwipeableNoteCardView appeared with \(notes.count) notes"
+            )
+        }
         .sheet(isPresented: $showAddNote) {
-            AddNoteView(notes: $notes)
+            AddNoteView(notes: $notes, compoundId: compoundId)
         }
         .sheet(item: $selectedNote) { note in
             EditNoteView(note: note) { updatedNote in
                 if let index = notes.firstIndex(where: { $0.id == updatedNote.id }) {
+                    CommonFunctions.debugNoteUpdate(
+                        noteId: updatedNote.id.uuidString,
+                        oldContent: notes[index].content,
+                        newContent: updatedNote.content
+                    )
                     notes[index] = updatedNote
                 }
                 isEditingNote = false
@@ -123,6 +137,11 @@ struct SwipeableNoteCardView: View {
     }
     
     private func deleteNote(at index: Int) {
+        let deletedNote = notes[index]
+        CommonFunctions.debugNoteDelete(
+            noteId: deletedNote.id.uuidString,
+            compoundId: deletedNote.compoundId.uuidString
+        )
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             notes.remove(at: index)
         }

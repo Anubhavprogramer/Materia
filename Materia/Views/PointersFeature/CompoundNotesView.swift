@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CompoundNotesView: View {
     @Binding var notes: [CompoundNote]
+    let compoundId: UUID
     @State private var showAddNote = false
     @State private var selectedNote: CompoundNote?
     @State private var isEditingNote = false
@@ -70,7 +71,7 @@ struct CompoundNotesView: View {
         }
         .padding(.horizontal, AppConstants.defaultPadding)
         .sheet(isPresented: $showAddNote) {
-            AddNoteView(notes: $notes)
+            AddNoteView(notes: $notes, compoundId: compoundId)
         }
         .sheet(item: $selectedNote) { note in
             EditNoteView(note: note) { updatedNote in
