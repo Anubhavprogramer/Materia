@@ -11,6 +11,7 @@ struct SwipeCard: View {
     let note: CompoundNote
     let onDelete: () -> Void
     let onEdit: () -> Void
+    let onMoveToBack: () -> Void
     let index: Int
     let totalCards: Int
     
@@ -18,31 +19,39 @@ struct SwipeCard: View {
     @State private var rotation: Double = 0
     @State private var showDeleteAlert = false
     @State private var swipeDirection: SwipeDirection? = nil
+    @State private var velocity: CGSize = .zero
+    @State private var shadowDepth: CGFloat = 2
+    @State private var cardScale: CGFloat = 1.0
+    @State private var isAnimating = false
     
     enum SwipeDirection {
         case left, right, up, down
     }
     
+    // Calculate dynamic shadow based on offset
+    private var shadowRadius: CGFloat {
+        let distance = sqrt(offset.width * offset.width + offset.height * offset.height)
+        return 2 + (distance / 100) * 8
+    }
+    
+    // Calculate dynamic shadow opacity based on movement
+    private var shadowOpacity: Double {
+        let distance = sqrt(offset.width * offset.width + offset.height * offset.height)
+        return 0.1 + min(distance / 300, 0.15)
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header with dots indicator
-            HStack {
-                Text(String(index + 1))
-                    .font(.caption)
-                    .fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
+                
+                // Subtitle/Content
+                Text(note.content)
+                    .font(.system(size: 13, weight: .regular))
                     .foregroundColor(AppColors.textSecondary)
-            }
-            
-            // Subtitle/Content
-            Text(note.content)
-                .font(.system(size: 13, weight: .regular))
-                .foregroundColor(AppColors.textSecondary)
-                .lineLimit(3)
-                .multilineTextAlignment(.leading)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
             
             Spacer()
             
-            // Footer with date
             Text(note.createdAt.formatted(date: .abbreviated, time: .shortened))
                 .font(.caption2)
                 .foregroundColor(AppColors.textSecondary)
@@ -50,38 +59,61 @@ struct SwipeCard: View {
         .padding(20)
         .frame(maxWidth: .infinity)
         .frame(minHeight: 220)
-        .background(AppColors.background)
+        .background(AppColors.Card)
         .cornerRadius(AppConstants.largeCornerRadius)
         
-        // Stacked effect
+        // Enhanced shadow with depth effect
+        .shadow(color: Color.black.opacity(shadowOpacity), radius: shadowRadius, x: 0, y: shadowRadius * 0.5)
+        
+        // Stacked effect with smooth transitions
         .offset(y: CGFloat(index) * 8)
         .offset(x: CGFloat(index) * 4)
         .scaleEffect(1 - CGFloat(index) * 0.02, anchor: .bottom)
         
         // Swipe gesture & tap to edit
         .offset(offset)
-        .rotationEffect(.degrees(rotation))
+        .rotationEffect(.degrees(rotation), anchor: .center)
+        .scaleEffect(cardScale, anchor: .center)
         .opacity(swipeDirection == nil ? 1 : 0.8)
-        .contentShape(Rectangle()) // Makes full card tappable
+        .contentShape(Rectangle())
+        .allowsHitTesting(index == 0) // Only top card can be interacted with
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    if index == 0 {
+                    if index == 0 && !isAnimating {
                         offset = value.translation
-                        rotation = Double(value.translation.width / 10)
+                        velocity = value.velocity
+                        
+                        // Determine primary direction
+                        let isVertical = abs(value.translation.height) > abs(value.translation.width)
+                        
+                        if isVertical {
+                            // Vertical swipe - apply scale effect
+                            cardScale = 1 - (abs(value.translation.height) / 1000)
+                            rotation = 0
+                        } else {
+                            // Horizontal swipe - apply rotation
+                            rotation = Double(value.translation.width / 10)
+                            cardScale = 1.0
+                        }
                     }
                 }
                 .onEnded { value in
-                    if index == 0 {
+                    if index == 0 && !isAnimating {
                         handleSwipe(value)
                     }
                 }
         )
-        .onTapGesture {
-            if index == 0 && offset == .zero {
-                onEdit()
-            }
-        }
+        .highPriorityGesture(
+            TapGesture()
+                .onEnded { _ in
+                    if index == 0 && offset == .zero && !isAnimating {
+                        let tapFeedback = UIImpactFeedbackGenerator(style: .light)
+                        tapFeedback.impactOccurred()
+                        onEdit()
+                    }
+                }
+        )
         .alert("Delete Note", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
                 performDelete()
@@ -93,59 +125,98 @@ struct SwipeCard: View {
     }
     
     private func handleSwipe(_ value: DragGesture.Value) {
+        // Prevent multiple swipes while animating
+        guard !isAnimating else { return }
+        
         let horizontalAmount = value.translation.width
         let verticalAmount = value.translation.height
         let threshold: CGFloat = 50
         
+        // Determine primary direction based on which is larger
+        let isVerticalSwipe = abs(verticalAmount) > abs(horizontalAmount)
+        
+        // Calculate velocity magnitude for responsive animations
+        let velocityMagnitude = sqrt(velocity.width * velocity.width + velocity.height * velocity.height)
+        
         // Determine swipe direction
-        if abs(verticalAmount) > threshold {
+        if isVerticalSwipe && abs(verticalAmount) > threshold {
+            // VERTICAL SWIPE - Delete
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.impactOccurred()
+            
             if verticalAmount > 0 {
-                // Swiped down - delete
                 swipeDirection = .down
-                deleteWithAnimation()
             } else {
-                // Swiped up - delete
                 swipeDirection = .up
-                deleteWithAnimation()
             }
-        } else if abs(horizontalAmount) > threshold {
+            deleteWithAnimation(velocity: velocityMagnitude)
+        } else if !isVerticalSwipe && abs(horizontalAmount) > threshold {
+            // HORIZONTAL SWIPE - Cycle cards
+            let selectionFeedback = UISelectionFeedbackGenerator()
+            selectionFeedback.selectionChanged()
+            
             if horizontalAmount > 0 {
-                // Swiped right - move to back
                 swipeDirection = .right
-                moveToBack()
             } else {
-                // Swiped left - move to back
                 swipeDirection = .left
-                moveToBack()
             }
+            moveToBack(velocity: velocityMagnitude)
         } else {
-            // Not enough movement - snap back
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            // Not enough movement - snap back with responsive spring
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.65, blendDuration: 0.1)) {
                 offset = .zero
                 rotation = 0
+                cardScale = 1.0
             }
         }
     }
     
-    private func deleteWithAnimation() {
-        withAnimation(.easeInOut(duration: 0.3)) {
+    private func deleteWithAnimation(velocity: CGFloat) {
+        isAnimating = true
+        
+        // Velocity-responsive animation timing
+        let duration = max(0.2, min(0.4, 0.3 / (velocity / 300)))
+        
+        withAnimation(.easeInOut(duration: duration)) {
             offset = swipeDirection == .up
                 ? CGSize(width: 0, height: -600)
                 : CGSize(width: 0, height: 600)
             rotation = 0
+            cardScale = 0.8
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+        // Haptic feedback on delete
+        let notificationFeedback = UINotificationFeedbackGenerator()
+        notificationFeedback.notificationOccurred(.warning)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.2, min(0.4, 0.3 / (velocity / 300)))) {
+            isAnimating = false
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.7, blendDuration: 0.1)) {
                 onDelete()
             }
         }
     }
     
-    private func moveToBack() {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+    private func moveToBack(velocity: CGFloat) {
+        isAnimating = true
+        
+        // Velocity-responsive spring animation
+        let response = max(0.2, min(0.4, 0.35 / (velocity / 300)))
+        
+        withAnimation(.spring(response: response, dampingFraction: 0.6, blendDuration: 0.1)) {
             offset = .zero
             rotation = 0
+            cardScale = 1.0
+        }
+        
+        // Light haptic feedback
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            // Call the callback to move card to back in array
+            onMoveToBack()
+            isAnimating = false
         }
     }
     

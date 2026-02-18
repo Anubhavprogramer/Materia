@@ -58,7 +58,10 @@ struct SwipeableNoteCardView: View {
                 .cornerRadius(AppConstants.defaultCornerRadius)
             } else {
                 ZStack {
-                    ForEach(Array(notes.enumerated()), id: \.element.id) { index, note in
+                    // Reverse order: render background cards first, top card last (on top)
+                    ForEach(Array(notes.enumerated()).reversed(), id: \.element.id) { item in
+                        let index = item.offset
+                        let note = item.element
                         SwipeCard(
                             note: note,
                             onDelete: {
@@ -67,6 +70,9 @@ struct SwipeableNoteCardView: View {
                             onEdit: {
                                 selectedNote = note
                                 isEditingNote = true
+                            },
+                            onMoveToBack: {
+                                moveNoteToBack(at: index)
                             },
                             index: index,
                             totalCards: notes.count
@@ -144,6 +150,15 @@ struct SwipeableNoteCardView: View {
         )
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
             notes.remove(at: index)
+        }
+    }
+    
+    private func moveNoteToBack(at index: Int) {
+        guard index == 0, notes.count > 1 else { return }
+        
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7, blendDuration: 0.1)) {
+            let movedNote = notes.remove(at: 0)
+            notes.append(movedNote)
         }
     }
 }
