@@ -221,6 +221,9 @@ struct CompoundResultView: View {
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
+                        // Notes Section
+                        notesSection
+                        
                         // Structure Information with CoreML Properties
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Structure Details")
@@ -274,8 +277,7 @@ struct CompoundResultView: View {
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
-                        // Notes Section
-                        notesSection
+                        
                     
                         
                     }

@@ -10,7 +10,7 @@ struct CompoundRowView: View {
     let compound: IdentifiedCompound
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(compound.compoundName)
@@ -19,12 +19,12 @@ struct CompoundRowView: View {
                     
                     Text(compound.iupacName)
                         .font(.subheadline)
-                        .foregroundColor(.purple)
+                        .foregroundColor(AppColors.accent)
                         .fontWeight(.medium)
                     
                     Text(compound.molecularFormula)
                         .font(.subheadline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.accentLight)
                         .fontWeight(.medium)
                 }
                 
@@ -66,7 +66,7 @@ struct CompoundRowView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            
+            .padding(AppConstants.defaultPadding)
             // Structure preview and notes indicator
             HStack {
                 Text("Structure:")
@@ -99,7 +99,10 @@ struct CompoundRowView: View {
                     .cornerRadius(4)
                 }
             }
+            
+            .padding(AppConstants.defaultPadding)
         }
-        .padding(.vertical, 4)
+        .background(AppColors.Card)
+        .cornerRadius(AppConstants.largeCornerRadius)
     }
 }

@@ -41,24 +41,27 @@ struct SwipeCard: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
-                
-                // Subtitle/Content
-                Text(note.content)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(AppColors.textSecondary)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
+        VStack(alignment: .leading, spacing: 16) {
+            // Note Content
+            Text(note.content)
+                .font(.system(size: AppConstants.body, weight: .semibold))
+                .foregroundColor(AppColors.textPrimary)
+                .lineLimit(4)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer()
             
+            // Created Date
             Text(note.createdAt.formatted(date: .abbreviated, time: .shortened))
-                .font(.caption2)
+                .font(.system(size: AppConstants.caption, weight: .regular))
                 .foregroundColor(AppColors.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(AppConstants.largePadding)
         .frame(maxWidth: .infinity)
-        .frame(minHeight: 220)
+        .frame(minHeight: 280)
         .background(AppColors.Card)
         .cornerRadius(AppConstants.largeCornerRadius)
         

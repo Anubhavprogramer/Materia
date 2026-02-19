@@ -38,25 +38,36 @@ struct SavedCompoundsTabView: View {
                                     } label: {
                                         CompoundRowView(compound: compound)
                                     }
-                                    .buttonStyle(.plain)
+                                    .listRowBackground(Color.clear)
+//                                    .buttonStyle(.plain)
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            viewModel.deleteCompound(compound)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                                 }
-                                .onDelete(perform: viewModel.deleteCompound)
                             } header: {
                                 HStack {
                                     Image(systemName: "bookmark.fill")
                                         .foregroundColor(AppColors.primary)
-                                    
+
                                     Text("Saved Compounds")
                                         .fontWeight(.semibold)
+
                                     Spacer()
+
                                     Text("\(viewModel.compoundCount)")
                                         .foregroundColor(AppColors.primary)
                                         .fontWeight(.bold)
                                 }
                             }
                         }
-                        .listStyle(.insetGrouped)
+                        .listStyle(.plain)
                         .scrollContentBackground(.hidden)
+                        .background(Color.clear)
+
                     } else {
                         VStack(spacing: 12) {
                             Image(systemName: "bookmark")

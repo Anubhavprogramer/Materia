@@ -80,7 +80,7 @@ struct SwipeableNoteCardView: View {
                     }
                 }
                 .frame(height: 280)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 0)
                 .padding(.vertical, 12)
             }
             
