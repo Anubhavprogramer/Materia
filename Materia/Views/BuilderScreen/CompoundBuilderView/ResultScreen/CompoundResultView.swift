@@ -82,7 +82,7 @@ struct CompoundResultView: View {
                         VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
                             HStack {
                                 Image(systemName: "graduationcap")
-                                    .foregroundColor(.purple)
+                                    .foregroundColor(AppColors.accent)
                                 Text("Educational Mode")
                                     .font(.headline)
                                     .fontWeight(.semibold)
@@ -135,8 +135,8 @@ struct CompoundResultView: View {
                                     icon: "info.circle.fill",
                                     title: "Info",
                                     message: "Turn this on to see step-by-step naming.",
-                                    accentColor: .blue,
-                                    backgroundColor: Color.blue.opacity(0.1),
+                                    accentColor: AppColors.accent,
+                                    backgroundColor: AppColors.accentLight,
                                     borderColor: Color.blue.opacity(0.3)
                                 )
                                 
@@ -158,9 +158,10 @@ struct CompoundResultView: View {
                                 Spacer()
                                 
                                 Text(currentCompound?.compoundName ?? "—")
-                                    .font(.largeTitle)
+                                    .font(.title)
                                     .fontWeight(.bold)
                                     .multilineTextAlignment(.center)
+                                    .foregroundColor(AppColors.accent)
                             }
                             
                             Divider()
@@ -176,7 +177,7 @@ struct CompoundResultView: View {
                                 Text(currentCompound?.iupacName ?? "—")
                                     .font(.title2)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.purple)
+                                    .foregroundColor(AppColors.accent.opacity(0.8))
                                     .multilineTextAlignment(.center)
                             }
                             
@@ -193,7 +194,7 @@ struct CompoundResultView: View {
                                 Text(currentCompound?.molecularFormula ?? "—")
                                     .font(.title)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(AppColors.accent.opacity(0.8))
                             }
                             
                             Divider()
@@ -211,8 +212,8 @@ struct CompoundResultView: View {
                                     .fontWeight(.medium)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.blue.opacity(0.1))
-                                    .foregroundColor(.blue)
+                                    .background(AppColors.textSecondary)
+                                    .foregroundColor(AppColors.accent.opacity(0.8))
                                     .cornerRadius(12)
                             }
                         }

@@ -21,6 +21,7 @@ struct InfoRow: View {
             Text(value)
                 .font(.system(.subheadline, design: title == "Structure Notation" ? .monospaced : .default))
                 .fontWeight(.medium)
+                .foregroundColor(AppColors.accent.opacity(0.8))
         }
         .padding(.vertical, 2)
     }

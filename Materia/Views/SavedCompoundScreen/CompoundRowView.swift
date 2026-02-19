@@ -36,8 +36,8 @@ struct CompoundRowView: View {
                             .font(.caption)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.1))
-                            .foregroundColor(.blue)
+                            .background(AppColors.accentLight)
+                            .foregroundColor(AppColors.accent)
                             .cornerRadius(8)
                         
                         // CoreML validation indicator
@@ -53,11 +53,11 @@ struct CompoundRowView: View {
                         HStack(spacing: 2) {
                             Image(systemName: "brain.head.profile")
                                 .font(.caption2)
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.textPrimary)
                             
                             Text("\(Int(confidence * 100))%")
                                 .font(.caption2)
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.textPrimary)
                         }
                     }
                     
