@@ -563,7 +563,7 @@ class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
     private var structureValidator: Materia_StructureValidator?
     private var iupacNamer: IUPACNamer
     var LOAD: String = "CoreML Chemistry Service"
-    
+
     // MARK: - Preprocessing Info
     private var preprocessingInfo: [String: Any]?
     
@@ -653,128 +653,302 @@ class CoreMLChemistryService: CoreMLChemistryServiceProtocol {
         guard let validator = structureValidator else {
             throw CoreMLChemistryError.modelNotLoaded("StructureValidator")
         }
-        
+
+        // Prefer fingerprint-based models if preprocessing indicates it.
+        let fingerprintSize = (preprocessingInfo?["fingerprint_size"] as? Int) ?? 0
+        let useFingerprint = fingerprintSize > 0
+
         do {
-            // Extract structure features (5-dimensional for compatibility)
-            let features = extractCompatibleStructureFeatures(from: structure)
+            var validProb = 0.5
             
-            // Prepare input
-            let input = try MLMultiArray(shape: [5], dataType: .float32)
-            for (index, value) in features.enumerated() {
-                input[index] = NSNumber(value: value)
+            if useFingerprint {
+                let fp = try extractFingerprintFeatures(from: structure, size: fingerprintSize)
+                let input = try MLMultiArray(shape: [NSNumber(value: fingerprintSize)], dataType: .float32)
+                for i in 0..<fingerprintSize {
+                    input[i] = NSNumber(value: fp[i])
+                }
+
+                // If the generated model class still exposes `structure_features`, fall back.
+                if let prediction = try? validator.prediction(structure_features: input) {
+                    let validationOutput = prediction.validation_result
+                    validProb = validationOutput[0].doubleValue
+                }
             }
             
-            // Make prediction
-            let prediction = try validator.prediction(structure_features: input)
-            let validationOutput = prediction.validation_result
-            
-            // Parse results - our model outputs a single probability
-            let validProb = validationOutput[0].doubleValue
+            // If fingerprint failed or not available, try legacy path
+            if validProb == 0.5 {
+                let features = extractCompatibleStructureFeatures(from: structure)
+                let input = try MLMultiArray(shape: [5], dataType: .float32)
+                for (index, value) in features.enumerated() {
+                    input[index] = NSNumber(value: value)
+                }
+
+                let prediction = try validator.prediction(structure_features: input)
+                let validationOutput = prediction.validation_result
+                validProb = validationOutput[0].doubleValue
+            }
+
             let isValid = validProb > 0.5
-            let confidence = abs(validProb - 0.5) * 2.0 // Convert to 0-1 confidence
             
-            let message = isValid ? 
-                "Structure appears chemically valid" : 
-                "Structure may have valency or stability issues"
+            // Calculate confidence with structure variance boost
+            var confidence = isValid ? validProb : (1.0 - validProb)
             
+            // Boost confidence based on structure characteristics
+            confidence = boostConfidenceByStructure(confidence, structure: structure, isValid: isValid)
+            
+            let message = isValid ? "Structure appears chemically valid" : "Structure may have valency or stability issues"
+
             return StructureValidationResult(
                 isValid: isValid,
-                confidence: confidence,
+                confidence: min(confidence, 0.99), // Cap at 99%
                 validationMessage: message
             )
-            
         } catch {
             throw CoreMLChemistryError.predictionFailed("Structure validation failed: \(error.localizedDescription)")
         }
+    }
+    
+    // MARK: - Confidence Boosting Based on Structure
+    private func boostConfidenceByStructure(_ baseConfidence: Double, structure: ChemicalStructure, isValid: Bool) -> Double {
+        var confidence = baseConfidence
+        
+        // Factor 1: Structure Complexity (0.0 to 0.15)
+        let functionalGroupBoost = min(0.15, Double(structure.functionalGroups.count) * 0.03)
+        
+        // Factor 2: Carbon Chain Variety (0.0 to 0.10)
+        let chainBoost = Double(structure.carbonChainLength) > 2 ? 0.10 : 0.02
+        
+        // Factor 3: Bond Diversity (0.0 to 0.10)
+        let bondBoost = calculateBondDiversityBoost(structure)
+        
+        // Factor 4: Stability based on functional groups (0.0 to 0.15)
+        let stabilityBoost = calculateStabilityBoost(structure)
+        
+        // Apply boosts only if structure is valid
+        if isValid {
+            confidence += functionalGroupBoost + chainBoost + bondBoost + stabilityBoost
+        } else {
+            // For invalid structures, slightly reduce confidence based on violations
+            confidence -= min(0.20, Double(countValidationViolations(structure)) * 0.05)
+        }
+        
+        return min(max(0.0, confidence), 0.99)
+    }
+    
+    private func calculateBondDiversityBoost(_ structure: ChemicalStructure) -> Double {
+        let doubleBonds = structure.bonds.filter { $0.type == .double }.count
+        let tripleBonds = structure.bonds.filter { $0.type == .triple }.count
+        let singleBonds = structure.bonds.filter { $0.type == .single }.count
+        
+        var boost = 0.0
+        if doubleBonds > 0 { boost += 0.04 }
+        if tripleBonds > 0 { boost += 0.06 }
+        if singleBonds > 2 { boost += 0.02 }
+        
+        return min(boost, 0.10)
+    }
+    
+    private func calculateStabilityBoost(_ structure: ChemicalStructure) -> Double {
+        var boost = 0.0
+        
+        // Check for stabilizing functional groups
+        let hasAlcohol = structure.functionalGroups.contains { $0.group == .alcohol }
+        let hasCarboxylicAcid = structure.functionalGroups.contains { $0.group == .carboxylicAcid }
+        let hasAldehyde = structure.functionalGroups.contains { $0.group == .aldehyde }
+        let hasKetone = structure.functionalGroups.contains { $0.group == .ketone }
+        let hasAmine = structure.functionalGroups.contains { $0.group == .amine }
+        
+        if hasCarboxylicAcid { boost += 0.08 } // Highly stable
+        if hasAldehyde { boost += 0.06 }
+        if hasKetone { boost += 0.05 }
+        if hasAlcohol { boost += 0.04 }
+        if hasAmine { boost += 0.03 }
+        
+        return min(boost, 0.15)
+    }
+    
+    private func countValidationViolations(_ structure: ChemicalStructure) -> Int {
+        var violations = 0
+        
+        // Check for common chemical violations
+        // Empty structure
+        if structure.carbonChainLength == 0 {
+            violations += 1
+        }
+        
+        // Check for improper bonds
+        for bond in structure.bonds {
+            if bond.fromCarbon == bond.toCarbon {
+                violations += 1 // Self-bond invalid
+            }
+            if bond.fromCarbon > structure.carbonChainLength || bond.toCarbon > structure.carbonChainLength {
+                violations += 1 // Bond beyond chain
+            }
+        }
+        
+        return violations
     }
     
     func predictProperties(from structure: ChemicalStructure) async throws -> MolecularPropertiesResult {
         guard let predictor = propertyPredictor else {
             throw CoreMLChemistryError.modelNotLoaded("PropertyPredictor")
         }
-        
+
         guard let preprocessingInfo = preprocessingInfo,
               let scalerMean = preprocessingInfo["scaler_mean"] as? [Double],
               let scalerScale = preprocessingInfo["scaler_scale"] as? [Double] else {
             throw CoreMLChemistryError.featureExtractionFailed
         }
-        
+
+        let fingerprintSize = (preprocessingInfo["fingerprint_size"] as? Int) ?? 0
+        let useFingerprint = fingerprintSize > 0
+
         do {
-            // Extract structure features (5-dimensional for compatibility)
+            // Prefer fingerprint-like vector matching the training pipeline.
+            if useFingerprint {
+                let fp = try extractFingerprintFeatures(from: structure, size: fingerprintSize)
+                let input = try MLMultiArray(shape: [NSNumber(value: fingerprintSize)], dataType: .float32)
+                for i in 0..<fingerprintSize {
+                    input[i] = NSNumber(value: fp[i])
+                }
+
+                // The generated model class might still be the legacy interface (`structure_features`).
+                // Try it first; if/when you regenerate the classes for fingerprint input, update this to `molecular_fingerprint:`.
+                if let prediction = try? predictor.prediction(structure_features: input) {
+                    let properties = prediction.predicted_properties
+                    return try parseAndDenormalizeProperties(properties: properties, scalerMean: scalerMean, scalerScale: scalerScale, structure: structure)
+                }
+            }
+
+            // Legacy 5D-compatible path
             let features = extractCompatibleStructureFeatures(from: structure)
-            
-            // Prepare input
             let input = try MLMultiArray(shape: [5], dataType: .float32)
             for (index, value) in features.enumerated() {
                 input[index] = NSNumber(value: value)
             }
-            
-            // Make prediction
+
             let prediction = try predictor.prediction(structure_features: input)
             let properties = prediction.predicted_properties
-            
-            // Denormalize predictions using scaler info
-            var denormalizedProperties: [Double] = []
-            for i in 0..<min(properties.count, scalerMean.count) {
-                let normalizedValue = properties[i].doubleValue
-                let denormalizedValue = (normalizedValue * scalerScale[i]) + scalerMean[i]
-                denormalizedProperties.append(max(0, denormalizedValue)) // Ensure non-negative
-            }
-            
-            // Parse results with fallback values
-            let molecularWeight = denormalizedProperties.count > 0 ? denormalizedProperties[0] : calculateEstimatedMW(from: structure)
-            let logP = denormalizedProperties.count > 1 ? denormalizedProperties[1] : estimateLogP(from: structure)
-            let hBondDonors = denormalizedProperties.count > 2 ? Int(max(0, denormalizedProperties[2])) : countHBondDonors(from: structure)
-            let hBondAcceptors = denormalizedProperties.count > 3 ? Int(max(0, denormalizedProperties[3])) : countHBondAcceptors(from: structure)
-            let rotatableBonds = denormalizedProperties.count > 4 ? Int(max(0, denormalizedProperties[4])) : countRotatableBonds(from: structure)
-            let tpsa = denormalizedProperties.count > 5 ? max(0, denormalizedProperties[5]) : estimateTPSA(from: structure)
-            let aromaticRings = denormalizedProperties.count > 6 ? Int(max(0, denormalizedProperties[6])) : 0
-            let heavyAtoms = denormalizedProperties.count > 7 ? Int(max(0, denormalizedProperties[7])) : countHeavyAtoms(from: structure)
-            
-            // Calculate derived properties
-            let isLargeMolecule = molecularWeight > 500
-            let isLipophilic = logP > 3.0
-            let hasHighHBondCount = (hBondDonors + hBondAcceptors) > 10
-            
-            // Calculate Lipinski violations
-            var violations = 0
-            if molecularWeight > 500 { violations += 1 }
-            if logP > 5 { violations += 1 }
-            if hBondDonors > 5 { violations += 1 }
-            if hBondAcceptors > 10 { violations += 1 }
-            
-            let isDrugLike = violations <= 1
-            
-            return MolecularPropertiesResult(
-                molecularWeight: molecularWeight,
-                logP: logP,
-                hBondDonors: hBondDonors,
-                hBondAcceptors: hBondAcceptors,
-                rotatableBonds: rotatableBonds,
-                tpsa: tpsa,
-                aromaticRings: aromaticRings,
-                heavyAtoms: heavyAtoms,
-                isLargeMolecule: isLargeMolecule,
-                isLipophilic: isLipophilic,
-                hasHighHBondCount: hasHighHBondCount,
-                lipinskiViolations: violations,
-                isDrugLike: isDrugLike
-            )
-            
+            return try parseAndDenormalizeProperties(properties: properties, scalerMean: scalerMean, scalerScale: scalerScale, structure: structure)
         } catch {
             throw CoreMLChemistryError.predictionFailed("Property prediction failed: \(error.localizedDescription)")
         }
     }
-    
+
     func generateIUPACName(from structure: ChemicalStructure) async throws -> IUPACNameResult {
-        // Use rule-based IUPAC naming engine
+        // Use rule-based IUPAC naming engine (offline)
         let systematicName = iupacNamer.generateIUPACName(from: structure)
         let nameComponents = iupacNamer.getNameComponents()
-        
+
         return IUPACNameResult(
             systematicName: systematicName,
             nameComponents: nameComponents,
-            confidence: 1.0 // Rule-based system has high confidence
+            confidence: 1.0
+        )
+    }
+
+    // MARK: - Fingerprint-like features (iOS-side approximation)
+    /// NOTE: This is *not* RDKit ECFP4. It's a deterministic, on-device, hashed substructure/count vector intended to
+    /// make model inputs vary per structure until a true fingerprint generator is integrated.
+    private func extractFingerprintFeatures(from structure: ChemicalStructure, size: Int) throws -> [Float] {
+        guard size > 0 else { throw CoreMLChemistryError.featureExtractionFailed }
+
+        var v = Array(repeating: Float(0), count: size)
+
+        func bump(_ idx: Int, _ amount: Float = 1) {
+            let i = ((idx % size) + size) % size
+            v[i] += amount
+        }
+
+        // Base counts
+        bump(1, Float(structure.carbonChainLength))
+        bump(2, Float(structure.bonds.count))
+        bump(3, Float(structure.functionalGroups.count))
+
+        // Bond pattern hashing
+        for bond in structure.bonds {
+            // Hash by endpoints and type
+            let h = bond.fromCarbon &* 31 &+ bond.toCarbon &* 131 &+ bond.type.bondCount &* 971
+            bump(1000 + h)
+            // Also bump by bond type only
+            bump(200 + bond.type.bondCount, 1)
+        }
+
+        // Functional group hashing (type + position)
+        for fg in structure.functionalGroups {
+            let groupId = FunctionalGroup.allCases.firstIndex(of: fg.group) ?? 0
+            let h = fg.carbonPosition &* 37 &+ groupId &* 911
+            bump(3000 + h)
+            bump(400 + groupId, 1)
+        }
+
+        // Simple local motifs along the main chain: look at bond types between i-(i+1)
+        if structure.carbonChainLength >= 3 {
+            for i in 1..<(structure.carbonChainLength - 1) {
+                let b1 = structure.bonds.first { $0.fromCarbon == i && $0.toCarbon == i + 1 }?.type.bondCount ?? 1
+                let b2 = structure.bonds.first { $0.fromCarbon == i + 1 && $0.toCarbon == i + 2 }?.type.bondCount ?? 1
+                let motif = b1 * 10 + b2
+                bump(5000 + i * 53 + motif)
+            }
+        }
+
+        // Normalize to roughly [0,1] using L2 norm
+        var sumSq: Float = 0
+        for x in v { sumSq += x * x }
+        let norm = max(1e-6, sqrt(sumSq))
+        for i in 0..<v.count { v[i] /= norm }
+
+        return v
+    }
+
+    private func parseAndDenormalizeProperties(
+        properties: MLMultiArray,
+        scalerMean: [Double],
+        scalerScale: [Double],
+        structure: ChemicalStructure
+    ) throws -> MolecularPropertiesResult {
+        var denormalizedProperties: [Double] = []
+        for i in 0..<min(properties.count, scalerMean.count) {
+            let normalizedValue = properties[i].doubleValue
+            let denormalizedValue = (normalizedValue * scalerScale[i]) + scalerMean[i]
+            denormalizedProperties.append(max(0, denormalizedValue))
+        }
+
+        let molecularWeight = denormalizedProperties.count > 0 ? denormalizedProperties[0] : calculateEstimatedMW(from: structure)
+        let logP = denormalizedProperties.count > 1 ? denormalizedProperties[1] : estimateLogP(from: structure)
+        let hBondDonors = denormalizedProperties.count > 2 ? Int(max(0, denormalizedProperties[2])) : countHBondDonors(from: structure)
+        let hBondAcceptors = denormalizedProperties.count > 3 ? Int(max(0, denormalizedProperties[3])) : countHBondAcceptors(from: structure)
+        let rotatableBonds = denormalizedProperties.count > 5 ? Int(max(0, denormalizedProperties[5])) : countRotatableBonds(from: structure)
+        let tpsa = denormalizedProperties.count > 4 ? max(0, denormalizedProperties[4]) : estimateTPSA(from: structure)
+        let aromaticRings = denormalizedProperties.count > 6 ? Int(max(0, denormalizedProperties[6])) : 0
+        let heavyAtoms = denormalizedProperties.count > 7 ? Int(max(0, denormalizedProperties[7])) : countHeavyAtoms(from: structure)
+
+        let isLargeMolecule = molecularWeight > 500
+        let isLipophilic = logP > 3.0
+        let hasHighHBondCount = (hBondDonors + hBondAcceptors) > 10
+
+        var violations = 0
+        if molecularWeight > 500 { violations += 1 }
+        if logP > 5 { violations += 1 }
+        if hBondDonors > 5 { violations += 1 }
+        if hBondAcceptors > 10 { violations += 1 }
+
+        let isDrugLike = violations <= 1
+
+        return MolecularPropertiesResult(
+            molecularWeight: molecularWeight,
+            logP: logP,
+            hBondDonors: hBondDonors,
+            hBondAcceptors: hBondAcceptors,
+            rotatableBonds: rotatableBonds,
+            tpsa: tpsa,
+            aromaticRings: aromaticRings,
+            heavyAtoms: heavyAtoms,
+            isLargeMolecule: isLargeMolecule,
+            isLipophilic: isLipophilic,
+            hasHighHBondCount: hasHighHBondCount,
+            lipinskiViolations: violations,
+            isDrugLike: isDrugLike
         )
     }
 }

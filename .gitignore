@@ -184,10 +184,10 @@ tensorboard_logs/
 
 # Data files
 *.csv
-*.json
+# *.json
 *.npy
 *.npz
-data/
+# data/
 datasets/
 *.db
 *.sqlite

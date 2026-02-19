@@ -112,14 +112,16 @@ struct ChemicalStructure: Identifiable, Codable {
     
     init(carbonChainLength: Int) {
         self.id = UUID()
-        self.carbonChainLength = carbonChainLength
+        self.carbonChainLength = max(0, carbonChainLength) // Ensure non-negative
         self.bonds = []
         self.functionalGroups = []
         self.createdAt = Date()
         
         // Add default single bonds between adjacent carbons
-        for i in 1..<carbonChainLength {
-            bonds.append(Bond(from: i, to: i + 1))
+        if self.carbonChainLength > 1 {
+            for i in 1..<self.carbonChainLength {
+                bonds.append(Bond(from: i, to: i + 1))
+            }
         }
     }
     
@@ -152,6 +154,11 @@ struct ChemicalStructure: Identifiable, Codable {
     // MARK: - SMILES-like representation
     func toSMILESLike() -> String {
         var result = ""
+        
+        // Handle edge case of no carbon chain
+        if carbonChainLength == 0 {
+            return result
+        }
         
         // Build basic carbon chain
         for i in 1...carbonChainLength {
@@ -187,6 +194,7 @@ struct IdentifiedCompound: Identifiable, Codable {
     let identifiedAt: Date
     let confidence: Double?
     let isValidated: Bool?
+    var notes: [CompoundNote]
     
     init(structure: ChemicalStructure, name: String, iupacName: String, formula: String, category: String, confidence: Double? = nil, isValidated: Bool? = nil) {
         self.id = UUID()
@@ -198,5 +206,21 @@ struct IdentifiedCompound: Identifiable, Codable {
         self.identifiedAt = Date()
         self.confidence = confidence
         self.isValidated = isValidated
+        self.notes = []
+    }
+    
+    mutating func addNote(content: String) {
+        let note = CompoundNote(compoundId: self.id, content: content)
+        self.notes.append(note)
+    }
+    
+    mutating func updateNote(_ note: CompoundNote) {
+        if let index = self.notes.firstIndex(where: { $0.id == note.id }) {
+            self.notes[index] = note
+        }
+    }
+    
+    mutating func deleteNote(_ noteId: UUID) {
+        self.notes.removeAll { $0.id == noteId }
     }
 }
