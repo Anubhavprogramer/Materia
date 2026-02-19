@@ -1,0 +1,373 @@
+{
+  "compounds": [
+    {
+      "id": "ethanol",
+      "name": "Ethanol",
+      "iupacName": "ethanol",
+      "formula": "C₂H₆O",
+      "category": "Alcohol",
+      "description": "A simple primary alcohol commonly found in alcoholic beverages.",
+      "commonNames": ["Ethyl Alcohol", "Grain Alcohol"],
+      "molarMass": 46.07,
+      "boilingPoint": 78.37,
+      "meltingPoint": -114.1,
+      "density": 0.789,
+      "heatCapacity": 112.3,
+      "structure": {
+        "carbonChainLength": 2,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": [
+          {
+            "carbonPosition": 2,
+            "group": "alcohol"
+          }
+        ]
+      }
+    },
+    {
+      "id": "methane",
+      "name": "Methane",
+      "iupacName": "methane",
+      "formula": "CH₄",
+      "category": "Alkane",
+      "description": "The simplest hydrocarbon and primary component of natural gas.",
+      "commonNames": ["Natural Gas", "Marsh Gas"],
+      "molarMass": 16.04,
+      "boilingPoint": -161.5,
+      "meltingPoint": -182.5,
+      "density": 0.656,
+      "heatCapacity": 35.7,
+      "structure": {
+        "carbonChainLength": 1,
+        "bonds": [],
+        "functionalGroups": []
+      }
+    },
+    {
+      "id": "ethene",
+      "name": "Ethene",
+      "iupacName": "ethene",
+      "formula": "C₂H₄",
+      "category": "Alkene",
+      "description": "The simplest alkene, also known as ethylene.",
+      "commonNames": ["Ethylene", "Olefiant Gas"],
+      "molarMass": 28.05,
+      "boilingPoint": -103.7,
+      "meltingPoint": -169.2,
+      "density": 1.178,
+      "heatCapacity": 42.3,
+      "structure": {
+        "carbonChainLength": 2,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "double"
+          }
+        ],
+        "functionalGroups": []
+      }
+    },
+    {
+      "id": "propane",
+      "name": "Propane",
+      "iupacName": "propane",
+      "formula": "C₃H₈",
+      "category": "Alkane",
+      "description": "A three-carbon alkane used as fuel and refrigerant.",
+      "commonNames": ["Liquefied Petroleum Gas"],
+      "molarMass": 44.1,
+      "boilingPoint": -42.1,
+      "meltingPoint": -187.6,
+      "density": 1.88,
+      "heatCapacity": 75.9,
+      "structure": {
+        "carbonChainLength": 3,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 2,
+            "toCarbon": 3,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": []
+      }
+    },
+    {
+      "id": "acetic_acid",
+      "name": "Acetic Acid",
+      "iupacName": "ethanoic acid",
+      "formula": "C₂H₄O₂",
+      "category": "Carboxylic Acid",
+      "description": "A weak acid found in vinegar and used in many industrial processes.",
+      "commonNames": ["Vinegar Acid", "Ethanoic Acid"],
+      "molarMass": 60.05,
+      "boilingPoint": 118.1,
+      "meltingPoint": 16.6,
+      "density": 1.049,
+      "heatCapacity": 123.1,
+      "structure": {
+        "carbonChainLength": 2,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": [
+          {
+            "carbonPosition": 2,
+            "group": "carboxylicAcid"
+          }
+        ]
+      }
+    },
+    {
+      "id": "formaldehyde",
+      "name": "Formaldehyde",
+      "iupacName": "methanal",
+      "formula": "CH₂O",
+      "category": "Aldehyde",
+      "description": "An aldehyde used in disinfectants and building materials.",
+      "commonNames": ["Methanal", "Formalin"],
+      "molarMass": 30.03,
+      "boilingPoint": -19.0,
+      "meltingPoint": -92.0,
+      "density": 1.09,
+      "heatCapacity": 40.2,
+      "structure": {
+        "carbonChainLength": 1,
+        "bonds": [],
+        "functionalGroups": [
+          {
+            "carbonPosition": 1,
+            "group": "aldehyde"
+          }
+        ]
+      }
+    },
+    {
+      "id": "acetone",
+      "name": "Acetone",
+      "iupacName": "propanone",
+      "formula": "C₃H₆O",
+      "category": "Ketone",
+      "description": "A common ketone solvent used in laboratories and industries.",
+      "commonNames": ["Propanone", "Dimethyl Ketone"],
+      "molarMass": 58.08,
+      "boilingPoint": 56.05,
+      "meltingPoint": -95.0,
+      "density": 0.784,
+      "heatCapacity": 124.5,
+      "structure": {
+        "carbonChainLength": 3,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 2,
+            "toCarbon": 3,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": [
+          {
+            "carbonPosition": 2,
+            "group": "ketone"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ammonia",
+      "name": "Ammonia",
+      "iupacName": "ammonia",
+      "formula": "NH₃",
+      "category": "Amine",
+      "description": "A strong base used in fertilizers and chemical manufacturing.",
+      "commonNames": ["Azane"],
+      "molarMass": 17.03,
+      "boilingPoint": -33.34,
+      "meltingPoint": -77.73,
+      "density": 0.817,
+      "heatCapacity": 35.06,
+      "structure": {
+        "carbonChainLength": 0,
+        "bonds": [],
+        "functionalGroups": []
+      }
+    },
+    {
+      "id": "benzene",
+      "name": "Benzene",
+      "iupacName": "benzene",
+      "formula": "C₆H₆",
+      "category": "Aromatic Hydrocarbon",
+      "description": "An aromatic hydrocarbon with a hexagonal ring structure.",
+      "commonNames": ["Benzol"],
+      "molarMass": 78.11,
+      "boilingPoint": 80.1,
+      "meltingPoint": 5.5,
+      "density": 0.876,
+      "heatCapacity": 135.7,
+      "structure": {
+        "carbonChainLength": 6,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "double"
+          },
+          {
+            "fromCarbon": 2,
+            "toCarbon": 3,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 3,
+            "toCarbon": 4,
+            "type": "double"
+          },
+          {
+            "fromCarbon": 4,
+            "toCarbon": 5,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 5,
+            "toCarbon": 6,
+            "type": "double"
+          },
+          {
+            "fromCarbon": 6,
+            "toCarbon": 1,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": []
+      }
+    },
+    {
+      "id": "butanol",
+      "name": "Butanol",
+      "iupacName": "butan-1-ol",
+      "formula": "C₄H₁₀O",
+      "category": "Alcohol",
+      "description": "A four-carbon alcohol used as a solvent and fuel.",
+      "commonNames": ["1-Butanol", "Butyl Alcohol"],
+      "molarMass": 74.12,
+      "boilingPoint": 117.7,
+      "meltingPoint": -89.5,
+      "density": 0.81,
+      "heatCapacity": 177.2,
+      "structure": {
+        "carbonChainLength": 4,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 2,
+            "toCarbon": 3,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 3,
+            "toCarbon": 4,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": [
+          {
+            "carbonPosition": 1,
+            "group": "alcohol"
+          }
+        ]
+      }
+    },
+    {
+      "id": "methanol",
+      "name": "Methanol",
+      "iupacName": "methanol",
+      "formula": "CH₄O",
+      "category": "Alcohol",
+      "description": "The simplest alcohol, used as solvent and fuel.",
+      "commonNames": ["Wood Alcohol", "Methyl Alcohol"],
+      "molarMass": 32.04,
+      "boilingPoint": 64.7,
+      "meltingPoint": -97.6,
+      "density": 0.791,
+      "heatCapacity": 81.1,
+      "structure": {
+        "carbonChainLength": 1,
+        "bonds": [],
+        "functionalGroups": [
+          {
+            "carbonPosition": 1,
+            "group": "alcohol"
+          }
+        ]
+      }
+    },
+    {
+      "id": "glycerol",
+      "name": "Glycerol",
+      "iupacName": "propane-1,2,3-triol",
+      "formula": "C₃H₈O₃",
+      "category": "Polyol",
+      "description": "A sweet-tasting compound used in food and cosmetics.",
+      "commonNames": ["Glycerin", "Glycerine"],
+      "molarMass": 92.09,
+      "boilingPoint": 290.0,
+      "meltingPoint": 18.2,
+      "density": 1.261,
+      "heatCapacity": 249.7,
+      "structure": {
+        "carbonChainLength": 3,
+        "bonds": [
+          {
+            "fromCarbon": 1,
+            "toCarbon": 2,
+            "type": "single"
+          },
+          {
+            "fromCarbon": 2,
+            "toCarbon": 3,
+            "type": "single"
+          }
+        ],
+        "functionalGroups": [
+          {
+            "carbonPosition": 1,
+            "group": "alcohol"
+          },
+          {
+            "carbonPosition": 2,
+            "group": "alcohol"
+          },
+          {
+            "carbonPosition": 3,
+            "group": "alcohol"
+          }
+        ]
+      }
+    }
+  ]
+}
