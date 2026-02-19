@@ -15,7 +15,7 @@ struct StructureDiagramView: View {
             let width = geometry.size.width
             let height = geometry.size.height
             let carbonSpacing = min(width / max(Double(structure.carbonChainLength), 1), 80)
-            let startX = (width - carbonSpacing * Double(structure.carbonChainLength - 1)) / 2
+            let startX = (width - carbonSpacing * Double(max(structure.carbonChainLength - 1, 0))) / 2
             
             ZStack {
                 // Draw bonds
@@ -32,17 +32,19 @@ struct StructureDiagramView: View {
                 }
                 
                 // Draw carbons
-                ForEach(1...structure.carbonChainLength, id: \.self) { carbon in
-                    let x = startX + carbonSpacing * Double(carbon - 1)
-                    let y = height / 2
-                    
-                    CarbonAtomView(
-                        position: CGPoint(x: x, y: y),
-                        carbonNumber: carbon,
-                        functionalGroups: structure.functionalGroups
-                            .filter { $0.carbonPosition == carbon }
-                            .map { $0.group }
-                    )
+                if structure.carbonChainLength > 0 {
+                    ForEach(1...structure.carbonChainLength, id: \.self) { carbon in
+                        let x = startX + carbonSpacing * Double(carbon - 1)
+                        let y = height / 2
+                        
+                        CarbonAtomView(
+                            position: CGPoint(x: x, y: y),
+                            carbonNumber: carbon,
+                            functionalGroups: structure.functionalGroups
+                                .filter { $0.carbonPosition == carbon }
+                                .map { $0.group }
+                        )
+                    }
                 }
             }
         }

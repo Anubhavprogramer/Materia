@@ -192,9 +192,10 @@ struct CompoundResultView: View {
                                 Spacer()
 
                                 Text(currentCompound?.molecularFormula ?? "—")
-                                    .font(.title)
+                                    .font(.title2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.accent.opacity(0.8))
+                                    .multilineTextAlignment(.center)
                             }
                             
                             Divider()
@@ -209,12 +210,13 @@ struct CompoundResultView: View {
                                 
                                 Text(currentCompound?.category ?? "—")
                                     .font(.title2)
-                                    .fontWeight(.medium)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(AppColors.textSecondary)
+                                    .padding(.horizontal, AppConstants.defaultPadding)
+                                    .padding(.vertical, AppConstants.defaultPadding/2)
+                                    .background(AppColors.accentLight)
                                     .foregroundColor(AppColors.accent.opacity(0.8))
-                                    .cornerRadius(12)
+                                    .cornerRadius(AppConstants.defaultPadding)
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
                             }
                         }
                         .padding(AppConstants.defaultPadding)
@@ -289,12 +291,12 @@ struct CompoundResultView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if canSave {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .navigationBarLeading) {
                         Button("Close") {
                             dismiss()
                         }
                     }
-                    ToolbarItem(placement: .navigationBarLeading) {
+                    ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Save") {
                             saveCompound()
                         }

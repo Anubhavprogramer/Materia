@@ -30,13 +30,13 @@ struct CompoundStructureData: Codable {
 }
 
 struct BondData: Codable {
-    let from: Int
-    let to: Int
+    let fromCarbon: Int
+    let toCarbon: Int
     let type: String
 }
 
 struct FunctionalGroupData: Codable {
-    let position: Int
+    let carbonPosition: Int
     let group: String
 }
 
@@ -70,7 +70,7 @@ class CompoundSearchService: ObservableObject {
     }
     
     // MARK: - Load Pre-saved Compounds
-    private func loadPreSavedCompounds() {
+    func loadPreSavedCompounds() {
         isLoading = true
         defer { isLoading = false }
         
@@ -88,6 +88,29 @@ class CompoundSearchService: ObservableObject {
         } catch {
             CommonFunctions.debugPrint(load: "CompoundSearchService", message: "Failed to load pre-saved compounds: \(error)")
         }
+    }
+    
+    // MARK: - Convert PreSavedCompound to ChemicalStructure
+    func convertStructure(_ structureData: CompoundStructureData?) -> ChemicalStructure {
+        guard let structureData = structureData else {
+            return ChemicalStructure(carbonChainLength: 0)
+        }
+        
+        var structure = ChemicalStructure(carbonChainLength: structureData.carbonChainLength)
+        
+        // Convert bonds
+        structure.bonds = structureData.bonds.map { bondData in
+            let bondType = BondType(rawValue: bondData.type) ?? .single
+            return Bond(from: bondData.fromCarbon, to: bondData.toCarbon, type: bondType)
+        }
+        
+        // Convert functional groups
+        structure.functionalGroups = structureData.functionalGroups.compactMap { fgData in
+            guard let group = FunctionalGroup(rawValue: fgData.group) else { return nil }
+            return FunctionalGroupAttachment(position: fgData.carbonPosition, group: group)
+        }
+        
+        return structure
     }
     
     // MARK: - Update User Saved Compounds

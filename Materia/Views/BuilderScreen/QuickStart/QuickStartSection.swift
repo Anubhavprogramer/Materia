@@ -11,7 +11,7 @@ struct QuickStartSection: View {
     let onSelect: (ChemicalStructure) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppConstants.smallPadding) {
+        VStack(alignment: .leading, spacing: AppConstants.smallGap) {
                 
             Text(AppStrings.quickStart)
                 .font(.headline)

@@ -24,7 +24,7 @@ struct CompoundRowView: View {
                     
                     Text(compound.molecularFormula)
                         .font(.subheadline)
-                        .foregroundColor(AppColors.accentLight)
+                        .foregroundColor(AppColors.accent)
                         .fontWeight(.medium)
                 }
                 

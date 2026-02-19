@@ -21,6 +21,7 @@ struct AppStrings {
     static let buildTip = "Tip"
     static let buildTipText = "Your saved compounds are available in the Saved tab."
     static let resetButton = "Reset"
+    static let build = "Build Compound"
     
     // MARK: - Search Tab
     static let searchTitle = "Search"

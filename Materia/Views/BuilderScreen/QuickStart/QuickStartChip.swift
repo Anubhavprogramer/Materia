@@ -13,7 +13,7 @@ struct QuickStartChip: View {
                 // Structure Preview
                 StructureDiagramView(structure: structure)
                     .frame(height: 180)
-                    .background(AppColors.Card)
+                    .background(AppColors.Card.opacity(0.5))
                     .cornerRadius(AppConstants.largeCornerRadius)
 
                 // Title

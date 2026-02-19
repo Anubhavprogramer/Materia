@@ -30,7 +30,13 @@ struct CompoundBuilderView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: AppConstants.mediumGap) {
+                VStack(alignment: .leading, spacing: AppConstants.mediumGap) {
+                    
+                    Text(AppStrings.build)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(AppColors.textPrimary)
+                    
                     // Carbon Chain Section
                     CarbonChainSection(viewModel: viewModel)
                     
