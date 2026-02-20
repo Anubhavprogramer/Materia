@@ -63,7 +63,7 @@ class Model3DPerformanceManager {
         return entryId
     }
     
-    /// End monitoring 3D generation
+    // End monitoring 3D generation
     func endMonitoring(entryId: String, action: String) -> PerformanceSummary {
         let memoryAfter = getMemoryUsage()
         let startTime = Date()

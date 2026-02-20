@@ -14,12 +14,14 @@ struct Atom3D {
     let element: ElementType
     let position: SCNVector3
     let radius: Float
+    let customColor: SCNVector3?  // For functional group highlighting
     
-    init(element: ElementType, position: SCNVector3) {
+    init(element: ElementType, position: SCNVector3, customColor: SCNVector3? = nil) {
         self.id = UUID()
         self.element = element
         self.position = position
         self.radius = element.vanDerWaalsRadius
+        self.customColor = customColor
     }
 }
 

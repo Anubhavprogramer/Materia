@@ -25,6 +25,7 @@ struct Model3DView: View {
     var body: some View {
         ZStack {
             if let model = model3D {
+                
                 // 3D Viewer Background
                 SceneKitViewRepresentable(
                     model3D: model,
@@ -37,6 +38,7 @@ struct Model3DView: View {
                     onCoordinatorReady: { coord in
                         CommonFunctions.debugPrint(load: load, message: "🎯 Coordinator READY! Deferring state assignment")
                         DispatchQueue.main.async {
+                            CommonFunctions.justPrint(load: load, message: "Model is ", thing: model)
                             CommonFunctions.justPrint(load: load, message: "Before assignment", thing: coordinator)
                             coordinator = coord
                             CommonFunctions.debugPrint(load: load, message: "✅ Coordinator set successfully")

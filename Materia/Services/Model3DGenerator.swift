@@ -72,6 +72,17 @@ class Model3DGenerator {
     private static func generateModelUncached(from structure: ChemicalStructure, name: String) -> Model3D {
         var model = Model3D(name: name)
         
+        print("\n🧪🧪🧪 GENERATING 3D MODEL: \(name) 🧪🧪🧪")
+        print("📊 Structure: \(structure.carbonChainLength) carbons")
+        print("📊 Bonds: \(structure.bonds.count) total")
+        for (idx, bond) in structure.bonds.enumerated() {
+            print("   Bond[\(idx)]: C\(bond.fromCarbon)-C\(bond.toCarbon) type:\(bond.type.rawValue)")
+        }
+        print("📊 Functional Groups: \(structure.functionalGroups.count) total")
+        for (idx, group) in structure.functionalGroups.enumerated() {
+            print("   FuncGroup[\(idx)]: \(group.group.rawValue) at C\(group.carbonPosition)")
+        }
+        
         // Handle edge case: zero-carbon compounds
         if structure.carbonChainLength == 0 {
             return generateNonCarbonStructure(from: structure, name: name)
@@ -85,10 +96,12 @@ class Model3DGenerator {
             let atom = Atom3D(element: .carbon, position: position)
             model.addAtom(atom)
             carbonAtoms.append(index)
+            print("🔴 Carbon[\(index)]: added at position (\(position.x), \(position.y), \(position.z))")
         }
         
         // Add C-C bonds - Only bonds specified in structure (LINEAR chains, NOT cyclic)
         // This preserves the linear structure as defined by the user
+        print("\n🔗 Adding C-C bonds...")
         for bond in structure.bonds {
             let bondType = convertBondType(bond.type)
             let length = Self.carbonBondLength
@@ -100,9 +113,11 @@ class Model3DGenerator {
                 length: length
             )
             model.addBond(bondModel)
+            print("🔗 Bond: C\(bond.fromCarbon) -\(bond.type.rawValue)- C\(bond.toCarbon) (multiplicity: \(bond.type.bondCount))")
         }
         
         // Add hydrogen atoms
+        print("\n🌀 Adding Hydrogen atoms...")
         var hydrogenIndex = model.atoms.count
         for (carbonIndex, carbon) in carbonAtoms.enumerated() {
             let hydrogenCount = calculateHydrogenCount(
@@ -112,12 +127,14 @@ class Model3DGenerator {
                 functionalGroups: structure.functionalGroups
             )
             
+            print("💧 Carbon[\(carbonIndex)]: Adding \(hydrogenCount) hydrogen atoms")
+            
             let hydrogenPositions = generateHydrogenPositions(
                 aroundAtom: model.atoms[carbon],
                 count: hydrogenCount
             )
             
-            for hydrogenPos in hydrogenPositions {
+            for (hIdx, hydrogenPos) in hydrogenPositions.enumerated() {
                 let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
                 model.addAtom(hydrogen)
                 
@@ -128,12 +145,15 @@ class Model3DGenerator {
                     length: Self.carbonHydrogenLength
                 )
                 model.addBond(chBond)
+                print("   H[\(hIdx)]: added at (\(hydrogenPos.x), \(hydrogenPos.y), \(hydrogenPos.z)) - Bond: C\(carbon)-H\(hydrogenIndex)")
                 hydrogenIndex += 1
             }
         }
         
         // Add functional groups
+        print("\n🎨 Adding Functional Groups...")
         for functionalGroup in structure.functionalGroups {
+            print("💥 Functional Group: \(functionalGroup.group.rawValue) at C\(functionalGroup.carbonPosition)")
             addFunctionalGroup(
                 functionalGroup,
                 to: &model,
@@ -141,6 +161,16 @@ class Model3DGenerator {
                 startingAtomIndex: hydrogenIndex
             )
         }
+        
+        // Print final summary
+        print("\n✅✅✅ 3D MODEL GENERATION COMPLETE ✅✅✅")
+        print("📈 Total Atoms: \(model.atoms.count)")
+        print("📊 Total Bonds: \(model.bonds.count)")
+        print("   • Carbons: \(model.atoms.filter { $0.element == .carbon }.count)")
+        print("   • Hydrogens: \(model.atoms.filter { $0.element == .hydrogen }.count)")
+        print("   • Other Atoms: \(model.atoms.count - model.atoms.filter { $0.element == .carbon }.count - model.atoms.filter { $0.element == .hydrogen }.count)")
+        print("🎨 Functional Groups: \(structure.functionalGroups.count) colored and visualized")
+        print("✅✅✅ Ready for 3D Rendering ✅✅✅\n")
         
         return model
     }
@@ -273,23 +303,36 @@ class Model3DGenerator {
         bonds: [Bond],
         functionalGroups: [FunctionalGroupAttachment]
     ) -> Int {
-        var hydrogenCount = 4
+        var hydrogenCount = 4  // Carbon has valency 4
+        var debug_ccBonds = 0
+        var debug_bondMultiplicity = 0
+        var debug_functionalGroupBonds = 0
         
-        // Subtract bonds to other carbons
+        // Subtract bonds to other carbons (account for bond type multiplicity)
         for bond in bonds {
             if bond.fromCarbon == carbonIndex || bond.toCarbon == carbonIndex {
-                hydrogenCount -= 1
+                // Single bond subtracts 1, double subtracts 2, triple subtracts 3
+                let bondMultiplicity = bond.type.bondCount
+                hydrogenCount -= bondMultiplicity
+                debug_ccBonds += 1
+                debug_bondMultiplicity += bondMultiplicity
+                print("🔗 Carbon[\(carbonIndex)]: C-C Bond(\(bond.type.rawValue), multiplicity:\(bondMultiplicity)) → C:\(bond.fromCarbon) to C:\(bond.toCarbon)")
             }
         }
         
-        // Subtract bonds to functional groups
+        // Subtract bonds to functional groups (each is 1 bond)
         for group in functionalGroups {
             if group.carbonPosition == carbonIndex {
-                hydrogenCount -= 1
+                hydrogenCount -= 1  // Functional groups always use 1 bond
+                debug_functionalGroupBonds += 1
+                print("💥 Carbon[\(carbonIndex)]: Functional Group(\(group.group.rawValue)) attached → uses 1 bond")
             }
         }
         
-        return max(0, hydrogenCount)
+        let finalHCount = max(0, hydrogenCount)
+        print("✅ Carbon[\(carbonIndex)]: C-C Bonds=\(debug_ccBonds) (multiplicity total:\(debug_bondMultiplicity)) + Func Groups=\(debug_functionalGroupBonds) → Final H count=\(finalHCount) (valency check: \(debug_bondMultiplicity + debug_functionalGroupBonds + finalHCount) = 4?)")
+        
+        return finalHCount
     }
     
     private static func convertBondType(_ bondType: BondType) -> BondType3D {
@@ -350,12 +393,15 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Hydroxyl (OH) - Orange color for visibility
+        let oxygenColor = SCNVector3(1.0, 0.65, 0.0)  // Orange
+        
         let oxygenPos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.4,
             carbonAtom.position.z
         )
-        let oxygen = Atom3D(element: .oxygen, position: oxygenPos)
+        let oxygen = Atom3D(element: .oxygen, position: oxygenPos, customColor: oxygenColor)
         let oxygenIndex = model.atoms.count
         model.addAtom(oxygen)
         
@@ -367,12 +413,14 @@ class Model3DGenerator {
             oxygenPos.y + 0.96,
             oxygenPos.z
         )
-        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos, customColor: oxygenColor)
         let hydrogenIndex = model.atoms.count
         model.addAtom(hydrogen)
         
         let oHBond = Bond3D(from: oxygenIndex, to: hydrogenIndex, type: .single, length: 0.96)
         model.addBond(oHBond)
+        
+        print("🧡 Hydroxyl Group: O-H added with orange color at C\(attachedToAtom)")
     }
     
     private static func addCarbonylGroup(
@@ -380,17 +428,22 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Carbonyl (C=O) - Magenta/Pink color for visibility
+        let oxygenColor = SCNVector3(1.0, 0.0, 1.0)  // Magenta
+        
         let oxygenPos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.2,
             carbonAtom.position.z
         )
-        let oxygen = Atom3D(element: .oxygen, position: oxygenPos)
+        let oxygen = Atom3D(element: .oxygen, position: oxygenPos, customColor: oxygenColor)
         let oxygenIndex = model.atoms.count
         model.addAtom(oxygen)
         
         let cOBond = Bond3D(from: attachedToAtom, to: oxygenIndex, type: .double, length: 1.23)
         model.addBond(cOBond)
+        
+        print("💜 Carbonyl Group: C=O added with magenta color at C\(attachedToAtom)")
     }
     
     private static func addCarboxylGroup(
@@ -398,23 +451,34 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Carboxylic Acid (-COOH) - Bright Red color for visibility
+        let redColor = SCNVector3(1.0, 0.2, 0.2)  // Bright Red
+        
         // Add C=O and O-H
         let c1Pos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.5,
             carbonAtom.position.z
         )
-        let carbon = Atom3D(element: .carbon, position: c1Pos)
+        let carbon = Atom3D(element: .carbon, position: c1Pos, customColor: redColor)
         let carbonIndex = model.atoms.count
         model.addAtom(carbon)
         
         let ccBond = Bond3D(from: attachedToAtom, to: carbonIndex, type: .single, length: 1.54)
         model.addBond(ccBond)
         
-        addCarbonylGroup(to: &model, attachedToAtom: carbonIndex, carbonAtom: carbon)
+        // Add C=O (carbonyl part)
+        let oxygenDoubPos = SCNVector3(c1Pos.x, c1Pos.y + 1.2, c1Pos.z)
+        let oxygenDoub = Atom3D(element: .oxygen, position: oxygenDoubPos, customColor: redColor)
+        let oxygenDoubIndex = model.atoms.count
+        model.addAtom(oxygenDoub)
         
+        let cODoubBond = Bond3D(from: carbonIndex, to: oxygenDoubIndex, type: .double, length: 1.23)
+        model.addBond(cODoubBond)
+        
+        // Add O-H
         let oxygenPos = SCNVector3(c1Pos.x - 1.2, c1Pos.y, c1Pos.z)
-        let oxygen = Atom3D(element: .oxygen, position: oxygenPos)
+        let oxygen = Atom3D(element: .oxygen, position: oxygenPos, customColor: redColor)
         let oxygenIndex = model.atoms.count
         model.addAtom(oxygen)
         
@@ -422,12 +486,14 @@ class Model3DGenerator {
         model.addBond(cOBond)
         
         let hydrogenPos = SCNVector3(oxygenPos.x - 0.96, oxygenPos.y, oxygenPos.z)
-        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos, customColor: redColor)
         let hydrogenIndex = model.atoms.count
         model.addAtom(hydrogen)
         
         let oHBond = Bond3D(from: oxygenIndex, to: hydrogenIndex, type: .single, length: 0.96)
         model.addBond(oHBond)
+        
+        print("❤️ Carboxyl Group: -COOH added with red color at C\(attachedToAtom)")
     }
     
     private static func addAminoGroup(
@@ -435,12 +501,15 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Amino (-NH2) - Cyan color for visibility
+        let cyanColor = SCNVector3(0.0, 1.0, 0.8)  // Cyan
+        
         let nitrogenPos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.47,
             carbonAtom.position.z
         )
-        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos)
+        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos, customColor: cyanColor)
         let nitrogenIndex = model.atoms.count
         model.addAtom(nitrogen)
         
@@ -454,13 +523,15 @@ class Model3DGenerator {
                 nitrogenPos.y + 1.01 * sin(angle),
                 nitrogenPos.z
             )
-            let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+            let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos, customColor: cyanColor)
             let hydrogenIndex = model.atoms.count
             model.addAtom(hydrogen)
             
             let nHBond = Bond3D(from: nitrogenIndex, to: hydrogenIndex, type: .single, length: 1.01)
             model.addBond(nHBond)
         }
+        
+        print("💙 Amino Group: -NH2 added with cyan color at C\(attachedToAtom)")
     }
     
     private static func addNitroGroup(
@@ -468,12 +539,15 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Nitro (-NO2) - Deep Blue color for visibility
+        let blueColor = SCNVector3(0.0, 0.5, 1.0)  // Deep Blue
+        
         let nitrogenPos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.47,
             carbonAtom.position.z
         )
-        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos)
+        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos, customColor: blueColor)
         let nitrogenIndex = model.atoms.count
         model.addAtom(nitrogen)
         
@@ -481,7 +555,7 @@ class Model3DGenerator {
         model.addBond(cNBond)
         
         let oxygen1Pos = SCNVector3(nitrogenPos.x + 1.2, nitrogenPos.y, nitrogenPos.z)
-        let oxygen1 = Atom3D(element: .oxygen, position: oxygen1Pos)
+        let oxygen1 = Atom3D(element: .oxygen, position: oxygen1Pos, customColor: blueColor)
         let oxygen1Index = model.atoms.count
         model.addAtom(oxygen1)
         
@@ -489,12 +563,14 @@ class Model3DGenerator {
         model.addBond(nO1Bond)
         
         let oxygen2Pos = SCNVector3(nitrogenPos.x - 1.2, nitrogenPos.y, nitrogenPos.z)
-        let oxygen2 = Atom3D(element: .oxygen, position: oxygen2Pos)
+        let oxygen2 = Atom3D(element: .oxygen, position: oxygen2Pos, customColor: blueColor)
         let oxygen2Index = model.atoms.count
         model.addAtom(oxygen2)
         
         let nO2Bond = Bond3D(from: nitrogenIndex, to: oxygen2Index, type: .single, length: 1.27)
         model.addBond(nO2Bond)
+        
+        print("🔵 Nitro Group: -NO2 added with blue color at C\(attachedToAtom)")
     }
     
     // MARK: - Additional Functional Groups
@@ -572,12 +648,15 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Nitrile (-CN) - Lime Green color for visibility
+        let greenColor = SCNVector3(0.5, 1.0, 0.0)  // Lime Green
+        
         let nitrilePos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.5,
             carbonAtom.position.z
         )
-        let nitrileCarbon = Atom3D(element: .carbon, position: nitrilePos)
+        let nitrileCarbon = Atom3D(element: .carbon, position: nitrilePos, customColor: greenColor)
         let nitrileIndex = model.atoms.count
         model.addAtom(nitrileCarbon)
         
@@ -585,12 +664,14 @@ class Model3DGenerator {
         model.addBond(ccBond)
         
         let nitrogenPos = SCNVector3(nitrilePos.x, nitrilePos.y + 1.17, nitrilePos.z)
-        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos)
+        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos, customColor: greenColor)
         let nitrogenIndex = model.atoms.count
         model.addAtom(nitrogen)
         
         let cnBond = Bond3D(from: nitrileIndex, to: nitrogenIndex, type: .triple, length: 1.17)
         model.addBond(cnBond)
+        
+        print("💚 Nitrile Group: -CN added with lime green color at C\(attachedToAtom)")
     }
     
     private static func addThiolGroup(
@@ -598,12 +679,15 @@ class Model3DGenerator {
         attachedToAtom: Int,
         carbonAtom: Atom3D
     ) {
+        // Thiol (-SH) - Purple color for visibility
+        let purpleColor = SCNVector3(0.8, 0.0, 0.8)  // Purple
+        
         let sulfurPos = SCNVector3(
             carbonAtom.position.x,
             carbonAtom.position.y + 1.82,
             carbonAtom.position.z
         )
-        let sulfur = Atom3D(element: .sulfur, position: sulfurPos)
+        let sulfur = Atom3D(element: .sulfur, position: sulfurPos, customColor: purpleColor)
         let sulfurIndex = model.atoms.count
         model.addAtom(sulfur)
         
@@ -611,12 +695,14 @@ class Model3DGenerator {
         model.addBond(cSBond)
         
         let hydrogenPos = SCNVector3(sulfurPos.x, sulfurPos.y + 1.34, sulfurPos.z)
-        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos, customColor: purpleColor)
         let hydrogenIndex = model.atoms.count
         model.addAtom(hydrogen)
         
         let shBond = Bond3D(from: sulfurIndex, to: hydrogenIndex, type: .single, length: 1.34)
         model.addBond(shBond)
+        
+        print("💜 Thiol Group: -SH added with purple color at C\(attachedToAtom)")
     }
     
     private static func addHalogenGroup(

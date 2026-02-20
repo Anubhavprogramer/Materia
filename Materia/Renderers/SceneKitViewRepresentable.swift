@@ -314,9 +314,12 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
     private func buildAtoms(in pivotNode: SCNNode, from atoms: [Atom3D]) {
         CommonFunctions.debugPrint(load: "SceneKit", message: "buildAtoms: Adding \(atoms.count) atoms to pivot node")
         for (index, atom) in atoms.enumerated() {
-            let geometry = SCNSphere(radius: CGFloat(atom.radius * 0.3))  // Scaled appropriately
+            // Increase hydrogen size for visibility (hydrogen radius * 0.6 instead of 0.3)
+            let scaleFactor: Float = atom.element == .hydrogen ? 0.6 : 0.3
+            let geometry = SCNSphere(radius: CGFloat(atom.radius * scaleFactor))
             
-            let color = atom.element.color
+            // Use custom color if available (for functional groups), otherwise use element color
+            let color = atom.customColor ?? atom.element.color
             geometry.firstMaterial?.diffuse.contents = UIColor(
                 red: CGFloat(color.x),
                 green: CGFloat(color.y),
@@ -334,7 +337,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
             pivotNode.addChildNode(node)
             
             if index < 3 || index == atoms.count - 1 {
-                CommonFunctions.debugPrint(load: "SceneKit", message: "  Atom \(index): \(atom.element.displayName) at (\(atom.position.x), \(atom.position.y), \(atom.position.z))")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Atom \(index): \(atom.element.displayName) at (\(atom.position.x), \(atom.position.y), \(atom.position.z)) scale:\(scaleFactor)")
             }
         }
         CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Atoms complete: \(atoms.count) total")
@@ -357,15 +360,15 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
                 CommonFunctions.debugPrint(load: "SceneKit", message: "  Bond \(index): type=\(bond.bondType) cylinders=\(cylinderCount)")
             }
             
-            // For double/triple bonds, offset cylinders
+            // For double/triple bonds, offset cylinders for better visibility
             let offsets: [Float] = {
                 switch cylinderCount {
                 case 1:
                     return [0]
                 case 2:
-                    return [-0.15, 0.15]
+                    return [-0.25, 0.25]  // Increased offset from 0.15 to 0.25
                 case 3:
-                    return [-0.2, 0, 0.2]
+                    return [-0.35, 0, 0.35]  // Increased offset from 0.2 to 0.35
                 default:
                     return [0]
                 }
@@ -400,23 +403,58 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         cylinder.firstMaterial?.diffuse.contents = UIColor.gray
         
         let node = SCNNode(geometry: cylinder)
+        
+        // Calculate midpoint
+        let midX = (from.x + to.x) / 2
+        let midY = (from.y + to.y) / 2
+        let midZ = (from.z + to.z) / 2
+        
+        // Bond vector (normalized)
+        let bondVec = SCNVector3(dx, dy, dz)
+        let bondLen = length(bondVec)
+        let bondNorm = SCNVector3(bondVec.x / bondLen, bondVec.y / bondLen, bondVec.z / bondLen)
+        
+        // Create perpendicular offset for double/triple bonds
+        var offsetVec = SCNVector3(0, 0, 0)
+        if abs(offset) > 0.001 {
+            // Find a vector perpendicular to the bond
+            let perpendicular1 = abs(bondNorm.x) < 0.9 ? 
+                SCNVector3(1, 0, 0) : SCNVector3(0, 1, 0)
+            
+            // Cross product to get perpendicular vector
+            let perpendicular = crossProduct(bondNorm, perpendicular1)
+            let perpLen = length(perpendicular)
+            
+            if perpLen > 0.001 {
+                let perpNorm = SCNVector3(
+                    perpendicular.x / perpLen,
+                    perpendicular.y / perpLen,
+                    perpendicular.z / perpLen
+                )
+                offsetVec = SCNVector3(
+                    perpNorm.x * offset,
+                    perpNorm.y * offset,
+                    perpNorm.z * offset
+                )
+            }
+        }
+        
+        // Apply offset to position
         node.position = SCNVector3(
-            (from.x + to.x) / 2,
-            (from.y + to.y) / 2,
-            (from.z + to.z) / 2
+            midX + offsetVec.x,
+            midY + offsetVec.y,
+            midZ + offsetVec.z
         )
         
         // Rotate cylinder to align with bond
         let yAxis = SCNVector3(0, 1, 0)
-        let bondVector = SCNVector3(dx, dy, dz)
+        let crossProd = crossProduct(yAxis, bondVec)
+        let dotProd = dotProduct(yAxis, bondVec)
+        let angle = atan2(length(crossProd), dotProd)
         
-        let crossProduct = crossProduct(yAxis, bondVector)
-        let dotProduct = dotProduct(yAxis, bondVector)
-        let angle = atan2(length(crossProduct), dotProduct)
+        node.rotation = SCNVector4(crossProd.x, crossProd.y, crossProd.z, angle)
         
-        node.rotation = SCNVector4(crossProduct.x, crossProduct.y, crossProduct.z, angle)
-        
-        pivotNode.addChildNode(node)  // Add to pivot node, not scene
+        pivotNode.addChildNode(node)
     }
     
     private func crossProduct(_ a: SCNVector3, _ b: SCNVector3) -> SCNVector3 {
