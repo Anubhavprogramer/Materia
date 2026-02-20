@@ -92,7 +92,6 @@ struct Model3DView: View {
                                 PrimaryButton(
                                     icon: shouldAutoRotate ? "pause.circle.fill" : "play.circle.fill",
                                     title: shouldAutoRotate ? "Pause" : "Auto-Rotate",
-                                    color: .blue,
                                     action: { withAnimation { shouldAutoRotate.toggle() } }
                                 )
                                 
@@ -106,15 +105,14 @@ struct Model3DView: View {
                             
                             // Exploration Buttons - View Controls
                             VStack(spacing: AppConstants.smallGap) {
-                                Text("Explore Views")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(AppColors.textSecondary)
-                                    .padding(.top, AppConstants.smallPadding)
+//                                Text("Explore Views")
+//                                    .font(.system(size: 12, weight: .semibold))
+//                                    .foregroundColor(AppColors.textSecondary)
+//                                    .padding(.top, AppConstants.smallPadding)
                                 
                                 // View Buttons Grid
-                                VStack(spacing: AppConstants.smallGap) {
-                                    // Row 1: Top, Zoom In, Zoom Out
-                                    HStack(spacing: AppConstants.smallGap) {
+                                VStack(spacing: AppConstants.defaultGap) {
+                                    HStack(spacing: AppConstants.defaultGap) {
                                         ExplorationButton(
                                             icon: "plus.magnifyingglass",
                                             label: "Zoom+",
@@ -146,9 +144,9 @@ struct Model3DView: View {
                                     }
                                 }
                             }
-                            .padding(AppConstants.defaultPadding)
-                            .background(AppColors.accentLight.opacity(0.5))
-                            .cornerRadius(AppConstants.defaultCornerRadius)
+//                            .padding(AppConstants.defaultPadding)
+//                            .background(AppColors.accentLight.opacity(0.5))
+//                            .cornerRadius(AppConstants.defaultCornerRadius)
                         }
                     }
                     .padding(AppConstants.defaultPadding)
@@ -287,7 +285,6 @@ private struct InfoBadge: View {
 private struct PrimaryButton: View {
     let icon: String
     let title: String
-    let color: Color
     let action: () -> Void
     
     var body: some View {
@@ -302,10 +299,11 @@ private struct PrimaryButton: View {
             .foregroundColor(AppColors.accent)
             .frame(maxWidth: .infinity)
             .padding(AppConstants.smallPadding)
-            .background(AppColors.accentLight)
             .cornerRadius(AppConstants.defaultCornerRadius)
         }
         .activeScale(0.95)
+        .buttonStyle(.glassProminent)
+        .tint(AppColors.Card)
     }
 }
 
@@ -331,17 +329,14 @@ private struct ExplorationButton: View {
                 Text(label)
                     .font(.system(size: 10, weight: .medium))
             }
-            .foregroundColor(AppColors.accent)
+            .foregroundColor(AppColors.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
-            .background(AppColors.Card)
-            .cornerRadius(AppConstants.defaultCornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: AppConstants.defaultCornerRadius)
-                    .stroke(AppColors.primary.opacity(0.3), lineWidth: 1)
-            )
         }
         .activeScale(0.95)
+        .buttonStyle(.glassProminent)
+        .tint(AppColors.Card)
+        .padding(AppConstants.smallPadding)
     }
 }
 
