@@ -19,54 +19,84 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
     var onCoordinatorReady: ((Coordinator) -> Void)?
     
     func makeUIView(context: Context) -> SCNView {
+        CommonFunctions.debugPrint(load: "SceneKit", message: "=== PROFESSIONAL 3D VIEWER SETUP ===")
+        
         let sceneView = SCNView()
         sceneView.scene = SCNScene()
         sceneView.backgroundColor = UIColor(AppColors.background)
-        sceneView.autoenablesDefaultLighting = true
-        sceneView.allowsCameraControl = true
+        sceneView.autoenablesDefaultLighting = false  // We handle lighting manually
+        sceneView.allowsCameraControl = false  // We handle gestures manually
         sceneView.debugOptions = []
-        
-        // Performance optimization: enable rendering optimizations
         sceneView.preferredFramesPerSecond = 60
         
-        // Configure lighting
-        configureLighting(for: sceneView.scene!)
+        guard let scene = sceneView.scene else { return sceneView }
         
-        // Add camera
+        // STEP 1: Create pivot node (molecule container)
+        CommonFunctions.debugPrint(load: "SceneKit", message: "Step 1: Creating pivot node...")
+        let pivotNode = SCNNode()
+        pivotNode.name = "pivotNode"
+        scene.rootNode.addChildNode(pivotNode)
+        context.coordinator.pivotNode = pivotNode
+        CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Pivot node created and stored")
+        
+        // STEP 2: Setup professional 3-point lighting
+        CommonFunctions.debugPrint(load: "SceneKit", message: "Step 2: Setting up professional lighting...")
+        configureProfessionalLighting(for: scene)
+        
+        // STEP 3: Create and position camera
+        CommonFunctions.debugPrint(load: "SceneKit", message: "Step 3: Creating camera node...")
         let camera = SCNCamera()
         camera.zNear = 0.1
         camera.zFar = 1000
+        camera.fieldOfView = 60
         
         let cameraNode = SCNNode()
         cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 0, 35)  // 35 for better zoom range
+        cameraNode.position = SCNVector3(0, 0, 50)  // Will be updated after fit calculation
         cameraNode.name = "cameraNode"
-        sceneView.scene?.rootNode.addChildNode(cameraNode)
+        scene.rootNode.addChildNode(cameraNode)
+        sceneView.pointOfView = cameraNode
+        CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Camera created at Z=50")
         
-        // Build 3D representation with lazy loading
+        // STEP 4: Build molecule geometry on pivot node
+        CommonFunctions.debugPrint(load: "SceneKit", message: "Step 4: Building molecule geometry...")
         DispatchQueue.global(qos: .userInitiated).async {
-            // Generate geometry in background
-            let atoms = model3D.atoms
-            let bonds = model3D.bonds
+            let atoms = self.model3D.atoms
+            let bonds = self.model3D.bonds
+            CommonFunctions.debugPrint(load: "SceneKit", message: "Background: Building \(atoms.count) atoms and \(bonds.count) bonds")
             
             DispatchQueue.main.async {
-                // Update UI on main thread
-                self.buildAtoms(in: sceneView.scene!, from: atoms)
-                self.buildBonds(in: sceneView.scene!, from: bonds, model3D: model3D)
+                self.buildAtoms(in: pivotNode, from: atoms)
+                self.buildBonds(in: pivotNode, from: bonds, model3D: self.model3D)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ All geometry added to pivot node")
+                
+                // STEP 5: Calculate and apply auto-fit
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Step 5: Calculating auto-fit...")
+                self.performAutoFit(
+                    pivotNode: pivotNode,
+                    cameraNode: cameraNode,
+                    coordinator: context.coordinator
+                )
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Auto-fit complete")
+                
+                // STEP 6: Log final scene state
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Step 6: Scene ready")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Pivot position: (\(pivotNode.position.x), \(pivotNode.position.y), \(pivotNode.position.z))")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Pivot children: \(pivotNode.childNodes.count)")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Camera position: (\(cameraNode.position.x), \(cameraNode.position.y), \(cameraNode.position.z))")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "=== 3D VIEWER READY ===")
             }
         }
         
-        // Set camera position for good view
-        sceneView.defaultCameraController.target = SCNVector3(0, 0, 0)
-        
-        // Store initial camera position for reset
-        context.coordinator.initialCameraPosition = cameraNode.position
+        // Store coordinator state
         context.coordinator.sceneView = sceneView
+        context.coordinator.cameraNode = cameraNode
         
-        // Notify that coordinator is ready
-        CommonFunctions.debugPrint(load: "SceneKit", message: "makeUIView - Calling onCoordinatorReady callback")
-        onCoordinatorReady?(context.coordinator)
-        CommonFunctions.debugPrint(load: "SceneKit", message: "makeUIView - onCoordinatorReady callback completed")
+        // Notify coordinator is ready
+        DispatchQueue.main.async {
+            CommonFunctions.debugPrint(load: "SceneKit", message: "Calling onCoordinatorReady...")
+            self.onCoordinatorReady?(context.coordinator)
+        }
         
         // Add gesture recognizers
         let panGesture = UIPanGestureRecognizer(
@@ -148,6 +178,103 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         scene.rootNode.addChildNode(ambientLightNode)
     }
     
+    // MARK: - Professional 3-Point Lighting
+    private func configureProfessionalLighting(for scene: SCNScene) {
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Key light (1000 intensity)...")
+        // Key light - Main shadow caster
+        let keyLight = SCNLight()
+        keyLight.type = .directional
+        keyLight.intensity = 1000
+        keyLight.castsShadow = true
+        
+        let keyLightNode = SCNNode()
+        keyLightNode.light = keyLight
+        keyLightNode.position = SCNVector3(15, 20, 15)  // Forward, up, right
+        keyLightNode.name = "keyLight"
+        scene.rootNode.addChildNode(keyLightNode)
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Fill light (500 intensity)...")
+        // Fill light - Softens shadows from opposite side
+        let fillLight = SCNLight()
+        fillLight.type = .omni
+        fillLight.intensity = 500
+        
+        let fillLightNode = SCNNode()
+        fillLightNode.light = fillLight
+        fillLightNode.position = SCNVector3(-15, 5, -15)  // Opposite side, lower
+        fillLightNode.name = "fillLight"
+        scene.rootNode.addChildNode(fillLightNode)
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Ambient light (200 intensity)...")
+        // Ambient light - Prevents pure black areas
+        let ambientLight = SCNLight()
+        ambientLight.type = .ambient
+        ambientLight.intensity = 200
+        
+        let ambientLightNode = SCNNode()
+        ambientLightNode.light = ambientLight
+        ambientLightNode.name = "ambientLight"
+        scene.rootNode.addChildNode(ambientLightNode)
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  3-point lighting configured")
+    }
+    
+    // MARK: - Auto-Fit to View
+    private func performAutoFit(
+        pivotNode: SCNNode,
+        cameraNode: SCNNode,
+        coordinator: Coordinator
+    ) {
+        // Get pivot node's bounding box
+        let (minBounds, maxBounds) = pivotNode.boundingBox
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Bounding box min: (\(minBounds.x), \(minBounds.y), \(minBounds.z))")
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Bounding box max: (\(maxBounds.x), \(maxBounds.y), \(maxBounds.z))")
+        
+        // Calculate center
+        let centerX = (minBounds.x + maxBounds.x) / 2
+        let centerY = (minBounds.y + maxBounds.y) / 2
+        let centerZ = (minBounds.z + maxBounds.z) / 2
+        
+        // Calculate dimensions
+        let width = maxBounds.x - minBounds.x
+        let height = maxBounds.y - minBounds.y
+        let depth = maxBounds.z - minBounds.z
+        let maxDimension = max(width, max(height, depth))
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Molecule center: (\(centerX), \(centerY), \(centerZ))")
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Dimensions - W:\(width) H:\(height) D:\(depth) Max:\(maxDimension)")
+        
+        // Calculate optimal camera distance (multiply by 2.5 for safe margin)
+        let optimalDistance = maxDimension * 2.5
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Optimal camera distance: \(optimalDistance)")
+        
+        // Keep pivot node at origin and set its pivot point to the center of the molecule
+        // This way, when we rotate, we rotate around the molecule's center
+        pivotNode.position = SCNVector3(0, 0, 0)
+        
+        // Set pivot to the CENTER of the molecule (so rotation happens around center)
+        // SCNMatrix4MakeTranslation creates a translation matrix to offset the pivot point
+        let pivotMatrix = SCNMatrix4MakeTranslation(centerX, centerY, centerZ)
+        pivotNode.pivot = pivotMatrix
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Pivot node at origin with pivot matrix for center rotation")
+        
+        // Position camera at optimal distance
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0.5
+        cameraNode.position = SCNVector3(0, 0, optimalDistance)
+        SCNTransaction.commit()
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Camera positioned at distance: \(optimalDistance)")
+        
+        // Store camera distances for zoom bounds
+        coordinator.optimalDistance = optimalDistance
+        coordinator.minZoomDistance = optimalDistance * 0.3
+        coordinator.maxZoomDistance = optimalDistance * 5.0
+        
+        CommonFunctions.debugPrint(load: "SceneKit", message: "  Zoom bounds - Min: \(coordinator.minZoomDistance) Max: \(coordinator.maxZoomDistance)")
+    }
+    
     private func updateLabels(in scene: SCNScene, from model: Model3D) {
         // Remove existing labels
         clearLabels(in: scene)
@@ -184,9 +311,10 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
     }
     
     // MARK: - Private Methods
-    private func buildAtoms(in scene: SCNScene, from atoms: [Atom3D]) {
-        for atom in atoms {
-            let geometry = SCNSphere(radius: CGFloat(atom.radius * 0.6))
+    private func buildAtoms(in pivotNode: SCNNode, from atoms: [Atom3D]) {
+        CommonFunctions.debugPrint(load: "SceneKit", message: "buildAtoms: Adding \(atoms.count) atoms to pivot node")
+        for (index, atom) in atoms.enumerated() {
+            let geometry = SCNSphere(radius: CGFloat(atom.radius * 0.3))  // Scaled appropriately
             
             let color = atom.element.color
             geometry.firstMaterial?.diffuse.contents = UIColor(
@@ -203,12 +331,18 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
             node.position = atom.position
             node.name = atom.element.displayName
             
-            scene.rootNode.addChildNode(node)
+            pivotNode.addChildNode(node)
+            
+            if index < 3 || index == atoms.count - 1 {
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Atom \(index): \(atom.element.displayName) at (\(atom.position.x), \(atom.position.y), \(atom.position.z))")
+            }
         }
+        CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Atoms complete: \(atoms.count) total")
     }
     
-    private func buildBonds(in scene: SCNScene, from bonds: [Bond3D], model3D: Model3D) {
-        for bond in bonds {
+    private func buildBonds(in pivotNode: SCNNode, from bonds: [Bond3D], model3D: Model3D) {
+        CommonFunctions.debugPrint(load: "SceneKit", message: "buildBonds: Adding \(bonds.count) bonds to pivot node")
+        for (index, bond) in bonds.enumerated() {
             guard bond.fromAtom < model3D.atoms.count && bond.toAtom < model3D.atoms.count else {
                 continue
             }
@@ -218,6 +352,10 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
             
             let cylinderCount = bond.bondType.cylinderCount
             let cylinderRadius = bond.bondType.cylinderRadius
+            
+            if index < 3 || index == bonds.count - 1 {
+                CommonFunctions.debugPrint(load: "SceneKit", message: "  Bond \(index): type=\(bond.bondType) cylinders=\(cylinderCount)")
+            }
             
             // For double/triple bonds, offset cylinders
             let offsets: [Float] = {
@@ -235,7 +373,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
             
             for offset in offsets {
                 addBondCylinder(
-                    in: scene,
+                    in: pivotNode,
                     from: fromAtom.position,
                     to: toAtom.position,
                     radius: cylinderRadius,
@@ -243,10 +381,11 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
                 )
             }
         }
+        CommonFunctions.debugPrint(load: "SceneKit", message: "✔ Bonds complete: \(bonds.count) total")
     }
     
     private func addBondCylinder(
-        in scene: SCNScene,
+        in pivotNode: SCNNode,
         from: SCNVector3,
         to: SCNVector3,
         radius: Float,
@@ -277,7 +416,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         
         node.rotation = SCNVector4(crossProduct.x, crossProduct.y, crossProduct.z, angle)
         
-        scene.rootNode.addChildNode(node)
+        pivotNode.addChildNode(node)  // Add to pivot node, not scene
     }
     
     private func crossProduct(_ a: SCNVector3, _ b: SCNVector3) -> SCNVector3 {
@@ -306,7 +445,15 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         var onReset: (() -> Void)?
         
         weak var sceneView: SCNView?
-        var initialCameraPosition: SCNVector3 = SCNVector3(0, 0, 35)
+        weak var cameraNode: SCNNode?
+        weak var pivotNode: SCNNode?
+        
+        // Professional 3D viewer properties
+        var initialCameraPosition: SCNVector3 = SCNVector3(0, 0, 50)
+        var optimalDistance: Float = 25.0
+        var minZoomDistance: Float = 7.5
+        var maxZoomDistance: Float = 125.0
+        
         var displayLink: CADisplayLink?
         var rotationAngle: Float = 0
         
@@ -331,35 +478,40 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            guard let sceneView = sceneView else { return }
+            guard let sceneView = sceneView, let pivotNode = pivotNode else { return }
             
             switch gesture.state {
             case .began:
                 isRotating = true
                 onStart?()
                 shouldAutoRotate = false
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture started")
                 
             case .changed:
                 let translation = gesture.translation(in: sceneView)
-                let sensitivity: Float = 0.01
+                let sensitivity: Float = 0.005  // Adjusted for better responsiveness
                 
-                if let scene = sceneView.scene {
-                    // Rotate around X axis (vertical pan - up/down)
-                    var xRotation = scene.rootNode.eulerAngles.x
-                    xRotation -= Float(translation.y) * sensitivity
-                    
-                    // Rotate around Y axis (horizontal pan - left/right)
-                    var yRotation = scene.rootNode.eulerAngles.y
-                    yRotation -= Float(translation.x) * sensitivity
-                    
-                    scene.rootNode.eulerAngles = SCNVector3(xRotation, yRotation, 0)
-                    rotationAngle = yRotation
-                }
+                // Get current rotation
+                var currentRotation = pivotNode.eulerAngles
+                
+                // Vertical pan (up/down) → rotate around X (tilt up/down)
+                currentRotation.x += Float(translation.y) * sensitivity
+                
+                // Horizontal pan (left/right) → rotate around Y (spin left/right)
+                currentRotation.y += Float(translation.x) * sensitivity
+                
+                // Apply rotation
+                pivotNode.eulerAngles = currentRotation
+                rotationAngle = currentRotation.y
+                
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: X:\(currentRotation.x) Y:\(currentRotation.y) translation: (\(translation.x), \(translation.y))")
+                
                 gesture.setTranslation(CGPoint.zero, in: sceneView)
                 
             case .ended, .cancelled:
                 isRotating = false
                 onEnd?()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture ended")
                 
             default:
                 break
@@ -367,13 +519,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard
-                let sceneView = sceneView,
-                let cameraNode = sceneView.scene?.rootNode.childNode(
-                    withName: "cameraNode",
-                    recursively: false
-                )
-            else { return }
+            guard let sceneView = sceneView, let cameraNode = cameraNode else { return }
 
             switch gesture.state {
 
@@ -381,13 +527,15 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
                 shouldAutoRotate = false
 
             case .changed:
-                let delta = Float(gesture.scale - 1.0) * 20
+                let delta = Float(gesture.scale - 1.0) * 5  // Adjusted sensitivity
+                let newZ = max(minZoomDistance, min(maxZoomDistance, cameraNode.position.z - delta))
                 
-                if let camera = cameraNode.camera {
-                    let newFOV = max(30, min(100, camera.fieldOfView - CGFloat(delta)))
-                    camera.fieldOfView = newFOV
-                }
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.1
+                cameraNode.position.z = newZ
+                SCNTransaction.commit()
                 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pinch zoom: \(cameraNode.position.z)")
                 gesture.scale = 1.0
 
             default:
@@ -396,7 +544,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handleRotation(_ gesture: UIRotationGestureRecognizer) {
-            guard let sceneView = sceneView else { return }
+            guard let sceneView = sceneView, let pivotNode = pivotNode else { return }
             
             switch gesture.state {
             case .began:
@@ -405,11 +553,12 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
                 shouldAutoRotate = false
                 
             case .changed:
-                if let scene = sceneView.scene {
-                    var rotation = scene.rootNode.eulerAngles
-                    rotation.z += Float(gesture.rotation)
-                    scene.rootNode.eulerAngles = rotation
-                }
+                // Rotate PIVOT NODE around Z axis (roll/tilt)
+                var rotation = pivotNode.eulerAngles
+                rotation.z += Float(gesture.rotation)
+                pivotNode.eulerAngles = rotation
+                
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Rotation gesture: Z:\(rotation.z)")
                 gesture.rotation = 0
                 
             case .ended, .cancelled:
@@ -422,14 +571,13 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         }
         
         @objc func updateRotation() {
-            guard shouldAutoRotate, let sceneView = sceneView else { return }
+            guard shouldAutoRotate, let pivotNode = pivotNode else { return }
             
-            if let scene = sceneView.scene {
-                rotationAngle += 1.0
-                var rotation = scene.rootNode.eulerAngles
-                rotation.y = rotationAngle * Float.pi / 180.0
-                scene.rootNode.eulerAngles = rotation
-            }
+            CommonFunctions.debugPrint(load: "SceneKit", message: "updateRotation() - Auto-rotating molecule")
+            rotationAngle += 1.0
+            var rotation = pivotNode.eulerAngles
+            rotation.y = rotationAngle * Float.pi / 180.0
+            pivotNode.eulerAngles = rotation
         }
         
         func resetView() {
@@ -466,168 +614,142 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         // MARK: - Exploration Methods
         
         func rotateToFront() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - sceneView is NIL")
+            guard let pivotNode = pivotNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - pivotNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Starting animation to front view")
             DispatchQueue.main.async {
-                if let scene = sceneView.scene {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    scene.rootNode.eulerAngles = SCNVector3(0, 0, 0)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Animation applied")
-                    SCNTransaction.commit()
-                }
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                pivotNode.eulerAngles = SCNVector3(0, 0, 0)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Molecule rotated to front")
+                SCNTransaction.commit()
                 self.rotationAngle = 0
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Completed")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ rotateToFront completed")
             }
         }
         
         func rotateToLeft() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - sceneView is NIL")
+            guard let pivotNode = pivotNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - pivotNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Starting animation to left view")
             DispatchQueue.main.async {
-                if let scene = sceneView.scene {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    scene.rootNode.eulerAngles = SCNVector3(0, Float.pi / 2, 0)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Animation applied")
-                    SCNTransaction.commit()
-                }
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                pivotNode.eulerAngles = SCNVector3(0, Float.pi / 2, 0)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Molecule rotated to left")
+                SCNTransaction.commit()
                 self.rotationAngle = Float.pi / 2
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Completed")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ rotateToLeft completed")
             }
         }
         
         func rotateToRight() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - sceneView is NIL")
+            guard let pivotNode = pivotNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - pivotNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Starting animation to right view")
             DispatchQueue.main.async {
-                if let scene = sceneView.scene {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    scene.rootNode.eulerAngles = SCNVector3(0, -Float.pi / 2, 0)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Animation applied")
-                    SCNTransaction.commit()
-                }
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                pivotNode.eulerAngles = SCNVector3(0, -Float.pi / 2, 0)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Molecule rotated to right")
+                SCNTransaction.commit()
                 self.rotationAngle = -Float.pi / 2
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Completed")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ rotateToRight completed")
             }
         }
         
         func rotateToTop() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - sceneView is NIL")
+            guard let pivotNode = pivotNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - pivotNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Starting animation to top view")
             DispatchQueue.main.async {
-                if let scene = sceneView.scene {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    scene.rootNode.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Animation applied")
-                    SCNTransaction.commit()
-                }
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Completed")
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                pivotNode.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Molecule rotated to top")
+                SCNTransaction.commit()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ rotateToTop completed")
             }
         }
         
         func rotateToBottom() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - sceneView is NIL")
+            guard let pivotNode = pivotNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - pivotNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Starting animation to bottom view")
             DispatchQueue.main.async {
-                if let scene = sceneView.scene {
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    scene.rootNode.eulerAngles = SCNVector3(Float.pi / 2, 0, 0)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Animation applied")
-                    SCNTransaction.commit()
-                }
-                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Completed")
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                pivotNode.eulerAngles = SCNVector3(Float.pi / 2, 0, 0)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Molecule rotated to bottom")
+                SCNTransaction.commit()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ rotateToBottom completed")
             }
         }
         
         func zoomIn() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - sceneView is NIL")
+            guard let cameraNode = cameraNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - cameraNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Starting zoom in")
             DispatchQueue.main.async {
-                if let cameraNode = sceneView.scene?.rootNode.childNode(
-                    withName: "cameraNode",
-                    recursively: false
-                ) {
-                    let newDistance = max(2, cameraNode.position.z - 5)  // Closer zoom in allowed (min 2 instead of 3)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Camera distance: \(cameraNode.position.z) → \(newDistance)")
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.3
-                    cameraNode.position.z = newDistance
-                    SCNTransaction.commit()
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Completed")
-                }
+                let newDistance = max(self.minZoomDistance, cameraNode.position.z - 2)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Camera Z: \(cameraNode.position.z) → \(newDistance) (bounds: \(self.minZoomDistance)-\(self.maxZoomDistance))")
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.3
+                cameraNode.position.z = newDistance
+                SCNTransaction.commit()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ zoomIn completed")
             }
         }
         
         func zoomOut() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - sceneView is NIL")
+            guard let cameraNode = cameraNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - cameraNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Starting zoom out")
             DispatchQueue.main.async {
-                if let cameraNode = sceneView.scene?.rootNode.childNode(
-                    withName: "cameraNode",
-                    recursively: false
-                ) {
-                    let newDistance = min(100, cameraNode.position.z + 5)  // Farther zoom out allowed (max 100 instead of 80)
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Camera distance: \(cameraNode.position.z) → \(newDistance)")
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.3
-                    cameraNode.position.z = newDistance
-                    SCNTransaction.commit()
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Completed")
-                }
+                let newDistance = min(self.maxZoomDistance, cameraNode.position.z + 2)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Camera Z: \(cameraNode.position.z) → \(newDistance) (bounds: \(self.minZoomDistance)-\(self.maxZoomDistance))")
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.3
+                cameraNode.position.z = newDistance
+                SCNTransaction.commit()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ zoomOut completed")
             }
         }
         
         func fitToView() {
-            guard let sceneView = sceneView else { 
-                CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - sceneView is NIL")
+            guard let cameraNode = cameraNode else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - cameraNode is NIL")
                 return 
             }
             
-            CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Starting animation")
+            CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Resetting to optimal distance: \(optimalDistance)")
             DispatchQueue.main.async {
-                if let cameraNode = sceneView.scene?.rootNode.childNode(
-                    withName: "cameraNode",
-                    recursively: false
-                ) {
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Resetting camera to initial position: \(self.initialCameraPosition.z)")
-                    SCNTransaction.begin()
-                    SCNTransaction.animationDuration = 0.5
-                    cameraNode.position.z = self.initialCameraPosition.z
-                    SCNTransaction.commit()
-                    CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Completed")
-                }
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 0.5
+                cameraNode.position.z = self.optimalDistance
+                SCNTransaction.commit()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "✔ fitToView completed")
             }
         }
     }
