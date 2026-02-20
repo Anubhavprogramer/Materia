@@ -2,243 +2,220 @@
 //  Model3DUserGuide.swift
 //  Materia
 //
-//  On-screen help and instructions for 3D viewer
-//
 
 import SwiftUI
 
 struct Model3DUserGuide: View {
+    
     @State private var currentPage = 0
-    @Environment(\.dismiss) var dismiss
+    @Environment(\.dismiss) private var dismiss
+    
+    private let totalPages = 4
     
     var body: some View {
         ZStack {
+            
+            // Soft background
+            LinearGradient(
+                colors: [
+                    Color(.systemBackground),
+                    Color(.systemBackground).opacity(0.96)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
             VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Text("How to Use 3D View")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                    
-                    Spacer()
-                    
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.gray)
-                    }
-                }
-                .padding()
-                .background(Color(.systemGray6))
                 
-                // Content
+                // MARK: - Pages
                 TabView(selection: $currentPage) {
-                    // Page 1: Rotation
-                    VStack(spacing: 20) {
-                        Image(systemName: "hand.draw")
-                            .font(.system(size: 64))
-                            .foregroundColor(.blue)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Rotation")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "1.circle.fill")
-                                        .foregroundColor(.blue)
-                                        .font(.caption)
-                                    Text("Use 1 finger")
-                                        .font(.caption)
-                                }
-                                
-                                HStack(spacing: 12) {
-                                    Image(systemName: "arrow.up.and.down.and.arrow.left.and.right")
-                                        .font(.caption)
-                                        .foregroundColor(.blue)
-                                    Text("Drag to rotate in all directions")
-                                        .font(.caption)
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                    }
+                    
+                    GuidePageView(
+                        icon: "hand.draw",
+                        title: "Rotation",
+                        steps: [
+                            ("1 Finger", "Drag with one finger"),
+                            ("All Directions", "Rotate freely in 3D space"),
+                            ("Smooth Motion", "Experience fluid rotation")
+                        ]
+                    )
                     .tag(0)
                     
-                    // Page 2: Zoom
-                    VStack(spacing: 20) {
-                        Image(systemName: "hand.pinch")
-                            .font(.system(size: 64))
-                            .foregroundColor(.green)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Zoom")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "2.circle.fill")
-                                        .foregroundColor(.green)
-                                        .font(.caption)
-                                    Text("Use 2 fingers")
-                                        .font(.caption)
-                                }
-                                
-                                HStack(spacing: 12) {
-                                    Image(systemName: "plus.circle")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                    Text("Pinch in/out to zoom")
-                                        .font(.caption)
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                    }
+                    GuidePageView(
+                        icon: "hand.pinch",
+                        title: "Zoom & Scale",
+                        steps: [
+                            ("2 Fingers", "Use pinch gesture"),
+                            ("Pinch In", "Zoom out"),
+                            ("Pinch Out", "Zoom in for detail")
+                        ]
+                    )
                     .tag(1)
                     
-                    // Page 3: Tilt
-                    VStack(spacing: 20) {
-                        Image(systemName: "rotate.3d")
-                            .font(.system(size: 64))
-                            .foregroundColor(.orange)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Tilt")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "2.circle.fill")
-                                        .foregroundColor(.orange)
-                                        .font(.caption)
-                                    Text("Use 2 fingers")
-                                        .font(.caption)
-                                }
-                                
-                                HStack(spacing: 12) {
-                                    Image(systemName: "rotate.left.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.orange)
-                                    Text("Rotate for side view")
-                                        .font(.caption)
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                    }
+                    GuidePageView(
+                        icon: "rotate.3d",
+                        title: "Tilt & Perspective",
+                        steps: [
+                            ("Two Fingers Rotate", "Twist to change angle"),
+                            ("Vertical Drag", "Tilt up or down"),
+                            ("Explore Depth", "View from any perspective")
+                        ]
+                    )
                     .tag(2)
                     
-                    // Page 4: Controls
-                    VStack(spacing: 20) {
-                        Image(systemName: "slider.horizontal.3")
-                            .font(.system(size: 64))
-                            .foregroundColor(.purple)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Controls")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            
-                            VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "play.circle.fill")
-                                        .foregroundColor(.blue)
-                                        .font(.caption)
-                                    Text("Auto-rotate for demo")
-                                        .font(.caption)
-                                }
-                                
-                                HStack(spacing: 12) {
-                                    Image(systemName: "abc")
-                                        .foregroundColor(.green)
-                                        .font(.caption)
-                                    Text("Toggle element labels")
-                                        .font(.caption)
-                                }
-                                
-                                HStack(spacing: 12) {
-                                    Image(systemName: "arrow.counterclockwise")
-                                        .foregroundColor(.orange)
-                                        .font(.caption)
-                                    Text("Reset to default view")
-                                        .font(.caption)
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                    }
+                    GuidePageView(
+                        icon: "slider.horizontal.3",
+                        title: "Pro Tips",
+                        steps: [
+                            ("Double Tap", "Reset instantly"),
+                            ("Long Press", "Toggle labels"),
+                            ("Swipe Pages", "Navigate quickly")
+                        ]
+                    )
                     .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .padding()
                 
-                // Page indicator
-                HStack(spacing: 8) {
-                    ForEach(0..<4, id: \.self) { index in
-                        Circle()
-                            .fill(index == currentPage ? Color.blue : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                    }
-                }
-                .padding()
-                
-                // Footer buttons
-                HStack(spacing: 12) {
-                    if currentPage > 0 {
-                        Button(action: { withAnimation { currentPage -= 1 } }) {
-                            Text("Back")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(10)
-                                .background(Color.gray)
-                                .cornerRadius(6)
+                // MARK: - Page Indicator
+                HStack {
+                    HStack(spacing: 8) {
+                        ForEach(0..<totalPages, id: \.self) { index in
+                            Capsule()
+                                .fill(index == currentPage ? .primary : .secondary)
+                                .frame(width: index == currentPage ? 24 : 8, height: 8)
+                                .animation(.easeInOut(duration: 0.25), value: currentPage)
                         }
-                    } else {
-                        Spacer()
                     }
                     
-                    if currentPage < 3 {
-                        Button(action: { withAnimation { currentPage += 1 } }) {
-                            Text("Next")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(10)
-                                .background(Color.blue)
-                                .cornerRadius(6)
-                        }
-                    } else {
-                        Button(action: { dismiss() }) {
-                            Text("Got it!")
-                                .font(.caption)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(10)
-                                .background(Color.blue)
-                                .cornerRadius(6)
-                        }
-                    }
+                    Spacer()
+                    
+                    Text("\(currentPage + 1)/\(totalPages)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fontWeight(.semibold)
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                
+                Divider()
+                
+                // MARK: - Footer Buttons
+                HStack(spacing: 12) {
+                    
+                    if currentPage > 0 {
+                        Button {
+                            withAnimation(.easeInOut) {
+                                currentPage -= 1
+                            }
+                        } label: {
+                            Label("Back", systemImage: "chevron.left")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        }
+                        .buttonStyle(.glass)
+                        .tint(AppColors.accent)
+                    }
+                    
+                    Button {
+                        if currentPage < totalPages - 1 {
+                            withAnimation(.easeInOut) {
+                                currentPage += 1
+                            }
+                        } else {
+                            dismiss()
+                        }
+                    } label: {
+                        Label(
+                            currentPage == totalPages - 1 ? "Got It" : "Next",
+                            systemImage: currentPage == totalPages - 1 ? "checkmark.circle.fill" : "chevron.right"
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                    }
+                    .buttonStyle(.glassProminent)   // ← no custom color applied
+                    .tint(AppColors.accent)
+                }
+                .padding(20)
+            }
+        }
+        .navigationTitle("3D Viewer Guide")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Close") {
+                    dismiss()
+                }
             }
         }
     }
 }
 
-// MARK: - Preview
-#if DEBUG
-struct Model3DUserGuide_Previews: PreviewProvider {
-    static var previews: some View {
-        Model3DUserGuide()
+
+struct GuidePageView: View {
+    
+    let icon: String
+    let title: String
+    let steps: [(String, String)]
+    
+    var body: some View {
+        VStack(spacing: 28) {
+            
+            // MARK: - Icon Card
+            ZStack {
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(.ultraThinMaterial)
+                
+                VStack(spacing: 12) {
+                    Image(systemName: icon)
+                        .font(.system(size: 52, weight: .semibold))
+                    
+                    Text(title)
+                        .font(.title3.bold())
+                }
+                .padding()
+            }
+            .frame(height: 160)
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            
+            // MARK: - Steps
+            VStack(spacing: 14) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    
+                    HStack(spacing: 16) {
+                        
+                        ZStack {
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 40, height: 40)
+                            
+                            Text("\(index + 1)")
+                                .font(.headline)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(step.0)
+                                .font(.subheadline.weight(.semibold))
+                            
+                            Text(step.1)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18)
+                            .fill(.ultraThinMaterial)
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+        }
     }
 }
-#endif

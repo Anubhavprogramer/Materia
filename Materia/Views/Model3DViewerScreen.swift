@@ -18,58 +18,68 @@ struct Model3DViewerScreen: View {
     @State private var showLabels = false
     @State private var isLoading = true
     @State private var shouldAutoRotate = false
+    @State private var showHelpGuide = false
     
     var body: some View {
-        ZStack {
-            if let model = model3D {
-                // 3D Content
-                Model3DView(compound: compound)
-                
-            } else if isLoading {
-                ZStack {
-                    Color(.systemBackground).edgesIgnoringSafeArea(.all)
+        NavigationStack {
+            ZStack {
+                if let model = model3D {
+                    // 3D Content
+                    Model3DView(compound: compound)
                     
-                    VStack(spacing: 20) {
-                        Image(systemName: "atom")
-                            .font(.system(size: 56))
-                            .foregroundColor(.blue)
-                            .rotationEffect(.degrees(isAnimating ? 360 : 0))
-                            .onAppear {
-                                withAnimation(
-                                    Animation.linear(duration: 2).repeatForever(autoreverses: false)
-                                ) {
-                                    isAnimating = true
+                } else if isLoading {
+                    ZStack {
+                        Color(.systemBackground).edgesIgnoringSafeArea(.all)
+                        
+                        VStack(spacing: 20) {
+                            Image(systemName: "atom")
+                                .font(.system(size: 56))
+                                .foregroundColor(AppColors.accent)
+                                .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                                .onAppear {
+                                    withAnimation(
+                                        Animation.linear(duration: 2).repeatForever(autoreverses: false)
+                                    ) {
+                                        isAnimating = true
+                                    }
                                 }
-                            }
-                        
-                        VStack(spacing: 8) {
-                            Text("Building 3D Model")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.primary)
                             
-                            Text("Rendering \(compound.compoundName)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
+                            VStack(spacing: 8) {
+                                Text("Building 3D Model")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.primary)
+                                
+                                Text("Rendering \(compound.compoundName)")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            ProgressView()
+                                .tint(.blue)
+                                .scaleEffect(1.2, anchor: .center)
                         }
-                        
-                        ProgressView()
-                            .tint(.blue)
-                            .scaleEffect(1.2, anchor: .center)
+                    }
+                }
+            }
+            .navigationTitle("3D Model View")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Close") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showHelpGuide = true }) {
+                        Image(systemName: AppIcons.info)
+                            .font(.system(size: 20))
                     }
                 }
             }
         }
-        .navigationTitle("3D Model View")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button("Close") {
-                    dismiss()
-                }
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("help") {
-                    Model3DHelpButton()
-                }
+        .sheet(isPresented: $showHelpGuide) {
+            NavigationStack {
+                Model3DUserGuide()
             }
         }
         .onAppear {

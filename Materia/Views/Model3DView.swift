@@ -53,8 +53,6 @@ struct Model3DView: View {
                     // MARK: - Top Header
                     VStack(alignment: .leading, spacing: AppConstants.mediumGap) {
                         
-                        InfoCardView(icon: "atom", title: compound.compoundName, message: compound.molecularFormula, accentColor: AppColors.accent)
-                        
 //                        Spacer()
                         
                         // Rotation indicator
