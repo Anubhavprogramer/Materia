@@ -96,12 +96,12 @@ struct Model3DView: View {
                                     action: { withAnimation { shouldAutoRotate.toggle() } }
                                 )
                                 
-                                PrimaryButton(
-                                    icon: showLabels ? "abc.fill" : "abc",
-                                    title: showLabels ? "Hide Labels" : "Show Labels",
-                                    color: showLabels ? .green : .gray,
-                                    action: { withAnimation { showLabels.toggle() } }
-                                )
+//                                PrimaryButton(
+//                                    icon: showLabels ? "abc.fill" : "abc",
+//                                    title: showLabels ? "Hide Labels" : "Show Labels",
+//                                    color: showLabels ? .green : .gray,
+//                                    action: { withAnimation { showLabels.toggle() } }
+//                                )
                             }
                             
                             // Exploration Buttons - View Controls
@@ -135,12 +135,12 @@ struct Model3DView: View {
                                             }
                                         )
                                         ExplorationButton(
-                                            icon: "arrow.counterclockwise",
-                                            label: "Reset",
+                                            icon: "square.dashed",
+                                            label: "Fit",
                                             action: {
-                                                CommonFunctions.debugPrint(load: load, message: "Reset button tapped")
-                                                resetView()
-                                                CommonFunctions.debugPrint(load: load, message: "resetView() called")
+                                                CommonFunctions.debugPrint(load: load, message: "Fit button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.fitToView()
+                                                CommonFunctions.debugPrint(load: load, message: "fitToView() called")
                                             }
                                         )
                                     }

@@ -456,6 +456,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         
         var displayLink: CADisplayLink?
         var rotationAngle: Float = 0
+        var lastPanRotation: SCNVector3 = SCNVector3(0, 0, 0)  // Track pan rotation state
         
         init(
             isRotating: Binding<Bool>,
@@ -482,36 +483,33 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
             
             switch gesture.state {
             case .began:
+                lastPanRotation = pivotNode.eulerAngles  // Store initial rotation
                 isRotating = true
                 onStart?()
                 shouldAutoRotate = false
-                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture started")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture started, initial rotation: \(lastPanRotation)")
                 
             case .changed:
                 let translation = gesture.translation(in: sceneView)
-                let sensitivity: Float = 0.005  // Adjusted for better responsiveness
                 
-                // Get current rotation
-                var currentRotation = pivotNode.eulerAngles
+                // Calculate incremental rotation from initial state
+                let verticalDelta = Float(translation.y) * 0.008
+                let horizontalDelta = Float(translation.x) * 0.008
                 
-                // Vertical pan (up/down) → rotate around X (tilt up/down)
-                currentRotation.x += Float(translation.y) * sensitivity
+                // Apply rotations incrementally
+                var newRotation = lastPanRotation
+                newRotation.x -= verticalDelta    // Vertical pan tilts up/down
+                newRotation.y += horizontalDelta  // Horizontal pan spins left/right
                 
-                // Horizontal pan (left/right) → rotate around Y (spin left/right)
-                currentRotation.y += Float(translation.x) * sensitivity
+                pivotNode.eulerAngles = newRotation
+                rotationAngle = newRotation.y
                 
-                // Apply rotation
-                pivotNode.eulerAngles = currentRotation
-                rotationAngle = currentRotation.y
-                
-                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: X:\(currentRotation.x) Y:\(currentRotation.y) translation: (\(translation.x), \(translation.y))")
-                
-                gesture.setTranslation(CGPoint.zero, in: sceneView)
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: rotation (\(newRotation.x), \(newRotation.y), \(newRotation.z)) translation: (\(translation.x), \(translation.y))")
                 
             case .ended, .cancelled:
                 isRotating = false
                 onEnd?()
-                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture ended")
+                CommonFunctions.debugPrint(load: "SceneKit", message: "Pan: gesture ended, final rotation: \(pivotNode.eulerAngles)")
                 
             default:
                 break
