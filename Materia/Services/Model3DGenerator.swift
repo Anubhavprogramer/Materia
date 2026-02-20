@@ -35,6 +35,8 @@ class Model3DGenerator {
     // MARK: - Generate 3D Model from ChemicalStructure
     static func generate3DModel(from structure: ChemicalStructure, name: String) -> Model3D {
         // Generate cache key from structure
+        
+        CommonFunctions.justPrint(load: "Model3DGenerator", message: "This is the compound to be rendered", thing: structure)
         let cacheKey = generateCacheKey(structure: structure, name: name)
         
         // Check cache first
@@ -72,15 +74,15 @@ class Model3DGenerator {
     private static func generateModelUncached(from structure: ChemicalStructure, name: String) -> Model3D {
         var model = Model3D(name: name)
         
-        print("\n🧪🧪🧪 GENERATING 3D MODEL: \(name) 🧪🧪🧪")
-        print("📊 Structure: \(structure.carbonChainLength) carbons")
-        print("📊 Bonds: \(structure.bonds.count) total")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🧪🧪🧪 GENERATING 3D MODEL: \(name) 🧪🧪🧪")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "📊 Structure: \(structure.carbonChainLength) carbons")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "📊 Bonds: \(structure.bonds.count) total")
         for (idx, bond) in structure.bonds.enumerated() {
-            print("   Bond[\(idx)]: C\(bond.fromCarbon)-C\(bond.toCarbon) type:\(bond.type.rawValue)")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   Bond[\(idx)]: C\(bond.fromCarbon)-C\(bond.toCarbon) type:\(bond.type.rawValue)")
         }
-        print("📊 Functional Groups: \(structure.functionalGroups.count) total")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "📊 Functional Groups: \(structure.functionalGroups.count) total")
         for (idx, group) in structure.functionalGroups.enumerated() {
-            print("   FuncGroup[\(idx)]: \(group.group.rawValue) at C\(group.carbonPosition)")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   FuncGroup[\(idx)]: \(group.group.rawValue) at C\(group.carbonPosition)")
         }
         
         // Handle edge case: zero-carbon compounds
@@ -96,12 +98,12 @@ class Model3DGenerator {
             let atom = Atom3D(element: .carbon, position: position)
             model.addAtom(atom)
             carbonAtoms.append(index)
-            print("🔴 Carbon[\(index)]: added at position (\(position.x), \(position.y), \(position.z))")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🔴 Carbon[\(index)]: added at position (\(position.x), \(position.y), \(position.z))")
         }
         
         // Add C-C bonds - Only bonds specified in structure (LINEAR chains, NOT cyclic)
         // This preserves the linear structure as defined by the user
-        print("\n🔗 Adding C-C bonds...")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🔗 Adding C-C bonds...")
         for bond in structure.bonds {
             let bondType = convertBondType(bond.type)
             let length = Self.carbonBondLength
@@ -113,11 +115,11 @@ class Model3DGenerator {
                 length: length
             )
             model.addBond(bondModel)
-            print("🔗 Bond: C\(bond.fromCarbon) -\(bond.type.rawValue)- C\(bond.toCarbon) (multiplicity: \(bond.type.bondCount))")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🔗 Bond: C\(bond.fromCarbon) -\(bond.type.rawValue)- C\(bond.toCarbon) (multiplicity: \(bond.type.bondCount))")
         }
         
         // Add hydrogen atoms
-        print("\n🌀 Adding Hydrogen atoms...")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🌀 Adding Hydrogen atoms...")
         var hydrogenIndex = model.atoms.count
         for (carbonIndex, carbon) in carbonAtoms.enumerated() {
             let hydrogenCount = calculateHydrogenCount(
@@ -127,7 +129,7 @@ class Model3DGenerator {
                 functionalGroups: structure.functionalGroups
             )
             
-            print("💧 Carbon[\(carbonIndex)]: Adding \(hydrogenCount) hydrogen atoms")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💧 Carbon[\(carbonIndex)]: Adding \(hydrogenCount) hydrogen atoms")
             
             let hydrogenPositions = generateHydrogenPositions(
                 aroundAtom: model.atoms[carbon],
@@ -145,15 +147,15 @@ class Model3DGenerator {
                     length: Self.carbonHydrogenLength
                 )
                 model.addBond(chBond)
-                print("   H[\(hIdx)]: added at (\(hydrogenPos.x), \(hydrogenPos.y), \(hydrogenPos.z)) - Bond: C\(carbon)-H\(hydrogenIndex)")
+                CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   H[\(hIdx)]: added at (\(hydrogenPos.x), \(hydrogenPos.y), \(hydrogenPos.z)) - Bond: C\(carbon)-H\(hydrogenIndex)")
                 hydrogenIndex += 1
             }
         }
         
         // Add functional groups
-        print("\n🎨 Adding Functional Groups...")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🎨 Adding Functional Groups...")
         for functionalGroup in structure.functionalGroups {
-            print("💥 Functional Group: \(functionalGroup.group.rawValue) at C\(functionalGroup.carbonPosition)")
+            CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💥 Functional Group: \(functionalGroup.group.rawValue) at C\(functionalGroup.carbonPosition)")
             addFunctionalGroup(
                 functionalGroup,
                 to: &model,
@@ -163,14 +165,14 @@ class Model3DGenerator {
         }
         
         // Print final summary
-        print("\n✅✅✅ 3D MODEL GENERATION COMPLETE ✅✅✅")
-        print("📈 Total Atoms: \(model.atoms.count)")
-        print("📊 Total Bonds: \(model.bonds.count)")
-        print("   • Carbons: \(model.atoms.filter { $0.element == .carbon }.count)")
-        print("   • Hydrogens: \(model.atoms.filter { $0.element == .hydrogen }.count)")
-        print("   • Other Atoms: \(model.atoms.count - model.atoms.filter { $0.element == .carbon }.count - model.atoms.filter { $0.element == .hydrogen }.count)")
-        print("🎨 Functional Groups: \(structure.functionalGroups.count) colored and visualized")
-        print("✅✅✅ Ready for 3D Rendering ✅✅✅\n")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "✅✅✅ 3D MODEL GENERATION COMPLETE ✅✅✅")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "📈 Total Atoms: \(model.atoms.count)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "📊 Total Bonds: \(model.bonds.count)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   • Carbons: \(model.atoms.filter { $0.element == .carbon }.count)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   • Hydrogens: \(model.atoms.filter { $0.element == .hydrogen }.count)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "   • Other Atoms: \(model.atoms.count - model.atoms.filter { $0.element == .carbon }.count - model.atoms.filter { $0.element == .hydrogen }.count)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🎨 Functional Groups: \(structure.functionalGroups.count) colored and visualized")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "✅✅✅ Ready for 3D Rendering ✅✅✅")
         
         return model
     }
@@ -310,13 +312,17 @@ class Model3DGenerator {
         
         // Subtract bonds to other carbons (account for bond type multiplicity)
         for bond in bonds {
-            if bond.fromCarbon == carbonIndex || bond.toCarbon == carbonIndex {
+            // Convert bond indices from 1-based to 0-based for comparison
+            let bondFromIndex = bond.fromCarbon - 1
+            let bondToIndex = bond.toCarbon - 1
+            
+            if bondFromIndex == carbonIndex || bondToIndex == carbonIndex {
                 // Single bond subtracts 1, double subtracts 2, triple subtracts 3
                 let bondMultiplicity = bond.type.bondCount
                 hydrogenCount -= bondMultiplicity
                 debug_ccBonds += 1
                 debug_bondMultiplicity += bondMultiplicity
-                print("🔗 Carbon[\(carbonIndex)]: C-C Bond(\(bond.type.rawValue), multiplicity:\(bondMultiplicity)) → C:\(bond.fromCarbon) to C:\(bond.toCarbon)")
+                CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🔗 Carbon[\(carbonIndex)]: C-C Bond(\(bond.type.rawValue), multiplicity:\(bondMultiplicity)) → C:\(bond.fromCarbon) to C:\(bond.toCarbon)")
             }
         }
         
@@ -325,12 +331,12 @@ class Model3DGenerator {
             if group.carbonPosition == carbonIndex {
                 hydrogenCount -= 1  // Functional groups always use 1 bond
                 debug_functionalGroupBonds += 1
-                print("💥 Carbon[\(carbonIndex)]: Functional Group(\(group.group.rawValue)) attached → uses 1 bond")
+                CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💥 Carbon[\(carbonIndex)]: Functional Group(\(group.group.rawValue)) attached → uses 1 bond")
             }
         }
         
         let finalHCount = max(0, hydrogenCount)
-        print("✅ Carbon[\(carbonIndex)]: C-C Bonds=\(debug_ccBonds) (multiplicity total:\(debug_bondMultiplicity)) + Func Groups=\(debug_functionalGroupBonds) → Final H count=\(finalHCount) (valency check: \(debug_bondMultiplicity + debug_functionalGroupBonds + finalHCount) = 4?)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "✅ Carbon[\(carbonIndex)]: C-C Bonds=\(debug_ccBonds) (multiplicity total:\(debug_bondMultiplicity)) + Func Groups=\(debug_functionalGroupBonds) → Final H count=\(finalHCount) (valency check: \(debug_bondMultiplicity + debug_functionalGroupBonds + finalHCount) = 4?)")
         
         return finalHCount
     }
@@ -420,7 +426,7 @@ class Model3DGenerator {
         let oHBond = Bond3D(from: oxygenIndex, to: hydrogenIndex, type: .single, length: 0.96)
         model.addBond(oHBond)
         
-        print("🧡 Hydroxyl Group: O-H added with orange color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🧡 Hydroxyl Group: O-H added with orange color at C\(attachedToAtom)")
     }
     
     private static func addCarbonylGroup(
@@ -443,7 +449,7 @@ class Model3DGenerator {
         let cOBond = Bond3D(from: attachedToAtom, to: oxygenIndex, type: .double, length: 1.23)
         model.addBond(cOBond)
         
-        print("💜 Carbonyl Group: C=O added with magenta color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💜 Carbonyl Group: C=O added with magenta color at C\(attachedToAtom)")
     }
     
     private static func addCarboxylGroup(
@@ -493,7 +499,7 @@ class Model3DGenerator {
         let oHBond = Bond3D(from: oxygenIndex, to: hydrogenIndex, type: .single, length: 0.96)
         model.addBond(oHBond)
         
-        print("❤️ Carboxyl Group: -COOH added with red color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "❤️ Carboxyl Group: -COOH added with red color at C\(attachedToAtom)")
     }
     
     private static func addAminoGroup(
@@ -531,7 +537,7 @@ class Model3DGenerator {
             model.addBond(nHBond)
         }
         
-        print("💙 Amino Group: -NH2 added with cyan color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💙 Amino Group: -NH2 added with cyan color at C\(attachedToAtom)")
     }
     
     private static func addNitroGroup(
@@ -570,7 +576,7 @@ class Model3DGenerator {
         let nO2Bond = Bond3D(from: nitrogenIndex, to: oxygen2Index, type: .single, length: 1.27)
         model.addBond(nO2Bond)
         
-        print("🔵 Nitro Group: -NO2 added with blue color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "🔵 Nitro Group: -NO2 added with blue color at C\(attachedToAtom)")
     }
     
     // MARK: - Additional Functional Groups
@@ -671,7 +677,7 @@ class Model3DGenerator {
         let cnBond = Bond3D(from: nitrileIndex, to: nitrogenIndex, type: .triple, length: 1.17)
         model.addBond(cnBond)
         
-        print("💚 Nitrile Group: -CN added with lime green color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💚 Nitrile Group: -CN added with lime green color at C\(attachedToAtom)")
     }
     
     private static func addThiolGroup(
@@ -702,7 +708,7 @@ class Model3DGenerator {
         let shBond = Bond3D(from: sulfurIndex, to: hydrogenIndex, type: .single, length: 1.34)
         model.addBond(shBond)
         
-        print("💜 Thiol Group: -SH added with purple color at C\(attachedToAtom)")
+        CommonFunctions.debugPrint(load: "Model3DGenerator", message: "💜 Thiol Group: -SH added with purple color at C\(attachedToAtom)")
     }
     
     private static func addHalogenGroup(
