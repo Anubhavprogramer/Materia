@@ -319,18 +319,32 @@ class Model3DGenerator {
         let carbonAtom = model.atoms[carbonAtomIndex]
         
         switch group.group {
+        case .methyl:
+            addMethylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
         case .alcohol:
             addHydroxylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
-        case .ketone:
-            addCarbonylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
-        case .carboxylicAcid:
-            addCarboxylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
         case .amine:
             addAminoGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
+        case .carboxylicAcid:
+            addCarboxylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
+        case .aldehyde:
+            addAldehyde(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
+        case .ketone:
+            addCarbonylGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
+        case .nitrile:
+            addNitrileGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
         case .nitro:
             addNitroGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
-        default:
-            break
+        case .thiol:
+            addThiolGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom)
+        case .fluorine:
+            addHalogenGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom, element: .fluorine)
+        case .chlorine:
+            addHalogenGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom, element: .chlorine)
+        case .bromine:
+            addHalogenGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom, element: .bromine)
+        case .iodine:
+            addHalogenGroup(to: &model, attachedToAtom: carbonAtomIndex, carbonAtom: carbonAtom, element: .iodine)
         }
     }
     
@@ -484,5 +498,156 @@ class Model3DGenerator {
         
         let nO2Bond = Bond3D(from: nitrogenIndex, to: oxygen2Index, type: .single, length: 1.27)
         model.addBond(nO2Bond)
+    }
+    
+    // MARK: - Additional Functional Groups
+    
+    private static func addMethylGroup(
+        to model: inout Model3D,
+        attachedToAtom: Int,
+        carbonAtom: Atom3D
+    ) {
+        let methylPos = SCNVector3(
+            carbonAtom.position.x + 1.54,
+            carbonAtom.position.y,
+            carbonAtom.position.z
+        )
+        let methylCarbon = Atom3D(element: .carbon, position: methylPos)
+        let methylIndex = model.atoms.count
+        model.addAtom(methylCarbon)
+        
+        let ccBond = Bond3D(from: attachedToAtom, to: methylIndex, type: .single, length: 1.54)
+        model.addBond(ccBond)
+        
+        // Add 3 hydrogens to the methyl group
+        for i in 0..<3 {
+            let angle = Float(i) * (2 * Float.pi / 3)
+            let hydrogenPos = SCNVector3(
+                methylPos.x + 1.09 * cos(angle),
+                methylPos.y + 0.5 + 1.09 * sin(angle),
+                methylPos.z
+            )
+            let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+            let hydrogenIndex = model.atoms.count
+            model.addAtom(hydrogen)
+            
+            let chBond = Bond3D(from: methylIndex, to: hydrogenIndex, type: .single, length: 1.09)
+            model.addBond(chBond)
+        }
+    }
+    
+    private static func addAldehyde(
+        to model: inout Model3D,
+        attachedToAtom: Int,
+        carbonAtom: Atom3D
+    ) {
+        let aldehydePos = SCNVector3(
+            carbonAtom.position.x,
+            carbonAtom.position.y + 1.5,
+            carbonAtom.position.z
+        )
+        let aldehydeCarbon = Atom3D(element: .carbon, position: aldehydePos)
+        let aldehydeIndex = model.atoms.count
+        model.addAtom(aldehydeCarbon)
+        
+        let ccBond = Bond3D(from: attachedToAtom, to: aldehydeIndex, type: .single, length: 1.54)
+        model.addBond(ccBond)
+        
+        let oxygenPos = SCNVector3(aldehydePos.x, aldehydePos.y + 1.2, aldehydePos.z)
+        let oxygen = Atom3D(element: .oxygen, position: oxygenPos)
+        let oxygenIndex = model.atoms.count
+        model.addAtom(oxygen)
+        
+        let cOBond = Bond3D(from: aldehydeIndex, to: oxygenIndex, type: .double, length: 1.23)
+        model.addBond(cOBond)
+        
+        let hydrogenPos = SCNVector3(aldehydePos.x - 1.09, aldehydePos.y, aldehydePos.z)
+        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+        let hydrogenIndex = model.atoms.count
+        model.addAtom(hydrogen)
+        
+        let chBond = Bond3D(from: aldehydeIndex, to: hydrogenIndex, type: .single, length: 1.09)
+        model.addBond(chBond)
+    }
+    
+    private static func addNitrileGroup(
+        to model: inout Model3D,
+        attachedToAtom: Int,
+        carbonAtom: Atom3D
+    ) {
+        let nitrilePos = SCNVector3(
+            carbonAtom.position.x,
+            carbonAtom.position.y + 1.5,
+            carbonAtom.position.z
+        )
+        let nitrileCarbon = Atom3D(element: .carbon, position: nitrilePos)
+        let nitrileIndex = model.atoms.count
+        model.addAtom(nitrileCarbon)
+        
+        let ccBond = Bond3D(from: attachedToAtom, to: nitrileIndex, type: .single, length: 1.54)
+        model.addBond(ccBond)
+        
+        let nitrogenPos = SCNVector3(nitrilePos.x, nitrilePos.y + 1.17, nitrilePos.z)
+        let nitrogen = Atom3D(element: .nitrogen, position: nitrogenPos)
+        let nitrogenIndex = model.atoms.count
+        model.addAtom(nitrogen)
+        
+        let cnBond = Bond3D(from: nitrileIndex, to: nitrogenIndex, type: .triple, length: 1.17)
+        model.addBond(cnBond)
+    }
+    
+    private static func addThiolGroup(
+        to model: inout Model3D,
+        attachedToAtom: Int,
+        carbonAtom: Atom3D
+    ) {
+        let sulfurPos = SCNVector3(
+            carbonAtom.position.x,
+            carbonAtom.position.y + 1.82,
+            carbonAtom.position.z
+        )
+        let sulfur = Atom3D(element: .sulfur, position: sulfurPos)
+        let sulfurIndex = model.atoms.count
+        model.addAtom(sulfur)
+        
+        let cSBond = Bond3D(from: attachedToAtom, to: sulfurIndex, type: .single, length: 1.82)
+        model.addBond(cSBond)
+        
+        let hydrogenPos = SCNVector3(sulfurPos.x, sulfurPos.y + 1.34, sulfurPos.z)
+        let hydrogen = Atom3D(element: .hydrogen, position: hydrogenPos)
+        let hydrogenIndex = model.atoms.count
+        model.addAtom(hydrogen)
+        
+        let shBond = Bond3D(from: sulfurIndex, to: hydrogenIndex, type: .single, length: 1.34)
+        model.addBond(shBond)
+    }
+    
+    private static func addHalogenGroup(
+        to model: inout Model3D,
+        attachedToAtom: Int,
+        carbonAtom: Atom3D,
+        element: ElementType
+    ) {
+        let halogenPos = SCNVector3(
+            carbonAtom.position.x,
+            carbonAtom.position.y + 1.75,
+            carbonAtom.position.z
+        )
+        let halogen = Atom3D(element: element, position: halogenPos)
+        let halogenIndex = model.atoms.count
+        model.addAtom(halogen)
+        
+        let bondLength: Float = {
+            switch element {
+            case .fluorine: return 1.35
+            case .chlorine: return 1.77
+            case .bromine: return 1.94
+            case .iodine: return 2.14
+            default: return 1.75
+            }
+        }()
+        
+        let cHalogenBond = Bond3D(from: attachedToAtom, to: halogenIndex, type: .single, length: bondLength)
+        model.addBond(cHalogenBond)
     }
 }
