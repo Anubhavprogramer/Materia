@@ -16,11 +16,12 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
     var onRotationStart: (() -> Void)?
     var onRotationEnd: (() -> Void)?
     var onReset: (() -> Void)?
+    var onCoordinatorReady: ((Coordinator) -> Void)?
     
     func makeUIView(context: Context) -> SCNView {
         let sceneView = SCNView()
         sceneView.scene = SCNScene()
-        sceneView.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.98, alpha: 1.0)
+        sceneView.backgroundColor = UIColor(AppColors.background)
         sceneView.autoenablesDefaultLighting = true
         sceneView.allowsCameraControl = true
         sceneView.debugOptions = []
@@ -38,7 +39,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         
         let cameraNode = SCNNode()
         cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 0, 15)
+        cameraNode.position = SCNVector3(0, 0, 35)  // 35 for better zoom range
         cameraNode.name = "cameraNode"
         sceneView.scene?.rootNode.addChildNode(cameraNode)
         
@@ -61,6 +62,11 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         // Store initial camera position for reset
         context.coordinator.initialCameraPosition = cameraNode.position
         context.coordinator.sceneView = sceneView
+        
+        // Notify that coordinator is ready
+        CommonFunctions.debugPrint(load: "SceneKit", message: "makeUIView - Calling onCoordinatorReady callback")
+        onCoordinatorReady?(context.coordinator)
+        CommonFunctions.debugPrint(load: "SceneKit", message: "makeUIView - onCoordinatorReady callback completed")
         
         // Add gesture recognizers
         let panGesture = UIPanGestureRecognizer(
@@ -95,6 +101,11 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         context.coordinator.shouldAutoRotate = shouldAutoRotate
         context.coordinator.showLabels = showLabels
         context.coordinator.isRotating = isRotating
+        
+        // Also call coordinator callback in updateUIView to ensure it's set
+        CommonFunctions.debugPrint(load: "SceneKit", message: "updateUIView - Calling onCoordinatorReady callback")
+        onCoordinatorReady?(context.coordinator)
+        CommonFunctions.debugPrint(load: "SceneKit", message: "updateUIView - onCoordinatorReady callback completed")
         
         // Update labels visibility
         if showLabels {
@@ -175,7 +186,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
     // MARK: - Private Methods
     private func buildAtoms(in scene: SCNScene, from atoms: [Atom3D]) {
         for atom in atoms {
-            let geometry = SCNSphere(radius: CGFloat(atom.radius * 0.4))  // Scale for visibility
+            let geometry = SCNSphere(radius: CGFloat(atom.radius * 0.6))
             
             let color = atom.element.color
             geometry.firstMaterial?.diffuse.contents = UIColor(
@@ -295,7 +306,7 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         var onReset: (() -> Void)?
         
         weak var sceneView: SCNView?
-        var initialCameraPosition: SCNVector3 = SCNVector3(0, 0, 15)
+        var initialCameraPosition: SCNVector3 = SCNVector3(0, 0, 35)
         var displayLink: CADisplayLink?
         var rotationAngle: Float = 0
         
@@ -322,8 +333,6 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             guard let sceneView = sceneView else { return }
             
-            let location = gesture.location(in: sceneView)
-            
             switch gesture.state {
             case .began:
                 isRotating = true
@@ -335,16 +344,18 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
                 let sensitivity: Float = 0.01
                 
                 if let scene = sceneView.scene {
-                    // Rotate around X axis (vertical pan)
+                    // Rotate around X axis (vertical pan - up/down)
                     var xRotation = scene.rootNode.eulerAngles.x
                     xRotation -= Float(translation.y) * sensitivity
                     
-                    // Rotate around Y axis (horizontal pan)
+                    // Rotate around Y axis (horizontal pan - left/right)
                     var yRotation = scene.rootNode.eulerAngles.y
                     yRotation -= Float(translation.x) * sensitivity
                     
                     scene.rootNode.eulerAngles = SCNVector3(xRotation, yRotation, 0)
+                    rotationAngle = yRotation
                 }
+                gesture.setTranslation(CGPoint.zero, in: sceneView)
                 
             case .ended, .cancelled:
                 isRotating = false
@@ -356,23 +367,29 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard let sceneView = sceneView else { return }
-            
-            switch gesture.state {
-            case .began:
-                shouldAutoRotate = false
-                
-            case .changed:
-                if let cameraNode = sceneView.scene?.rootNode.childNode(
+            guard
+                let sceneView = sceneView,
+                let cameraNode = sceneView.scene?.rootNode.childNode(
                     withName: "cameraNode",
                     recursively: false
-                ) {
-                    let scale = Float(gesture.scale)
-                    let newDistance = max(5, min(50, initialCameraPosition.z / scale))
-                    cameraNode.position.z = newDistance
-                }
-                gesture.scale = 1.0
+                )
+            else { return }
+
+            switch gesture.state {
+
+            case .began:
+                shouldAutoRotate = false
+
+            case .changed:
+                let delta = Float(gesture.scale - 1.0) * 20
                 
+                if let camera = cameraNode.camera {
+                    let newFOV = max(30, min(100, camera.fieldOfView - CGFloat(delta)))
+                    camera.fieldOfView = newFOV
+                }
+                
+                gesture.scale = 1.0
+
             default:
                 break
             }
@@ -418,27 +435,204 @@ struct SceneKitViewRepresentable: UIViewRepresentable {
         func resetView() {
             guard let sceneView = sceneView else { return }
             
-            if let cameraNode = sceneView.scene?.rootNode.childNode(
-                withName: "cameraNode",
-                recursively: false
-            ) {
-                withAnimation {
-                    cameraNode.position = initialCameraPosition
+            CommonFunctions.debugPrint(load: "SceneKit", message: "resetView() - Starting animation")
+            DispatchQueue.main.async {
+                if let cameraNode = sceneView.scene?.rootNode.childNode(
+                    withName: "cameraNode",
+                    recursively: false
+                ) {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    cameraNode.position = self.initialCameraPosition
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "resetView() - Camera reset to initial position")
+                    SCNTransaction.commit()
                 }
-            }
-            
-            if let scene = sceneView.scene {
-                withAnimation {
+                
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
                     scene.rootNode.eulerAngles = SCNVector3(0, 0, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "resetView() - Rotation reset")
+                    SCNTransaction.commit()
                 }
+                
+                self.rotationAngle = 0
+                self.shouldAutoRotate = false
+                self.onReset?()
+                CommonFunctions.debugPrint(load: "SceneKit", message: "resetView() - Completed")
+            }
+        }
+        
+        // MARK: - Exploration Methods
+        
+        func rotateToFront() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - sceneView is NIL")
+                return 
             }
             
-            rotationAngle = 0
-            shouldAutoRotate = false
-            onReset?()
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Starting animation")
+            DispatchQueue.main.async {
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    scene.rootNode.eulerAngles = SCNVector3(0, 0, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Animation applied")
+                    SCNTransaction.commit()
+                }
+                self.rotationAngle = 0
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToFront() - Completed")
+            }
+        }
+        
+        func rotateToLeft() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Starting animation")
+            DispatchQueue.main.async {
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    scene.rootNode.eulerAngles = SCNVector3(0, Float.pi / 2, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Animation applied")
+                    SCNTransaction.commit()
+                }
+                self.rotationAngle = Float.pi / 2
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToLeft() - Completed")
+            }
+        }
+        
+        func rotateToRight() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Starting animation")
+            DispatchQueue.main.async {
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    scene.rootNode.eulerAngles = SCNVector3(0, -Float.pi / 2, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Animation applied")
+                    SCNTransaction.commit()
+                }
+                self.rotationAngle = -Float.pi / 2
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToRight() - Completed")
+            }
+        }
+        
+        func rotateToTop() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Starting animation")
+            DispatchQueue.main.async {
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    scene.rootNode.eulerAngles = SCNVector3(-Float.pi / 2, 0, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Animation applied")
+                    SCNTransaction.commit()
+                }
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToTop() - Completed")
+            }
+        }
+        
+        func rotateToBottom() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Starting animation")
+            DispatchQueue.main.async {
+                if let scene = sceneView.scene {
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    scene.rootNode.eulerAngles = SCNVector3(Float.pi / 2, 0, 0)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Animation applied")
+                    SCNTransaction.commit()
+                }
+                CommonFunctions.debugPrint(load: "SceneKit", message: "rotateToBottom() - Completed")
+            }
+        }
+        
+        func zoomIn() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Starting animation")
+            DispatchQueue.main.async {
+                if let cameraNode = sceneView.scene?.rootNode.childNode(
+                    withName: "cameraNode",
+                    recursively: false
+                ) {
+                    let newDistance = max(2, cameraNode.position.z - 5)  // Closer zoom in allowed (min 2 instead of 3)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Camera distance: \(cameraNode.position.z) → \(newDistance)")
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.3
+                    cameraNode.position.z = newDistance
+                    SCNTransaction.commit()
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomIn() - Completed")
+                }
+            }
+        }
+        
+        func zoomOut() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Starting animation")
+            DispatchQueue.main.async {
+                if let cameraNode = sceneView.scene?.rootNode.childNode(
+                    withName: "cameraNode",
+                    recursively: false
+                ) {
+                    let newDistance = min(100, cameraNode.position.z + 5)  // Farther zoom out allowed (max 100 instead of 80)
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Camera distance: \(cameraNode.position.z) → \(newDistance)")
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.3
+                    cameraNode.position.z = newDistance
+                    SCNTransaction.commit()
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "zoomOut() - Completed")
+                }
+            }
+        }
+        
+        func fitToView() {
+            guard let sceneView = sceneView else { 
+                CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - sceneView is NIL")
+                return 
+            }
+            
+            CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Starting animation")
+            DispatchQueue.main.async {
+                if let cameraNode = sceneView.scene?.rootNode.childNode(
+                    withName: "cameraNode",
+                    recursively: false
+                ) {
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Resetting camera to initial position: \(self.initialCameraPosition.z)")
+                    SCNTransaction.begin()
+                    SCNTransaction.animationDuration = 0.5
+                    cameraNode.position.z = self.initialCameraPosition.z
+                    SCNTransaction.commit()
+                    CommonFunctions.debugPrint(load: "SceneKit", message: "fitToView() - Completed")
+                }
+            }
         }
     }
 }
+
 
 //// MARK: - Preview
 //#if DEBUG

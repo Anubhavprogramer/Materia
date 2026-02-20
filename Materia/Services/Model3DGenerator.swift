@@ -13,7 +13,7 @@ class Model3DGenerator {
     // MARK: - Constants
     private static let carbonBondLength: Float = 1.54      // Angstroms
     private static let carbonHydrogenLength: Float = 1.09  // Angstroms
-    private static let structureSpacing: Float = 2.5       // Scaling factor
+    private static let backboneScale: Float = 3.0   // Scaling factor
     
     // MARK: - Cache (Thread-safe)
     private static let cacheLock = NSLock()
@@ -87,7 +87,8 @@ class Model3DGenerator {
             carbonAtoms.append(index)
         }
         
-        // Add C-C bonds
+        // Add C-C bonds - Only bonds specified in structure (LINEAR chains, NOT cyclic)
+        // This preserves the linear structure as defined by the user
         for bond in structure.bonds {
             let bondType = convertBondType(bond.type)
             let length = Self.carbonBondLength
@@ -204,15 +205,11 @@ class Model3DGenerator {
     private static func generateCarbonBackbone(length: Int) -> [SCNVector3] {
         var positions: [SCNVector3] = []
         
-        let angleY = Float.pi / 6  // 30 degrees for zigzag
+        let bondLength = Self.carbonBondLength * Self.backboneScale
         
         for i in 0..<length {
-            let angle = Float(i) * angleY
-            let x = Float(i) * Self.structureSpacing * cos(angle)
-            let y = Float(i) * Self.structureSpacing * sin(angle)
-            let z: Float = 0
-            
-            positions.append(SCNVector3(x, y, z))
+            let x = Float(i) * bondLength
+            positions.append(SCNVector3(x, 0, 0))   // Straight line along X-axis
         }
         
         return positions

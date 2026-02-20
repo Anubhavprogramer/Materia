@@ -20,6 +20,7 @@ struct Model3DView: View {
     @State private var zoomLevel: Float = 1.0
     @State private var rotationAngle: Float = 0.0
     @State private var showControlPanel = true
+    @State private var coordinator: SceneKitViewRepresentable.Coordinator?
     
     var body: some View {
         ZStack {
@@ -32,7 +33,16 @@ struct Model3DView: View {
                     showLabels: $showLabels,
                     onRotationStart: { withAnimation { isRotating = true } },
                     onRotationEnd: { withAnimation { isRotating = false } },
-                    onReset: { resetView() }
+                    onReset: { resetView() },
+                    onCoordinatorReady: { coord in
+                        CommonFunctions.debugPrint(load: load, message: "🎯 Coordinator READY! Deferring state assignment")
+                        DispatchQueue.main.async {
+                            CommonFunctions.justPrint(load: load, message: "Before assignment", thing: coordinator)
+                            coordinator = coord
+                            CommonFunctions.debugPrint(load: load, message: "✅ Coordinator set successfully")
+                            CommonFunctions.justPrint(load: load, message: "After assignment", thing: coordinator)
+                        }
+                    }
                 )
                 .background(AppColors.background)
 //                .edgesIgnoringSafeArea(.all)
@@ -93,6 +103,119 @@ struct Model3DView: View {
                                     action: { withAnimation { showLabels.toggle() } }
                                 )
                             }
+                            
+                            // Exploration Buttons - View Controls
+                            VStack(spacing: AppConstants.smallGap) {
+                                Text("Explore Views")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(AppColors.textSecondary)
+                                    .padding(.top, AppConstants.smallPadding)
+                                
+                                // View Buttons Grid
+                                VStack(spacing: AppConstants.smallGap) {
+                                    // Row 1: Front, Left, Right
+                                    HStack(spacing: AppConstants.smallGap) {
+                                        ExplorationButton(
+                                            icon: "arrow.forward",
+                                            label: "Front",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Front button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.rotateToFront()
+                                                CommonFunctions.debugPrint(load: load, message: "rotateToFront() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "arrow.left",
+                                            label: "Left",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Left button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.rotateToLeft()
+                                                CommonFunctions.debugPrint(load: load, message: "rotateToLeft() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "arrow.right",
+                                            label: "Right",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Right button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.rotateToRight()
+                                                CommonFunctions.debugPrint(load: load, message: "rotateToRight() called")
+                                            }
+                                        )
+                                    }
+                                    
+                                    // Row 2: Top, Zoom In, Zoom Out
+                                    HStack(spacing: AppConstants.smallGap) {
+                                        ExplorationButton(
+                                            icon: "arrow.up",
+                                            label: "Top",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Top button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.rotateToTop()
+                                                CommonFunctions.debugPrint(load: load, message: "rotateToTop() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "plus.magnifyingglass",
+                                            label: "Zoom+",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Zoom+ button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.zoomIn()
+                                                CommonFunctions.debugPrint(load: load, message: "zoomIn() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "minus.magnifyingglass",
+                                            label: "Zoom-",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Zoom- button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.zoomOut()
+                                                CommonFunctions.debugPrint(load: load, message: "zoomOut() called")
+                                            }
+                                        )
+                                    }
+                                    
+                                    // Row 3: Bottom, Reset, Fit
+                                    HStack(spacing: AppConstants.smallGap) {
+                                        ExplorationButton(
+                                            icon: "arrow.down",
+                                            label: "Bottom",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Bottom button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.rotateToBottom()
+                                                CommonFunctions.debugPrint(load: load, message: "rotateToBottom() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "arrow.counterclockwise",
+                                            label: "Reset",
+                                            action: { 
+                                                CommonFunctions.debugPrint(load: load, message: "Reset button tapped")
+                                                resetView()
+                                                CommonFunctions.debugPrint(load: load, message: "resetView() called")
+                                            }
+                                        )
+                                        
+                                        ExplorationButton(
+                                            icon: "square.dashed",
+                                            label: "Fit",
+                                            action: {
+                                                CommonFunctions.debugPrint(load: load, message: "Fit button tapped - Coordinator: \(coordinator != nil ? "EXISTS" : "NIL")")
+                                                coordinator?.fitToView()
+                                                CommonFunctions.debugPrint(load: load, message: "fitToView() called")
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            .padding(AppConstants.defaultPadding)
+                            .background(AppColors.accentLight.opacity(0.5))
+                            .cornerRadius(AppConstants.defaultCornerRadius)
                         }
                     }
                     .padding(AppConstants.defaultPadding)
@@ -257,6 +380,35 @@ private struct PrimaryButton: View {
 extension View {
     func activeScale(_ scale: CGFloat) -> some View {
         self.scaleEffect(1.0)
+    }
+}
+
+// MARK: - Exploration Button Component
+private struct ExplorationButton: View {
+    let icon: String
+    let label: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                
+                Text(label)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundColor(AppColors.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(AppColors.background.opacity(0.8))
+            .cornerRadius(AppConstants.defaultCornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppConstants.defaultCornerRadius)
+                    .stroke(AppColors.accent.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .activeScale(0.95)
     }
 }
 

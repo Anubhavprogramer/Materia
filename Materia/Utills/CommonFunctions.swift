@@ -20,6 +20,10 @@ enum CommonFunctions {
         print("MESSAGE PRINT: \(load.uppercased()) :: \(message)")
     }
     
+    static func justPrint(load: String, message: String, thing: Any ){
+        print("MESSAGE PRINT: \(load.uppercased()) :: \(message) and has \(thing)")
+    }
+    
     // MARK: - Notes Feature Debugging
     static func debugNote(action: String, noteId: String, compoundId: String, message: String) {
         print("📝 NOTE DEBUG [\(action)] :: CompoundId: \(compoundId) :: NoteId: \(noteId) :: \(message)")
