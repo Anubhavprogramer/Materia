@@ -17,6 +17,7 @@ struct CompoundResultView: View {
     @EnvironmentObject var toastManager: ToastManager
     @State private var isSaved = false
     @State private var showToast = false
+    @State private var show3DViewer = false
 
     @State private var showIUPACExplanation = false
     @State private var modifiedStructure: ChemicalStructure?
@@ -265,20 +266,43 @@ struct CompoundResultView: View {
                         
                         // Structure Preview
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Structure Diagram")
-                                .font(.headline)
-                                .fontWeight(.semibold)
+                            HStack {
+                                Text("Structure Diagram")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                
+                                Spacer()
+                                
+                                if let compound = currentCompound {
+                                    Button(action: { show3DViewer = true }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "cube.transparent")
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, AppConstants.smallPadding)
+                                        .padding(.vertical, AppConstants.smallPadding/2)
+                                        .background(AppColors.accent)
+                                        .cornerRadius(AppConstants.largeCornerRadius)
+                                    }
+                                }
+                            }
                             
                             StructureDiagramView(structure: activeStructure)
                                 .frame(height: 200)
                                 .background(AppColors.Card)
-                                .cornerRadius(12)
+                                .cornerRadius(AppConstants.defaultCornerRadius)
                                 .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                         }
                         .padding(AppConstants.defaultPadding)
                         .background(AppColors.surface)
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
+                        .sheet(isPresented: $show3DViewer) {
+                            if let compound = currentCompound {
+                                Model3DViewerScreen(compound: compound)
+                            }
+                        }
                         
                         
                     

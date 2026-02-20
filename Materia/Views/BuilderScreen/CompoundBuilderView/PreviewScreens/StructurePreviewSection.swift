@@ -9,12 +9,30 @@ import SwiftUI
 
 struct StructurePreviewSection: View {
     @ObservedObject var viewModel: CompoundBuilderViewModel
+    @State private var show3DViewer = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: AppConstants.largeGap) {
-            Text(AppStrings.structurePreview)
-                .font(.headline)
-                .fontWeight(.semibold)
+            HStack {
+                Text(AppStrings.structurePreview)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                // 3D View Button
+                Button(action: { show3DViewer = true }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "cube.transparent")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, AppConstants.defaultPadding)
+                    .padding(.vertical, AppConstants.smallPadding)
+                    .background(AppColors.accent)
+                    .cornerRadius(AppConstants.largeCornerRadius)
+                }
+            }
             
             VStack(spacing: AppConstants.largeGap) {
                 // 2D Structure Visualization
@@ -36,6 +54,23 @@ struct StructurePreviewSection: View {
                 }
             }
         }
+        .sheet(isPresented: $show3DViewer) {
+            if let compound = createCompoundForPreview() {
+                Model3DViewerScreen(compound: compound)
+            }
+        }
+    }
+    
+    private func createCompoundForPreview() -> IdentifiedCompound? {
+        return IdentifiedCompound(
+            structure: viewModel.structure,
+            name: "Structure Preview",
+            iupacName: "Structure",
+            formula: "C\(viewModel.structure.carbonChainLength)H\((viewModel.structure.carbonChainLength * 2) + 2)",
+            category: "Preview",
+            confidence: 1.0,
+            isValidated: false
+        )
     }
 }
 
