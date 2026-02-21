@@ -21,6 +21,7 @@ struct CompoundResultView: View {
 
     @State private var showIUPACExplanation = false
     @State private var modifiedStructure: ChemicalStructure?
+    @State private var showCompoundStory = false
 
     private var activeStructure: ChemicalStructure {
         modifiedStructure ?? structure ?? compound?.structure ?? ChemicalStructure(carbonChainLength: 1)
@@ -79,74 +80,45 @@ struct CompoundResultView: View {
             // NavigationStack {
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Educational Mode: IUPAC explanation
+                        // Educational Mode: Story Button
                         VStack(alignment: .leading, spacing: AppConstants.defaultGap) {
                             HStack {
                                 Image(systemName: "graduationcap")
                                     .foregroundColor(AppColors.accent)
-                                Text("Educational Mode")
+                                Text("Learn How It's Built")
                                     .font(.headline)
                                     .fontWeight(.semibold)
                                 Spacer()
-                                Toggle("", isOn: $showIUPACExplanation)
-                                    .labelsHidden()
+                                
+                                // Circular Button with Apple Intelligence Icon
+                                Button(action: { showCompoundStory = true }) {
+                                    Image(systemName: "sparkles")
+                                        .font(.headline)
+                                        .foregroundColor(AppColors.accent)
+                                }
+                                .frame(width: 30, height: 30)
+                                .background(AppColors.Card)
+                                .clipShape(Circle())
                             }
                             
-                            if showIUPACExplanation {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Text("How the IUPAC name is built")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    
-                                    ForEach(iupacExplanation.steps) { step in
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(step.title)
-                                                .font(.subheadline)
-                                                .fontWeight(.semibold)
-                                            Text(step.detail)
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(10)
-                                        .background(Color(.systemBackground))
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .stroke(Color(.systemGray5), lineWidth: 1)
-                                        )
-                                    }
-                                    
-                                    if !iupacExplanation.notes.isEmpty {
-                                        VStack(alignment: .leading, spacing: 6) {
-                                            Text("Notes")
-                                                .font(.subheadline)
-                                                .fontWeight(.semibold)
-                                            ForEach(iupacExplanation.notes, id: \.self) { note in
-                                                Text("• \(note)")
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
-                                            }
-                                        }
-                                        .padding(.top, 2)
-                                    }
-                                }
-                            } else {
-                                InfoCardView(
-                                    icon: "info.circle.fill",
-                                    title: "Info",
-                                    message: "Turn this on to see step-by-step naming.",
-                                    accentColor: AppColors.accent,
-                                    backgroundColor: AppColors.accentLight,
-                                    borderColor: Color.blue.opacity(0.3)
-                                )
-                                
-                            }
+                            InfoCardView(
+                                icon: "info.circle.fill",
+                                title: "Info",
+                                message: "Tap the button to see how this compound is built step by step.",
+                                accentColor: AppColors.accent,
+                                backgroundColor: AppColors.accentLight,
+                                borderColor: Color.blue.opacity(0.3)
+                            )
                         }
                         .padding(AppConstants.defaultPadding)
                         .background(AppColors.surface)
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
+                        .sheet(isPresented: $showCompoundStory) {
+                            if let comp = currentCompound {
+                                CompoundStoryScreen(compound: comp, iupacExplanation: iupacExplanation)
+                            }
+                        }
                         
                         // Compound Information Card
                         VStack(spacing: 20) {
