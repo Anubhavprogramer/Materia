@@ -36,7 +36,7 @@ struct ValidationStatusSection: View {
                 // Basic Validation Status
                 HStack {
                     Image(systemName: viewModel.isValidStructure ? AppIcons.checkmark : AppIcons.xmark)
-                        .foregroundColor(viewModel.isValidStructure ? .green : .red)
+                        .foregroundColor(viewModel.isValidStructure ? AppColors.accent : AppColors.error)
                         .font(.title2)
                     
                     VStack(alignment: .leading, spacing: 2) {
@@ -62,10 +62,10 @@ struct ValidationStatusSection: View {
                                 .scaleEffect(0.8)
                         } else if let result = viewModel.validationResult {
                             Image(systemName: result.isValid ? AppIcons.brain : AppIcons.exclamation )
-                                .foregroundColor(result.isValid ? .blue : .orange)
+                                .foregroundColor(result.isValid ? AppColors.accent : AppColors.error)
                         } else {
                             Image(systemName: AppIcons.brain)
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppColors.textSecondary)
                         }
                     }
                     .font(.title2)
@@ -81,8 +81,8 @@ struct ValidationStatusSection: View {
                                     .font(.caption)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(Color.blue.opacity(0.1))
-                                    .foregroundColor(.blue)
+                                    .background(AppColors.accent.opacity(0.1))
+                                    .foregroundColor(AppColors.accent)
                                     .cornerRadius(4)
                             }
                         }
@@ -115,18 +115,18 @@ struct ValidationStatusSection: View {
                                 Text(result.isValid ? AppStrings.overallConfidence : AppStrings.structureIssues)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(result.isValid ? .green : .red)
+                                    .foregroundColor(result.isValid ? AppColors.accent : AppColors.error)
                                 
                                 Spacer()
                                 
                                 Text("\(Int(combinedConfidence * 100))%")
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(result.isValid ? .green : .red)
+                                    .foregroundColor(result.isValid ? AppColors.accent : AppColors.error)
                             }
                             
                             ProgressView(value: combinedConfidence)
-                                .progressViewStyle(LinearProgressViewStyle(tint: result.isValid ? .green : .red))
+                                .progressViewStyle(LinearProgressViewStyle(tint: result.isValid ? AppColors.accent : AppColors.error))
                                 .frame(height: 6)
                         }
                         
@@ -139,7 +139,7 @@ struct ValidationStatusSection: View {
                                     HStack {
                                         Image(systemName: AppIcons.checkmark)
                                             .font(.caption)
-                                            .foregroundColor(.green)
+                                            .foregroundColor(AppColors.accent)
                                         
                                         Text(AppStrings.basicRules)
                                             .font(.caption)
@@ -149,7 +149,7 @@ struct ValidationStatusSection: View {
                                     Text(AppStrings.basicRulesConfidence)
                                         .font(.caption2)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(.green)
+                                        .foregroundColor(AppColors.accent)
                                 }
                                 
                                 Spacer()
@@ -162,13 +162,13 @@ struct ValidationStatusSection: View {
                                         
                                         Image(systemName: AppIcons.brain)
                                             .font(.caption)
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(AppColors.accent)
                                     }
                                     
                                     Text("\(Int(result.confidence * 100))%")
                                         .font(.caption2)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(AppColors.accent)
                                 }
                             }
                         }

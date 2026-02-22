@@ -13,9 +13,9 @@ final class AppColors {
     static let surface = Color("MateriaSurface")
     
     // MARK: - Brand Colors (Green Palette)
-    static let primary = Color("MateriaPrimary")           // Vibrant green (#66CC99)
-    static let secondary = Color("MateriaSecondary")       // Pale mint green
-    static let accent = Color("MateriaAccent")             // Bright lime green
+    static let primary = Color("MateriaAccent")
+    static let secondary = Color("MateriaSecondary")
+    static let accent = Color("MateriaAccent")         
     
     // MARK: - Text Colors
     static let textPrimary = Color("MateriaTextPrimary")

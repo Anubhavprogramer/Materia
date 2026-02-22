@@ -15,11 +15,11 @@ enum ToastType {
     var backgroundColor: Color {
         switch self {
         case .success:
-            return Color.green
+            return Color.white
         case .error:
-            return Color.red
+            return Color.white
         case .info:
-            return Color.blue
+            return Color.white
         }
     }
     
@@ -78,23 +78,23 @@ struct ToastView: View {
     
     var body: some View {
         VStack {
-            HStack(spacing: 12) {
+            HStack(spacing: AppConstants.mediumGap) {
                 Image(systemName: toast.type.icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.textPrimary)
                 
                 Text(toast.message)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.textPrimary)
                     .lineLimit(2)
                 
                 Spacer()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, AppConstants.defaultPadding)
+            .padding(.vertical, AppConstants.defaultPadding)
             .background(toast.type.backgroundColor)
-            .cornerRadius(12)
+            .cornerRadius(AppConstants.largeCornerRadius)
             .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
             .padding(.horizontal, 16)
             .opacity(isVisible ? 1 : 0)

@@ -28,8 +28,9 @@ struct CompoundDetailView: View {
                     .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(AppColors.accent)
                     }
                 }
             }

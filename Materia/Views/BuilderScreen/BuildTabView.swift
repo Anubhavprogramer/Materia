@@ -41,9 +41,9 @@ struct BuildTabView: View {
                             // Title with animation
                             Text(AppStrings.AppName)
                                 .font(.system(size: max(20, 36 - abs(scrollOffset) / 5), weight: .bold, design: .default))
-                                .foregroundColor(AppColors.primary)
+                                .foregroundColor(AppColors.textPrimary)
                             
-                            InfoCardView(icon: AppTips.buildTabTip.icon, title: AppTips.buildTabTip.title, message: AppTips.buildTabTip.message , accentColor: AppColors.accentLight)
+                            InfoCardView(icon: AppTips.buildTabTip.icon, title: AppTips.buildTabTip.title, message: AppTips.buildTabTip.message , accentColor: AppColors.accent)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
@@ -84,7 +84,7 @@ struct BuildTabView: View {
                         initialStructure = nil
                         builderSessionID = UUID()
                     }
-                    .foregroundColor(AppColors.primary)
+                    .foregroundColor(AppColors.accent)
                     .fontWeight(.semibold)
                 }
             }

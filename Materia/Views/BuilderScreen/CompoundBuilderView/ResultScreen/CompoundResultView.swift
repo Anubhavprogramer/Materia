@@ -288,8 +288,9 @@ struct CompoundResultView: View {
             .toolbar {
                 if canSave {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Close") {
-                            dismiss()
+                        Button(action: { dismiss() }) {
+                            Image(systemName: "xmark")
+                                .foregroundColor(AppColors.accent)
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {

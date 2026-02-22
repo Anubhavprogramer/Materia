@@ -143,8 +143,9 @@ struct Model3DUserGuide: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Close") {
-                    dismiss()
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(AppColors.accent)
                 }
             }
         }
