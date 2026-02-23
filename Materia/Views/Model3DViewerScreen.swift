@@ -81,6 +81,8 @@ struct Model3DViewerScreen: View {
         .sheet(isPresented: $showHelpGuide) {
             NavigationStack {
                 Model3DUserGuide()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
         .onAppear {

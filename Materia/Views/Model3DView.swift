@@ -39,10 +39,8 @@ struct Model3DView: View {
                         CommonFunctions.debugPrint(load: load, message: "🎯 Coordinator READY! Deferring state assignment")
                         DispatchQueue.main.async {
                             CommonFunctions.justPrint(load: load, message: "Model is ", thing: model)
-                            CommonFunctions.justPrint(load: load, message: "Before assignment", thing: coordinator)
                             coordinator = coord
                             CommonFunctions.debugPrint(load: load, message: "✅ Coordinator set successfully")
-                            CommonFunctions.justPrint(load: load, message: "After assignment", thing: coordinator)
                         }
                     }
                 )
@@ -94,22 +92,10 @@ struct Model3DView: View {
                                     title: shouldAutoRotate ? "Pause" : "Auto-Rotate",
                                     action: { withAnimation { shouldAutoRotate.toggle() } }
                                 )
-                                
-//                                PrimaryButton(
-//                                    icon: showLabels ? "abc.fill" : "abc",
-//                                    title: showLabels ? "Hide Labels" : "Show Labels",
-//                                    color: showLabels ? .green : .gray,
-//                                    action: { withAnimation { showLabels.toggle() } }
-//                                )
                             }
                             
                             // Exploration Buttons - View Controls
                             VStack(spacing: AppConstants.smallGap) {
-//                                Text("Explore Views")
-//                                    .font(.system(size: 12, weight: .semibold))
-//                                    .foregroundColor(AppColors.textSecondary)
-//                                    .padding(.top, AppConstants.smallPadding)
-                                
                                 // View Buttons Grid
                                 VStack(spacing: AppConstants.defaultGap) {
                                     HStack(spacing: AppConstants.defaultGap) {
@@ -144,9 +130,6 @@ struct Model3DView: View {
                                     }
                                 }
                             }
-//                            .padding(AppConstants.defaultPadding)
-//                            .background(AppColors.accentLight.opacity(0.5))
-//                            .cornerRadius(AppConstants.defaultCornerRadius)
                         }
                     }
                     .padding(AppConstants.defaultPadding)
