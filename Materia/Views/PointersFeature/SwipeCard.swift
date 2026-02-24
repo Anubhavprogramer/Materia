@@ -16,7 +16,6 @@ struct SwipeCard: View {
     let totalCards: Int
     
     @State private var offset: CGSize = .zero
-    @State private var rotation: Double = 0
     @State private var showDeleteAlert = false
     @State private var swipeDirection: SwipeDirection? = nil
     @State private var velocity: CGSize = .zero
@@ -75,7 +74,7 @@ struct SwipeCard: View {
         
         // Swipe gesture & tap to edit
         .offset(offset)
-        .rotationEffect(.degrees(rotation), anchor: .center)
+//        .rotationEffect(.degrees(rotation), anchor: .center)
         .scaleEffect(cardScale, anchor: .center)
         .opacity(swipeDirection == nil ? 1 : 0.8)
         .contentShape(Rectangle())
@@ -90,13 +89,12 @@ struct SwipeCard: View {
                         // Determine primary direction
                         let isVertical = abs(value.translation.height) > abs(value.translation.width)
                         
+                        
                         if isVertical {
-                            // Vertical swipe - apply scale effect
+                            // Vertical swipe: depth effect
                             cardScale = 1 - (abs(value.translation.height) / 1000)
-                            rotation = 0
                         } else {
-                            // Horizontal swipe - apply rotation
-                            rotation = Double(value.translation.width / 10)
+                            // Horizontal swipe: keep normal size
                             cardScale = 1.0
                         }
                     }
@@ -168,7 +166,6 @@ struct SwipeCard: View {
             // Not enough movement - snap back with responsive spring
             withAnimation(.spring(response: 0.25, dampingFraction: 0.65, blendDuration: 0.1)) {
                 offset = .zero
-                rotation = 0
                 cardScale = 1.0
             }
         }
@@ -184,7 +181,6 @@ struct SwipeCard: View {
             offset = swipeDirection == .up
                 ? CGSize(width: 0, height: -600)
                 : CGSize(width: 0, height: 600)
-            rotation = 0
             cardScale = 0.8
         }
         
@@ -208,7 +204,6 @@ struct SwipeCard: View {
         
         withAnimation(.spring(response: response, dampingFraction: 0.6, blendDuration: 0.1)) {
             offset = .zero
-            rotation = 0
             cardScale = 1.0
         }
         
