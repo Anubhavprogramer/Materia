@@ -120,6 +120,47 @@ struct CompoundResultView: View {
                             }
                         }
                         
+                        
+                        // Structure Preview
+                        VStack(alignment: .leading, spacing: 16) {
+                            HStack {
+                                Text("Structure Diagram")
+                                    .font(.headline)
+                                    .fontWeight(.semibold)
+                                
+                                Spacer()
+                                
+                                if let compound = currentCompound {
+                                    Button(action: { show3DViewer = true }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "cube.transparent")
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, AppConstants.smallPadding)
+                                        .padding(.vertical, AppConstants.smallPadding/2)
+                                        .background(AppColors.accent)
+                                        .cornerRadius(AppConstants.largeCornerRadius)
+                                    }
+                                }
+                            }
+                            
+                            StructureDiagramView(structure: activeStructure)
+                                .frame(height: 200)
+                                .background(AppColors.Card)
+                                .cornerRadius(AppConstants.defaultCornerRadius)
+                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                        }
+                        .padding(AppConstants.defaultPadding)
+                        .background(AppColors.surface)
+                        .cornerRadius(AppConstants.defaultCornerRadius)
+                        .padding(.horizontal)
+                        .sheet(isPresented: $show3DViewer) {
+                            if let compound = currentCompound {
+                                Model3DViewerScreen(compound: compound)
+                            }
+                        }
+                        
                         // Compound Information Card
                         VStack(spacing: 20) {
                             // Common Name
@@ -131,7 +172,7 @@ struct CompoundResultView: View {
                                 Spacer()
                                 
                                 Text(currentCompound?.compoundName ?? "—")
-                                    .font(.title)
+                                    .font(.body)
                                     .fontWeight(.bold)
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(AppColors.accent)
@@ -148,7 +189,7 @@ struct CompoundResultView: View {
                                 Spacer()
 
                                 Text(currentCompound?.iupacName ?? "—")
-                                    .font(.title2)
+                                    .font(.body)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.accent.opacity(0.8))
                                     .multilineTextAlignment(.center)
@@ -165,7 +206,7 @@ struct CompoundResultView: View {
                                 Spacer()
 
                                 Text(currentCompound?.molecularFormula ?? "—")
-                                    .font(.title2)
+                                    .font(.body)
                                     .fontWeight(.semibold)
                                     .foregroundColor(AppColors.accent.opacity(0.8))
                                     .multilineTextAlignment(.center)
@@ -182,14 +223,11 @@ struct CompoundResultView: View {
                                 Spacer()
                                 
                                 Text(currentCompound?.category ?? "—")
-                                    .font(.title2)
-                                    .padding(.horizontal, AppConstants.defaultPadding)
-                                    .padding(.vertical, AppConstants.defaultPadding/2)
-                                    .background(AppColors.accentLight)
-                                    .foregroundColor(AppColors.accent.opacity(0.8))
-                                    .cornerRadius(AppConstants.defaultPadding)
-                                    .font(.title2)
+                                    .font(.body)
+                                    .font(.body)
                                     .fontWeight(.semibold)
+                                    .foregroundColor(AppColors.accent.opacity(0.8))
+                                    .multilineTextAlignment(.center)
                             }
                         }
                         .padding(AppConstants.defaultPadding)
@@ -233,51 +271,6 @@ struct CompoundResultView: View {
                         .cornerRadius(AppConstants.defaultCornerRadius)
                         .padding(.horizontal)
                         
-                        // CoreML Properties Section
-                        //                    CoreMLPropertiesSection(compound: compound)
-                        
-                        // Structure Preview
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack {
-                                Text("Structure Diagram")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-                                
-                                Spacer()
-                                
-                                if let compound = currentCompound {
-                                    Button(action: { show3DViewer = true }) {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "cube.transparent")
-                                        }
-                                        .font(.caption)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, AppConstants.smallPadding)
-                                        .padding(.vertical, AppConstants.smallPadding/2)
-                                        .background(AppColors.accent)
-                                        .cornerRadius(AppConstants.largeCornerRadius)
-                                    }
-                                }
-                            }
-                            
-                            StructureDiagramView(structure: activeStructure)
-                                .frame(height: 200)
-                                .background(AppColors.Card)
-                                .cornerRadius(AppConstants.defaultCornerRadius)
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-                        }
-                        .padding(AppConstants.defaultPadding)
-                        .background(AppColors.surface)
-                        .cornerRadius(AppConstants.defaultCornerRadius)
-                        .padding(.horizontal)
-                        .sheet(isPresented: $show3DViewer) {
-                            if let compound = currentCompound {
-                                Model3DViewerScreen(compound: compound)
-                            }
-                        }
-                        
-                        
-                    
                         
                     }
                     .padding(.vertical, AppConstants.defaultPadding)

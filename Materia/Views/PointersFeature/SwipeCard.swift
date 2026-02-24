@@ -16,7 +16,6 @@ struct SwipeCard: View {
     let totalCards: Int
     
     @State private var offset: CGSize = .zero
-    @State private var rotation: Double = 0
     @State private var showDeleteAlert = false
     @State private var swipeDirection: SwipeDirection? = nil
     @State private var velocity: CGSize = .zero
@@ -75,7 +74,7 @@ struct SwipeCard: View {
         
         // Swipe gesture & tap to edit
         .offset(offset)
-        .rotationEffect(.degrees(rotation), anchor: .center)
+//        .rotationEffect(.degrees(rotation), anchor: .center)
         .scaleEffect(cardScale, anchor: .center)
         .opacity(swipeDirection == nil ? 1 : 0.8)
         .contentShape(Rectangle())
@@ -90,13 +89,12 @@ struct SwipeCard: View {
                         // Determine primary direction
                         let isVertical = abs(value.translation.height) > abs(value.translation.width)
                         
+                        
                         if isVertical {
-                            // Vertical swipe - apply scale effect
+                            // Vertical swipe: depth effect
                             cardScale = 1 - (abs(value.translation.height) / 1000)
-                            rotation = 0
                         } else {
-                            // Horizontal swipe - apply rotation
-                            rotation = Double(value.translation.width / 10)
+                            // Horizontal swipe: keep normal size
                             cardScale = 1.0
                         }
                     }
@@ -121,9 +119,19 @@ struct SwipeCard: View {
             Button("Delete", role: .destructive) {
                 performDelete()
             }
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {
+                restoreCardPosition()
+            }
         } message: {
             Text("Are you sure you want to delete this note?")
+        }
+    }
+    
+    private func restoreCardPosition() {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            offset = .zero
+            cardScale = 1.0
+            swipeDirection = nil
         }
     }
     
@@ -168,7 +176,6 @@ struct SwipeCard: View {
             // Not enough movement - snap back with responsive spring
             withAnimation(.spring(response: 0.25, dampingFraction: 0.65, blendDuration: 0.1)) {
                 offset = .zero
-                rotation = 0
                 cardScale = 1.0
             }
         }
@@ -184,7 +191,6 @@ struct SwipeCard: View {
             offset = swipeDirection == .up
                 ? CGSize(width: 0, height: -600)
                 : CGSize(width: 0, height: 600)
-            rotation = 0
             cardScale = 0.8
         }
         
@@ -192,11 +198,19 @@ struct SwipeCard: View {
         let notificationFeedback = UINotificationFeedbackGenerator()
         notificationFeedback.notificationOccurred(.warning)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.2, min(0.4, 0.3 / (velocity / 300)))) {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.2, min(0.4, 0.3 / (velocity / 300)))) {
+//            isAnimating = false
+//            withAnimation(.spring(response: 0.25, dampingFraction: 0.7, blendDuration: 0.1)) {
+//                onDelete()
+//            }
+//        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             isAnimating = false
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.7, blendDuration: 0.1)) {
-                onDelete()
-            }
+            showDeleteAlert = true
+            
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.warning)
         }
     }
     
@@ -208,7 +222,6 @@ struct SwipeCard: View {
         
         withAnimation(.spring(response: response, dampingFraction: 0.6, blendDuration: 0.1)) {
             offset = .zero
-            rotation = 0
             cardScale = 1.0
         }
         

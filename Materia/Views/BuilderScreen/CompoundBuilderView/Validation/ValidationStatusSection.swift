@@ -81,8 +81,7 @@ struct ValidationStatusSection: View {
                                     .font(.caption)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(AppColors.accent.opacity(0.1))
-                                    .foregroundColor(AppColors.accent)
+                                    .foregroundColor(AppColors.textPrimary)
                                     .cornerRadius(4)
                             }
                         }
@@ -115,14 +114,14 @@ struct ValidationStatusSection: View {
                                 Text(result.isValid ? AppStrings.overallConfidence : AppStrings.structureIssues)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(result.isValid ? AppColors.accent : AppColors.error)
+                                    .foregroundColor(result.isValid ? AppColors.textPrimary : AppColors.error)
                                 
                                 Spacer()
                                 
                                 Text("\(Int(combinedConfidence * 100))%")
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(result.isValid ? AppColors.accent : AppColors.error)
+                                    .foregroundColor(result.isValid ? AppColors.textPrimary : AppColors.error)
                             }
                             
                             ProgressView(value: combinedConfidence)
@@ -139,7 +138,7 @@ struct ValidationStatusSection: View {
                                     HStack {
                                         Image(systemName: AppIcons.checkmark)
                                             .font(.caption)
-                                            .foregroundColor(AppColors.accent)
+                                            .foregroundColor(AppColors.textPrimary)
                                         
                                         Text(AppStrings.basicRules)
                                             .font(.caption)
@@ -149,7 +148,7 @@ struct ValidationStatusSection: View {
                                     Text(AppStrings.basicRulesConfidence)
                                         .font(.caption2)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(AppColors.accent)
+                                        .foregroundColor(AppColors.textPrimary)
                                 }
                                 
                                 Spacer()
