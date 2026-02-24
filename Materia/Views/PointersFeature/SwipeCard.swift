@@ -119,9 +119,19 @@ struct SwipeCard: View {
             Button("Delete", role: .destructive) {
                 performDelete()
             }
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {
+                restoreCardPosition()
+            }
         } message: {
             Text("Are you sure you want to delete this note?")
+        }
+    }
+    
+    private func restoreCardPosition() {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            offset = .zero
+            cardScale = 1.0
+            swipeDirection = nil
         }
     }
     
@@ -188,11 +198,19 @@ struct SwipeCard: View {
         let notificationFeedback = UINotificationFeedbackGenerator()
         notificationFeedback.notificationOccurred(.warning)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.2, min(0.4, 0.3 / (velocity / 300)))) {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + max(0.2, min(0.4, 0.3 / (velocity / 300)))) {
+//            isAnimating = false
+//            withAnimation(.spring(response: 0.25, dampingFraction: 0.7, blendDuration: 0.1)) {
+//                onDelete()
+//            }
+//        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             isAnimating = false
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.7, blendDuration: 0.1)) {
-                onDelete()
-            }
+            showDeleteAlert = true
+            
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.warning)
         }
     }
     
