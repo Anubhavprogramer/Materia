@@ -35,7 +35,7 @@ Students are asked to remember structures they’ve never been allowed to build.
 
 Materia introduces a hands-on approach to chemistry education.
 
-> If students can build molecules instead of memorizing them, they will understand chemistry instead of fearing it.
+> If students can build molecules instead of memorizing them, they will understand chemistry instead of fearing it. <
 
 The app enables interactive construction, instant feedback, spatial visualization, intelligent explanations, and offline collaboration.
 
