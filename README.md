@@ -197,7 +197,7 @@ The goal is to reduce friction between curiosity and learning.
 
 ---
 
-# 📣 Conclusion
+# Conclusion
 
 Materia is not just a chemistry app.
 
