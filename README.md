@@ -1,200 +1,212 @@
-# Materia - Chemical Structure Identifier
 
-A comprehensive iOS chemistry app built with SwiftUI that identifies chemical compounds from molecular structures. Perfect for chemistry students and educators.
 
-## 🧪 Features
+#  Materia
 
-### Core Functionality
-- **Compound Builder**: Interactive form-based molecular structure builder
-- **Structure Visualization**: Real-time 2D molecular diagrams
-- **Compound Identification**: AI-powered compound naming and classification
-- **Compound Library**: Save and manage identified compounds
-
-### Structure Input Methods
-1. **Visual Structure Builder** (Primary)
-   - Carbon chain configuration (1-10 carbons)
-   - Bond type selection (single, double, triple)
-   - Functional group attachment
-   - Real-time validation
-
-2. **Touch-based Drawing** (Planned)
-   - Direct molecular drawing interface
-   - Atom and bond placement
-
-3. **Image Upload** (Planned)
-   - Skeletal diagram recognition
-   - Structure extraction from images
-
-## 🏗️ Architecture
-
-### SwiftUI + MVVM Pattern
-- **Models**: `ChemicalStructure`, `IdentifiedCompound`, `Bond`, `FunctionalGroup`
-- **ViewModels**: `CompoundBuilderViewModel`, `HomeViewModel`
-- **Views**: Modular SwiftUI components for each screen
-
-### Key Components
-
-#### Data Models
-- `ChemicalStructure`: Core molecular representation
-- `Bond`: Carbon-carbon bond configuration
-- `FunctionalGroupAttachment`: Functional group positioning
-- `IdentifiedCompound`: Complete compound with metadata
-
-#### ViewModels
-- `CompoundBuilderViewModel`: Handles structure building logic
-- `HomeViewModel`: Manages compound library and persistence
-
-#### Views
-- `HomeView`: Main screen with compound library
-- `CompoundBuilderView`: Interactive structure builder
-- `CompoundResultView`: Compound identification results
-- `StructurePreviewSection`: 2D molecular visualization
-
-## 🧬 Chemistry Features
-
-### Supported Functional Groups
-- **Alkyl**: Methyl (CH₃)
-- **Alcohols**: Hydroxyl (OH)
-- **Amines**: Amino (NH₂)
-- **Carboxylic Acids**: Carboxyl (COOH)
-- **Aldehydes**: Formyl (CHO)
-- **Ketones**: Carbonyl (CO)
-- **Nitriles**: Cyano (CN)
-- **Nitro Groups**: Nitro (NO₂)
-- **Thiols**: Sulfhydryl (SH)
-- **Halogens**: F, Cl, Br, I
-
-### Bond Types
-- Single bonds (C—C)
-- Double bonds (C=C)
-- Triple bonds (C≡C)
-
-### Validation Rules
-- Carbon valency enforcement (max 4 bonds)
-- Chemical feasibility checking
-- Real-time error feedback
-
-## 🎯 Compound Identification
-
-### Dual Nomenclature System
-- **Common Names**: Student-friendly traditional names (e.g., "Ethanol", "Acetic Acid")
-- **IUPAC Names**: Systematic chemical nomenclature (e.g., "ethanol", "ethanoic acid")
-- **Smart Display**: Both names shown for educational comparison
-- **Color Coding**: Purple for IUPAC, blue for molecular formulas
-
-### AI-Powered Naming
-- **Dual nomenclature**: Both common and IUPAC names
-- Common name preference (e.g., "Ethanol" vs "Ethyl alcohol")
-- IUPAC systematic naming (e.g., "ethanol", "propan-1-ol")
-- Functional group priority rules
-- Molecular formula calculation
-
-### Supported Compound Classes
-- **Alkanes**: Methane/methane, Ethane/ethane, Propane/propane, etc.
-- **Alcohols**: Methanol/methanol, Ethanol/ethanol, Propanol/propan-1-ol, etc.
-- **Carboxylic Acids**: Formic Acid/methanoic acid, Acetic Acid/ethanoic acid, etc.
-- **Aldehydes**: Formaldehyde/methanal, Acetaldehyde/ethanal, etc.
-- **Ketones**: Acetone/propan-2-one, Butanone/butan-2-one, etc.
-- **Amines**: Methylamine/methanamine, Ethylamine/ethanamine, etc.
-
-## 📱 User Experience
-
-### Clean, Educational Interface
-- Chemistry-first design principles
-- Immediate validation feedback
-- Progressive disclosure of complexity
-- Student-friendly terminology
-
-### Workflow
-1. **Build**: Create molecular structure using form controls
-2. **Validate**: Real-time chemical feasibility checking
-3. **Identify**: AI-powered compound identification
-4. **Save**: Store compounds in personal library
-
-## 🛠️ Technical Implementation
-
-### Technologies
-- **SwiftUI**: Modern declarative UI framework
-- **Combine**: Reactive programming for data flow
-- **UserDefaults**: Local compound persistence
-- **Apple Intelligence**: Compound identification (simulated)
-
-### Code Quality
-- MVVM architecture pattern
-- Comprehensive data validation
-- Modular, reusable components
-- Clean, documented code
-
-### Performance
-- Efficient 2D rendering
-- Optimized structure calculations
-- Smooth animations and transitions
-- Memory-conscious design
-
-## 🎓 Educational Value
-
-### Learning Objectives
-- Molecular structure understanding
-- Chemical nomenclature mastery
-- Functional group recognition
-- Bond type comprehension
-
-### Use Cases
-- **Students**: Learn organic chemistry concepts
-- **Educators**: Demonstrate molecular structures
-- **Researchers**: Quick compound identification
-- **Hobbyists**: Explore chemical structures
-
-## 🚀 Getting Started
-
-### Requirements
-- iOS 18.5+
-- Xcode 16.4+
-- Swift 5.0+
-
-### Installation
-1. Clone the repository
-2. Open `Materia.xcodeproj` in Xcode
-3. Build and run on iOS Simulator or device
-
-### Usage
-1. Launch the app
-2. Tap "Build Compound"
-3. Configure carbon chain length
-4. Set bond types between carbons
-5. Add functional groups
-6. Tap "Identify Compound"
-7. View results and save to library
-
-## 🔬 Future Enhancements
-
-### Planned Features
-- Touch-based molecular drawing
-- Image recognition for skeletal structures
-- Advanced IUPAC naming rules
-- 3D molecular visualization
-- Reaction mechanism builder
-- Compound property database
-
-### Technical Improvements
-- Core Data integration
-- CloudKit synchronization
-- Advanced AI integration
-- Performance optimizations
-
-## 📄 License
-
-This project is designed for educational purposes and chemistry learning.
-
-## 🤝 Contributing
-
-Built as a Swift Student Challenge submission demonstrating:
-- Advanced SwiftUI techniques
-- MVVM architecture
-- Chemistry domain knowledge
-- Educational app design
-- Clean code principles
+### Build. Connect. Understand.
 
 ---
 
-**Materia** - Making chemistry accessible through technology 🧪✨# Materia
+## Overview
+
+Materia is an interactive organic chemistry learning app designed to transform memorization into exploration.
+
+Instead of recalling static textbook structures, students construct molecules atom by atom, receive real-time validation, explore them in 3D, and collaborate — even without internet access.
+
+Materia turns chemistry from something intimidating into something tangible and interactive.
+
+---
+
+## The Problem
+
+Organic chemistry is widely perceived as one of the most difficult subjects for students in grades 9–12.
+
+The challenge often comes from:
+
+* Memorizing structural formulas without interaction
+* Visualizing 3D molecules from flat diagrams
+* Learning in isolation
+* Limited access to collaborative tools
+
+Students are asked to remember structures they’ve never been allowed to build.
+
+---
+
+## The Solution
+
+Materia introduces a hands-on approach to chemistry education.
+
+> If students can build molecules instead of memorizing them, they will understand chemistry instead of fearing it.
+
+The app enables interactive construction, instant feedback, spatial visualization, intelligent explanations, and offline collaboration.
+
+---
+
+# Submission Explanation
+
+## Innovation
+
+Materia reimagines organic chemistry education by shifting from passive memorization to active molecular construction. Real-time validation, 3D visualization, intelligent explanations, and offline collaboration create a modern and interactive learning experience.
+
+## Technical Implementation
+
+Built entirely using Apple technologies, Materia integrates:
+
+* SwiftUI for responsive UI
+* SceneKit for 3D molecular rendering
+* Multipeer Connectivity for offline collaboration
+* Apple’s on-device foundation model for private AI-powered explanations
+
+The app uses MVVM architecture and Swift Concurrency to ensure scalable state management and smooth real-time updates.
+
+## Creativity
+
+Materia introduces a simple but impactful idea:
+
+Chemistry should be built, not memorized.
+
+By combining construction, annotation, spatial visualization, and intelligent assistance, it transforms abstract structures into interactive experiences.
+
+## Impact
+
+Organic chemistry is often feared by students in secondary education. Materia aims to improve conceptual clarity, reduce anxiety, and encourage curiosity-driven learning.
+
+The offline collaboration feature makes it accessible even in low-connectivity environments, promoting inclusive education.
+
+---
+
+# Inspiration
+
+Materia was inspired by observing students — including my younger sister — struggle with organic chemistry during board exam preparation.
+
+The app reflects a belief that understanding begins when students are allowed to build.
+
+---
+
+# Core Features
+
+## Real-Time Molecular Builder
+
+* Construct molecules atom by atom
+* Create single, double, and triple bonds
+* Real-time validation of bonding rules
+* Automatic systematic nomenclature generation
+
+Students receive immediate feedback, turning mistakes into learning moments.
+
+---
+
+## Interactive 3D Visualization (SceneKit)
+
+* Compounds rendered in interactive 3D
+* Rotate, zoom, and inspect molecular geometry
+* Better spatial understanding of structure
+
+Flat diagrams become spatial experiences.
+
+---
+
+## Intelligent Compound Explanations
+
+Powered by Apple’s On-Device Foundation Model
+
+* Generates contextual explanations for compounds
+* Helps students understand formation and behavior
+* Fully private and processed on-device
+
+Learning becomes deeper and more intuitive.
+
+---
+
+## Integrated Notes  Support
+
+* Add personalized notes directly to compounds
+* Annotate structures visually
+* Gesture-based navigation and note management
+* Save learning insights for revision
+
+Students document understanding alongside construction.
+
+---
+
+## Molecular Weight Calculator
+
+* Dynamic molecular mass calculation
+* Updates automatically as structure changes
+* Reinforces quantitative chemistry concepts
+
+Structure meets precision.
+
+---
+
+## Offline Collaboration
+
+Powered by Multipeer Connectivity
+
+* Connect nearby devices without internet
+* Share and co-build molecular structures
+* Real-time collaborative learning
+* Fully local and secure
+
+Learning should not depend on network strength.
+
+---
+
+## Saved Compounds & Global Search
+
+* Save constructed molecules
+* Edit, update, or delete compounds
+* Global search for predefined compounds
+* Organized revision workflow
+
+Learning becomes continuous and structured.
+
+---
+
+# Technology Stack
+
+* SwiftUI
+* SceneKit
+* Multipeer Connectivity
+* Apple On-Device Foundation Model
+* Swift Concurrency (async/await)
+* MVVM Architecture
+
+---
+
+# Design Philosophy
+
+Materia follows Apple’s Human Interface Guidelines:
+
+* Minimal and focused interface
+* Smooth animations and real-time updates
+* Clear typography and accessible layout
+* Modular and scalable architecture
+
+The goal is to reduce friction between curiosity and learning.
+
+---
+
+
+# Future Improvements
+
+* Reaction pathway simulation
+* Expanded compound library
+* AR-based molecular exploration
+* Teacher-led collaborative sessions
+
+
+---
+
+# 📣 Conclusion
+
+Materia is not just a chemistry app.
+
+It is an attempt to transform how students interact with science — from memorization to exploration, from isolation to collaboration.
+
+Because when students build molecules themselves,
+
+they don’t just remember them.
+
+They understand them.
+
+---
