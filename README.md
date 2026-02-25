@@ -4,6 +4,7 @@
 
 ### Build. Connect. Understand.
 
+[![Video](https://youtu.be/lpjPZRYxAhU?si=5SQzztY6jw81jzM_)
 ---
 
 ## Overview
