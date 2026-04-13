@@ -49,3 +49,23 @@ enum CommonFunctions {
         print("❌ NOTE ERROR [\(action)] :: \(error)")
     }
 }
+
+enum StructureCoder {
+    static func encoder(_ structure: ChemicalStructure) -> Data?{
+        return try? JSONEncoder().encode(structure)
+    }
+    
+    static func decoder(_ data: Data) -> ChemicalStructure? {
+        return try? JSONDecoder().decode(ChemicalStructure.self, from: data)
+    }
+}
+
+enum NoteCoder {
+    static func encoder(_ note: [CompoundNote]) -> Data?{
+        return try? JSONEncoder().encode(note)
+    }
+    
+    static func decoder(_ data: Data) -> [CompoundNote]? {
+        return try? JSONDecoder().decode([CompoundNote].self, from: data)
+    }
+}
