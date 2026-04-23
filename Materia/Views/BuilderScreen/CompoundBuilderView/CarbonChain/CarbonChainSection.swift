@@ -53,15 +53,22 @@ struct CarbonChainSection: View {
                     HStack(spacing: 8) {
                         ForEach(1...viewModel.carbonChainLength, id: \.self) { carbon in
                             VStack(spacing: 4) {
-                                Circle()
-                                    .fill(AppColors.carbon)
-                                    .frame(width: AppConstants.carbonAtomSize, height: AppConstants.carbonAtomSize)
-                                    .overlay(
-                                        Text("C\(carbon)")
-                                            .font(.caption)
-                                            .fontWeight(.medium)
-                                            .foregroundColor(AppColors.carbonTextColor)
-                                    )
+                                ZStack {
+                                    // Glass background
+                                    Circle()
+                                        .fill(.ultraThinMaterial) // ✅ real system glass
+                                        .background(
+                                            Circle()
+                                                .fill(AppColors.carbon.opacity(0.25)) // tint behind glass
+                                        )
+
+                                    // Content
+                                    Text("C\(carbon)")
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(AppColors.textPrimary)
+                                }
+                                .frame(width: AppConstants.carbonAtomSize, height: AppConstants.carbonAtomSize)
                             }
                             
                             if carbon < viewModel.carbonChainLength {

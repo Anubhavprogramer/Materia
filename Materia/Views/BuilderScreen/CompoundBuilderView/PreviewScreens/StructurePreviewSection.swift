@@ -26,12 +26,26 @@ struct StructurePreviewSection: View {
                         Image(systemName: "cube.transparent")
                     }
                     .font(.caption)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                     .padding(.horizontal, AppConstants.defaultPadding)
                     .padding(.vertical, AppConstants.smallPadding)
-                    .background(AppColors.accent)
-                    .cornerRadius(AppConstants.largeCornerRadius)
                 }
+                .background(
+//                    ZStack {
+                        // Glass layer
+                        RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
+                            .fill(.ultraThinMaterial)
+                        
+                        // Tint (gives identity, otherwise it looks plain)
+//                        RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
+//                            .fill(AppColors.accent.opacity(0.25))
+//                    }
+                )
+                .overlay(
+                    // Glass edge highlight
+                    RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
             }
             
             VStack(spacing: AppConstants.largeGap) {
