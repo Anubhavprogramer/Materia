@@ -30,7 +30,7 @@ struct CarbonChainSection: View {
                         Text("\(viewModel.carbonChainLength)")
                             .font(.caption)
                             .fontWeight(.medium)
-                            .foregroundColor(AppColors.accent)
+                            .foregroundColor(AppColors.actionButtonText)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
                             .background(AppColors.accent.opacity(0.15))

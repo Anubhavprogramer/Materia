@@ -94,7 +94,7 @@ struct CompoundResultView: View {
                                 Button(action: { showCompoundStory = true }) {
                                     Image(systemName: "sparkles")
                                         .font(.headline)
-                                        .foregroundColor(AppColors.accent)
+                                        .foregroundColor(AppColors.actionButtonText)
                                 }
                                 .frame(width: 30, height: 30)
                                 .background(AppColors.Card)
@@ -136,12 +136,18 @@ struct CompoundResultView: View {
                                             Image(systemName: "cube.transparent")
                                         }
                                         .font(.caption)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(AppColors.actionButtonText)
                                         .padding(.horizontal, AppConstants.smallPadding)
                                         .padding(.vertical, AppConstants.smallPadding/2)
-                                        .background(AppColors.accent)
-                                        .cornerRadius(AppConstants.largeCornerRadius)
                                     }
+                                    .background(
+                                        RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius, style: .continuous)
+                                            .fill(.ultraThinMaterial)
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius, style: .continuous)
+                                            .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
+                                    )
                                 }
                             }
                             
@@ -149,7 +155,6 @@ struct CompoundResultView: View {
                                 .frame(height: 200)
                                 .background(AppColors.Card)
                                 .cornerRadius(AppConstants.defaultCornerRadius)
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                         }
                         .padding(AppConstants.defaultPadding)
                         .background(AppColors.surface)

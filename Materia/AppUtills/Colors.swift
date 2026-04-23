@@ -33,6 +33,8 @@ final class AppColors {
     
     static let PrimaryButton = Color("PrimaryButton")
     
+    static let actionButtonText = Color("ActionButtonText")
+    
     // MARK: - Utility Colors (Green Theme Variants)
     static let primaryLight = primary.opacity(0.15)        // Light primary for backgrounds
     static let primaryMuted = primary.opacity(0.3)         // Muted primary for borders

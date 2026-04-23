@@ -62,25 +62,29 @@ struct CompoundBuilderView: View {
                     }
                     
                     // Build Button
-                    Button(action: buildCompound) {
-                        HStack {
-                            if viewModel.isBuilding {
-                                ProgressView()
-                                    .scaleEffect(0.9)
-                                    .tint(.white)
-                            }
+                    HStack(alignment: .center){
+                        Spacer()
+                        Button(action: buildCompound) {
+                            HStack {
+                                if viewModel.isBuilding {
+                                    ProgressView()
+                                        .scaleEffect(0.9)
+                                        .tint(.white)
+                                }
 
-                            Text(viewModel.isBuilding ? AppStrings.identifying : AppStrings.identifyCompound)
-                                .fontWeight(.semibold)
+                                Text(viewModel.isBuilding ? AppStrings.identifying : AppStrings.identifyCompound)
+                                    .fontWeight(.semibold)
+                            }
                         }
+                        .disabled(!viewModel.isValidStructure || viewModel.isBuilding)
+                        .liquidGlassButton(
+                            color: viewModel.isValidStructure && !viewModel.isBuilding ? AppColors.accent : Color.gray,
+                            size: .large,
+                            isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
+                        )
+                        .padding(.bottom)
+                        Spacer()
                     }
-                    .disabled(!viewModel.isValidStructure || viewModel.isBuilding)
-                    .liquidGlassButton(
-                        color: viewModel.isValidStructure && !viewModel.isBuilding ? AppColors.accent : Color.gray,
-                        size: .large,
-                        isEnabled: viewModel.isValidStructure && !viewModel.isBuilding
-                    )
-                    .padding(.bottom)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

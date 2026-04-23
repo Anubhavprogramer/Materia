@@ -29,11 +29,18 @@ struct SwipeableNoteCardView: View {
                         Image(systemName: "plus.circle.fill")
                     }
                     .font(.caption)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.actionButtonText)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(AppColors.accent)
                     .cornerRadius(AppConstants.defaultCornerRadius)
+                    .background(
+                        RoundedRectangle(cornerRadius: AppConstants.defaultCornerRadius, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppConstants.defaultCornerRadius, style: .continuous)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
+                    )
                 }
             }
             

@@ -26,20 +26,13 @@ struct StructurePreviewSection: View {
                         Image(systemName: "cube.transparent")
                     }
                     .font(.caption)
-                    .foregroundColor(.black)
+                    .foregroundColor(AppColors.actionButtonText)
                     .padding(.horizontal, AppConstants.defaultPadding)
                     .padding(.vertical, AppConstants.smallPadding)
                 }
                 .background(
-//                    ZStack {
-                        // Glass layer
                         RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
                             .fill(.ultraThinMaterial)
-                        
-                        // Tint (gives identity, otherwise it looks plain)
-//                        RoundedRectangle(cornerRadius: AppConstants.largeCornerRadius)
-//                            .fill(AppColors.accent.opacity(0.25))
-//                    }
                 )
                 .overlay(
                     // Glass edge highlight
