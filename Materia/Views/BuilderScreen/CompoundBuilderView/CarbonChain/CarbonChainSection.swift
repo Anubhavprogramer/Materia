@@ -17,17 +17,36 @@ struct CarbonChainSection: View {
                 .foregroundColor(AppColors.textPrimary)
             
             VStack(spacing: 12) {
-                CustomSlider(
-                    value: Binding(
-                        get: { Double(viewModel.carbonChainLength) },
-                        set: { viewModel.updateCarbonChainLength(Int($0)) }
-                    ),
-                    in: 1...Double(AppConstants.carbonAttomNumber),
-                    step: 1,
-                    label: AppStrings.carbonChainLength,
-                    tintColor: AppColors.accent,
-                    trackHeight: 8
-                )
+                VStack(alignment: .leading, spacing: 12) {
+                    
+                    HStack {
+                        Text(AppStrings.carbonChainLength)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(AppColors.textPrimary)
+                        
+                        Spacer()
+                        
+                        Text("\(viewModel.carbonChainLength)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(AppColors.accent)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(AppColors.accent.opacity(0.15))
+                            .cornerRadius(6)
+                    }
+                    
+                    Slider(
+                        value: Binding(
+                            get: { Double(viewModel.carbonChainLength) },
+                            set: { viewModel.updateCarbonChainLength(Int($0)) }
+                        ),
+                        in: 1...Double(AppConstants.carbonAttomNumber),
+                        step: 1
+                    )
+                    .tint(AppColors.accent) // 🔥 this replaces your custom tint
+                }
                 
                 // Carbon chain visualization
                 ScrollView(.horizontal, showsIndicators: false) {
