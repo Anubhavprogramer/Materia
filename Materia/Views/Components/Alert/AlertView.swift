@@ -40,6 +40,7 @@ struct InfoCardView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
+//        .glassEffect()
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(backgroundColor)
