@@ -191,34 +191,51 @@ class IUPACNamer {
     ]
     
     func generateIUPACName(from structure: ChemicalStructure) -> String {
+        // DEBUG: Log input structure
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "=== STARTING IUPAC NAME GENERATION ===")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Input structure: \(structure.carbonChainLength) carbons, \(structure.functionalGroups.count) functional groups")
+        for fg in structure.functionalGroups {
+            CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - \(fg.group.displayName) at position \(fg.carbonPosition)")
+        }
+        
         // Step 1: Identify parent structure (longest chain) - Rule 1
         let parentChain = identifyParentChain(structure)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 1: Parent chain = \(parentChain) carbons")
         
         // Step 2: Identify principal functional group - Rule 2
         let principalGroup = identifyPrincipalFunctionalGroup(structure)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 2: Principal functional group = \(principalGroup?.displayName ?? "NONE")")
         
         // Step 3: Number the parent chain (lowest locants) - Rule 3
         let numbering = numberParentChain(structure, principalGroup: principalGroup)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 3: Numbering scheme applied")
         
         // Step 4: Select parent name (root + primary suffix) - Rule 4
         let parentName = selectParentName(structure, numbering: numbering)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 4: Parent name = '\(parentName)'")
         
         // Step 5: Add secondary suffix (functional group) - Rule 5
         let secondarySuffix = getSecondarySuffix(principalGroup, unsaturation: getUnsaturationType(structure))
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 5: Secondary suffix = '\(secondarySuffix)'")
         
         // Step 6-8: Name and position substituents - Rules 6-8
         let substituents = nameSubstituents(structure, principalGroup: principalGroup, numbering: numbering)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 6-8: Substituents = \(substituents)")
         
         // Step 9: Handle unsaturation - Rule 9
         let unsaturationInfo = handleUnsaturation(structure, numbering: numbering)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Step 9: Unsaturation info = '\(unsaturationInfo)'")
         
         // Combine all parts following IUPAC rules
-        return assembleIUPACName(
+        let result = assembleIUPACName(
             substituents: substituents,
             parentName: parentName,
             unsaturation: unsaturationInfo,
             suffix: secondarySuffix
         )
+        
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "=== FINAL IUPAC NAME: '\(result)' ===")
+        return result
     }
     
     // MARK: - Rule 1: Identify Parent Structure
@@ -230,6 +247,9 @@ class IUPACNamer {
     
     // MARK: - Rule 2: Identify Principal Functional Group
     private func identifyPrincipalFunctionalGroup(_ structure: ChemicalStructure) -> FunctionalGroup? {
+        // DEBUG: Log structure analysis
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "identifyPrincipalFunctionalGroup: Analyzing \(structure.functionalGroups.count) functional groups")
+        
         var highestPriority = 0
         var principalGroup: FunctionalGroup?
         
@@ -237,9 +257,37 @@ class IUPACNamer {
             if let priority = functionalGroupPriority[attachment.group], priority > highestPriority {
                 highestPriority = priority
                 principalGroup = attachment.group
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - \(attachment.group.displayName): priority \(priority) → NEW PRINCIPAL")
+            } else if let priority = functionalGroupPriority[attachment.group] {
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - \(attachment.group.displayName): priority \(priority) (not higher than \(highestPriority))")
             }
         }
         
+        // CRITICAL FIX: Halogens and methyls (priority 1) are NEVER principal groups
+        // They should only appear as substituents, UNLESS they're the only groups
+        // But if there's a chain with ONLY halogens, we should still treat the chain as principal
+        if let principal = principalGroup, let priority = functionalGroupPriority[principal], priority <= 1 {
+            // Check if there are any higher-priority groups
+            let hasHigherPriorityGroups = structure.functionalGroups.contains { attachment in
+                if let p = functionalGroupPriority[attachment.group] {
+                    return p > 1
+                }
+                return false
+            }
+            
+            if hasHigherPriorityGroups {
+                // There ARE higher priority groups, so halogen/methyl cannot be principal
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "⚠️ HALOGEN/METHYL detected as principal, but higher priority groups exist")
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "   → Returning NIL to treat as substituent only")
+                return nil
+            } else {
+                // Only halogens/methyls exist, they become substituents (return nil for principal)
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "ℹ️ Only halogens/methyls found, treating as substituents")
+                return nil
+            }
+        }
+        
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Final principal functional group: \(principalGroup?.displayName ?? "NONE")")
         return principalGroup
     }
     
@@ -281,15 +329,27 @@ class IUPACNamer {
         
         // Collect all non-principal functional groups as substituents
         for attachment in structure.functionalGroups {
+            // Include if it's not the principal group OR if no principal group exists
             if attachment.group != principalGroup {
                 if let prefix = substituentPrefixes[attachment.group] {
                     if substituentCounts[prefix] == nil {
                         substituentCounts[prefix] = []
                     }
                     substituentCounts[prefix]?.append(attachment.carbonPosition)
+                    // DEBUG: Log substituent detection
+                    CommonFunctions.debugPrint(load: "IUPACNamer", message: "✓ Found substituent: \(attachment.group.displayName) at position \(attachment.carbonPosition), prefix: '\(prefix)'")
+                } else {
+                    // DEBUG: Log missing prefix
+                    CommonFunctions.debugPrint(load: "IUPACNamer", message: "✗ No prefix found for substituent: \(attachment.group.displayName)")
                 }
+            } else {
+                // DEBUG: Log when substituent is principal group
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "⊘ \(attachment.group.displayName) at position \(attachment.carbonPosition) is principal group, skipping as substituent")
             }
         }
+        
+        // DEBUG: Log collected substituents
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Collected substituent counts: \(substituentCounts)")
         
         // Format substituents with multiplicative prefixes and positions
         for (prefix, positions) in substituentCounts {
@@ -299,17 +359,29 @@ class IUPACNamer {
             if positions.count > 1 {
                 let multiplicative = multiplicativePrefixes[min(positions.count, multiplicativePrefixes.count - 1)]
                 substituents.append("\(positionString)-\(multiplicative)\(prefix)")
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "  → Built substituent: '\(positionString)-\(multiplicative)\(prefix)'")
             } else {
                 substituents.append("\(positionString)-\(prefix)")
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "  → Built substituent: '\(positionString)-\(prefix)'")
             }
         }
         
+        // DEBUG: Log final substituents before sorting
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Final substituents (before alphabetical sort): \(substituents)")
+        
         // Rule 8: Alphabetical order (ignore multiplicative prefixes)
-        return substituents.sorted { substituent1, substituent2 in
+        let sortedSubstituents = substituents.sorted { substituent1, substituent2 in
             let name1 = extractBaseName(from: substituent1)
             let name2 = extractBaseName(from: substituent2)
-            return name1 < name2
+            let result = name1 < name2
+            if name1 != name2 {
+                CommonFunctions.debugPrint(load: "IUPACNamer", message: "  Sorting: '\(name1)' vs '\(name2)' → \(result ? "first" : "second")")
+            }
+            return result
         }
+        
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Final substituents (after alphabetical sort): \(sortedSubstituents)")
+        return sortedSubstituents
     }
     
     // MARK: - Rule 9: Handle Unsaturation
@@ -501,9 +573,19 @@ class IUPACNamer {
     private func assembleIUPACName(substituents: [String], parentName: String, unsaturation: String, suffix: String) -> String {
         var nameParts: [String] = []
         
+        // DEBUG: Log inputs
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "assembleIUPACName called with:")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - substituents: \(substituents)")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - parentName: '\(parentName)'")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - unsaturation: '\(unsaturation)'")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "  - suffix: '\(suffix)'")
+        
         // Add substituents (Rule 15: hyphens between numbers and letters)
         if !substituents.isEmpty {
-            nameParts.append(substituents.joined(separator: "-"))
+            // Join multiple substituents with hyphens
+            let substituentString = substituents.joined(separator: "-")
+            nameParts.append(substituentString)
+            CommonFunctions.debugPrint(load: "IUPACNamer", message: "Added substituents: '\(substituentString)'")
         }
         
         // Build parent name with unsaturation and suffix
@@ -524,9 +606,13 @@ class IUPACNamer {
         }
         
         nameParts.append(finalParentName)
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Final parent name part: '\(finalParentName)'")
+        
+        let result = nameParts.joined(separator: "")
+        CommonFunctions.debugPrint(load: "IUPACNamer", message: "Final assembled name: '\(result)'")
         
         // Rule 15: Join with hyphens, no spaces in names
-        return nameParts.joined(separator: "")
+        return result
     }
     
     func getNameComponents() -> [String] {
