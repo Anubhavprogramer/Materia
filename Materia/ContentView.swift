@@ -17,13 +17,13 @@ struct ContentView: View {
                     .transition(.opacity)
             } else {
                 TabView {
-            Tab ("Materia", systemImage: "plus.circle"){
+            Tab ("Home", systemImage: "house"){
                 BuildTabView()
             }
             Tab ("Weight", systemImage: "scalemass.fill"){
                 MolecularWeightCalculatorView()
             }
-            Tab ("Live", systemImage: "person.2.wave.2"){
+            Tab ("Connect", systemImage: "person.2.wave.2"){
                 ModePickerView()
             }
             Tab ("Saved", systemImage: "bookmark"){

@@ -12,7 +12,7 @@ struct AppStrings {
     static let AppName = "Materiya"
     static let search = "Search"
     static let weight = "Weight"
-    static let live = "Live"
+    static let live = "Connect"
     static let saved = "Saved"
     
     // MARK: - Build Tab
