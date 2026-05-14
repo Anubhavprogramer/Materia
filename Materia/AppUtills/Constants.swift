@@ -9,7 +9,7 @@ import UIKit
 
 struct AppStrings {
     // MARK: - Navigation & Tabs
-    static let AppName = "Materiya"
+    static let AppName = "Nomiq"
     static let search = "Search"
     static let weight = "Weight"
     static let live = "Connect"
